@@ -17,6 +17,8 @@ import {
   IBMPlexMono_600SemiBold,
 } from "@expo-google-fonts/ibm-plex-mono";
 import { color as C } from "@/theme";
+import { PhoneFrame } from "@/components/PhoneFrame";
+import { AppWidthProvider } from "@/components/AppWidth";
 
 /* Hold the native splash until the fonts are in. Without this the whole app
    renders one frame in the system face and then reflows, which is the single
@@ -56,6 +58,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <View style={{ flex: 1, backgroundColor: C.void }} onLayout={onLayout}>
           <StatusBar style="light" />
+          {/* A passthrough on iOS and Android. On a wide browser it centres the
+              app at phone width, because this is a phone app and a 1440px-wide
+              column of list rows reads as broken rather than as a decision. */}
+          <PhoneFrame>
+          <AppWidthProvider>
           <Stack
             screenOptions={{
               headerShown: false,
@@ -71,6 +78,8 @@ export default function RootLayout() {
             <Stack.Screen name="panda" options={{ animation: "slide_from_bottom" }} />
             <Stack.Screen name="pay" options={{ animation: "slide_from_bottom" }} />
           </Stack>
+          </AppWidthProvider>
+          </PhoneFrame>
         </View>
       </SafeAreaProvider>
     </GestureHandlerRootView>

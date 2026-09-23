@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Platform, StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
@@ -14,6 +14,7 @@ import Animated, {
 import { Icon, type IconName } from "@/icons/Icon";
 import { color as C, font, motion, radius, space } from "@/theme";
 import { Touch } from "./primitives";
+import { useAppWidth } from "./AppWidth";
 
 /**
  * The tab bar.
@@ -55,7 +56,10 @@ const ROUTE_ICON: Record<string, IconName> = {
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  /* The app's width, not the window's: inside the web preview's phone frame
+     they differ, and sizing five slots off the window leaves four of them off
+     the side of the phone. */
+  const width = useAppWidth();
 
   const SIDE = space.lg;
   const barWidth = width - SIDE * 2;

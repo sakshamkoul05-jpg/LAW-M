@@ -44,6 +44,23 @@ red screen about a mismatched Reanimated or Screens version.
 
 ---
 
+## The web preview
+
+`vercel.json` builds `expo export --platform web` into `dist` and rewrites every
+path to `index.html`, because the router is an SPA (`output: "single"`). Without
+that rewrite, `/wallet` is a 404 — there is no file at that path.
+
+On a browser wider than 760px the app renders inside a phone frame. It is a
+phone app; at 1440px a column of 44pt list rows looks broken rather than
+designed. `PhoneFrame` is a passthrough on iOS and Android.
+
+Two things do not exist in a browser and are not bugs: **haptics** (silently
+no-op) and the **native blur** behind the tab bar (the opaque layer underneath
+carries it). Everything else — the springs, the wallet, the parallax, the
+counting balance — works.
+
+---
+
 ## Layout
 
 ```

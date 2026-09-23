@@ -18,9 +18,24 @@
     "android": {
       "package": "pro.lawfic.app",
       "edgeToEdgeEnabled": true,
-      "adaptiveIcon": { "backgroundColor": "#08090C" }
+      "adaptiveIcon": {
+        "backgroundColor": "#08090C"
+      }
     },
-    "plugins": ["expo-router", "expo-font"],
-    "experiments": { "typedRoutes": true }
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "name": "LAWFIC",
+      "shortName": "LAWFIC",
+      "backgroundColor": "#08090C",
+      "themeColor": "#08090C"
+    }
   }
 }

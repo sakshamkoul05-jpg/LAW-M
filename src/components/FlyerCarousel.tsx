@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  useWindowDimensions,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
@@ -21,6 +20,7 @@ import { Icon } from "@/icons/Icon";
 import { color as C, elevation, font, radius, space, text } from "@/theme";
 import { flyers, type Flyer } from "@/data/flyers";
 import { Touch } from "./primitives";
+import { useAppWidth } from "./AppWidth";
 
 /**
  * The promotional flyers, as a paging carousel.
@@ -38,7 +38,10 @@ import { Touch } from "./primitives";
  * means the eye has to choose, and it chooses not to look at either.
  */
 export function FlyerCarousel({ onOpen }: { onOpen: (flyer: Flyer) => void }) {
-  const { width } = useWindowDimensions();
+  /* As in TabBar: the card is a fraction of the APP, and the card's height
+     is a fraction of the card. Measuring the window here made a 774px-tall
+     flyer inside a 414px phone. */
+  const width = useAppWidth();
   const CARD = width - space.lg * 2;
   const GAP = space.md;
   const STRIDE = CARD + GAP;

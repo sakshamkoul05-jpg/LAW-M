@@ -67,12 +67,17 @@ export function Leather({
      into static. */
   const grain = useMemo(() => {
     const rnd = seeded(seed);
-    return Array.from({ length: 46 }, () => ({
+    /* Tuned against the rendered object, not in the abstract. The first pass
+       used radii up to 32 at up to 11% opacity, which on a 300pt wallet is a
+       blob a tenth of its width — the panel read as soap bubbles rather than
+       as hide. Grain is small, dense and nearly invisible one mark at a time;
+       it is the ACCUMULATION that reads as texture. */
+    return Array.from({ length: 70 }, () => ({
       cx: rnd() * width,
       cy: rnd() * height,
-      r: 6 + rnd() * 26,
-      o: 0.04 + rnd() * 0.07,
-      dark: rnd() > 0.42,
+      r: 2 + rnd() * 9,
+      o: 0.018 + rnd() * 0.032,
+      dark: rnd() > 0.38,
     }));
   }, [width, height, seed]);
 
@@ -94,9 +99,9 @@ export function Leather({
       <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
         <Defs>
           <RadialGradient id="pull" cx="30%" cy="18%" r="82%">
-            <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.14} />
-            <Stop offset="0.55" stopColor="#FFFFFF" stopOpacity={0.03} />
-            <Stop offset="1" stopColor="#000000" stopOpacity={0.16} />
+            <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.07} />
+            <Stop offset="0.55" stopColor="#FFFFFF" stopOpacity={0.015} />
+            <Stop offset="1" stopColor="#000000" stopOpacity={0.22} />
           </RadialGradient>
         </Defs>
 
@@ -180,22 +185,26 @@ export function Stitching({
       {/* The trench the thread sits in, drawn first and one step darker. Thread
           laid straight onto a surface looks printed; thread in a groove looks
           sewn. */}
+      {/* Tighter, thinner and much quieter than the first pass, which at 2pt
+          and 72% opacity read as a dashed CSS border sitting on top of the
+          panel rather than as thread sunk into it. Real saddle stitch is a
+          short dash with a short gap, close in value to the leather. */}
       <Path
         d={d}
         fill="none"
         stroke="#000000"
-        strokeOpacity={0.35}
-        strokeWidth={3.4}
-        strokeDasharray="5.5 4.5"
+        strokeOpacity={0.4}
+        strokeWidth={2.6}
+        strokeDasharray="3.6 3.2"
         strokeLinecap="round"
       />
       <Path
         d={d}
         fill="none"
         stroke={tone}
-        strokeOpacity={0.72}
-        strokeWidth={2}
-        strokeDasharray="5.5 4.5"
+        strokeOpacity={0.42}
+        strokeWidth={1.3}
+        strokeDasharray="3.6 3.2"
         strokeLinecap="round"
       />
     </Svg>

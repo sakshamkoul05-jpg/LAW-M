@@ -127,8 +127,13 @@ export function CountingBalance({
     return { text: shown, defaultValue: shown } as unknown as TextInputProps;
   });
 
+  /* `alignSelf: stretch` plus a centred input, rather than a row that hugs
+     its content. On the web an <input> carries a default size of about twenty
+     characters and a TextInput with no width inherits it, so the balance was
+     rendering into a box narrower than itself and losing its first digits. A
+     row that shrink-wraps looks identical on iOS and clips on web. */
   return (
-    <View style={{ flexDirection: "row" }}>
+    <View style={{ alignSelf: "stretch", alignItems: "center" }}>
       <AnimatedInput
         editable={false}
         /* Off the tab order and out of the accessibility tree — the real value
@@ -142,7 +147,13 @@ export function CountingBalance({
         style={[
           styles.counter,
           tabular,
-          { fontSize: size, color: tone, lineHeight: size * 1.12 },
+          {
+            fontSize: size,
+            color: tone,
+            lineHeight: size * 1.12,
+            width: "100%",
+            textAlign: "center",
+          },
         ]}
       />
     </View>
