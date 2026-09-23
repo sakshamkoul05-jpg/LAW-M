@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "LAWFIC",
+    "slug": "lawfic",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "lawfic",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#08090C",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "pro.lawfic.app"
+    },
+    "android": {
+      "package": "pro.lawfic.app",
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": { "backgroundColor": "#08090C" }
+    },
+    "plugins": ["expo-router", "expo-font"],
+    "experiments": { "typedRoutes": true }
+  }
+}
