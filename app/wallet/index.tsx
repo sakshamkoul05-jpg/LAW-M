@@ -34,13 +34,14 @@ export default function Wallet() {
   const params = useLocalSearchParams<{ entry?: string; statement?: string }>();
   const width = useAppWidth();
   const layout = useLayout();
-  const { state, status, balance, setPrefs } = useStore();
+  const { state, status, balance, setPrefs, mode, refresh } = useStore();
   const lock = useLock();
   const { entitled, plan } = useMembership();
   const pass = usePassData();
   const [filter, setFilter] = useState<Filter>("all");
   const [entry, setEntry] = useState<WalletEntry | null>(null);
   const [statement, setStatement] = useState(params.statement === "1");
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (params.entry) setEntry(state.entries.find((e) => e.id === params.entry) ?? null);
@@ -90,6 +91,12 @@ export default function Wallet() {
   return (
     <Screen
       back
+      onRefresh={async () => {
+        setRefreshing(true);
+        await refresh();
+        setRefreshing(false);
+      }}
+      refreshing={refreshing}
       title="Wallet"
       right={
         <IconButton
@@ -208,7 +215,7 @@ export default function Wallet() {
             successLabel="Ready"
             onPress={async () => {
               if (locked && !(await lock.unlock())) return false;
-              const ok = await exportStatement(state.entries, state.profile.fullName);
+              const ok = await exportStatement(state.entries, state.profile.fullName, mode === "demo");
               if (ok) setTimeout(() => setStatement(false), 900);
               return ok;
             }}

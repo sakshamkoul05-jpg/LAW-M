@@ -66,6 +66,8 @@ export type PassData = {
   plan: string | null;
   discount: number | null;
   holder: string | null;
+  /** Increments when money lands, so the pass can catch the light. */
+  flash?: number;
 };
 
 /** The interactive wrapper: tilt, light, press. Faces render inside it. */
@@ -170,6 +172,7 @@ function Finish({
   px,
   py,
   on,
+  flash,
 }: {
   kind: PassKind;
   width: number;
@@ -177,9 +180,12 @@ function Finish({
   px: SharedValue<number>;
   py: SharedValue<number>;
   on: SharedValue<number>;
+  flash?: number;
 }) {
   const m = MATERIAL[kind];
   const light = kind === "membership";
+
+
 
   /* A sheen crosses the pass every few seconds. Slow, and once — a card on a
      desk catching a window, not a loading bar. */
@@ -191,6 +197,16 @@ function Finish({
     );
   }, [sweep]);
   const sheen = useAnimatedStyle(() => ({ transform: [{ translateX: sweep.value * width * 1.2 }, { rotate: "18deg" }] }));
+
+  /* Money landed: a warm burst across the whole pass and a fast sheen, once.
+     The only time the pass moves on its own — which is why it registers. */
+  const burst = useSharedValue(0);
+  useEffect(() => {
+    if (!flash) return;
+    burst.value = withSequence(withTiming(1, { duration: 260 }), withTiming(0, { duration: 1100 }));
+    sweep.value = withSequence(withTiming(-1, { duration: 0 }), withTiming(1, { duration: 750, easing: Easing.out(Easing.cubic) }));
+  }, [flash]); // eslint-disable-line react-hooks/exhaustive-deps
+  const burstStyle = useAnimatedStyle(() => ({ opacity: burst.value * 0.32 }));
 
   const spot = width * 1.3;
   const glare = useAnimatedStyle(() => ({
@@ -226,6 +242,9 @@ function Finish({
       </Animated.View>
       <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, falloff]}>
         <LinearGradient colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)"]} start={{ x: 0.3, y: 0.3 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+      </Animated.View>
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, burstStyle]}>
+        <LinearGradient colors={["rgba(224,184,58,0.9)", "rgba(198,161,91,0.25)", "rgba(198,161,91,0)"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
       </Animated.View>
       <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.rim, light && { borderColor: "rgba(255,255,255,0.35)" }]} />
       <LinearGradient
@@ -348,7 +367,7 @@ export function Pass({
       {({ px, py, on }) => (
         <View style={[styles.card, { width, height }]}>
           <LinearGradient colors={m.bg} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-          <Finish kind={kind} width={width} height={height} px={px} py={py} on={on} />
+          <Finish kind={kind} width={width} height={height} px={px} py={py} on={on} flash={data.flash} />
 
           <View style={[styles.face, { padding: width * 0.06 }]}>
             {kind === "wallet" && (

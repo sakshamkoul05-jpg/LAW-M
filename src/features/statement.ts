@@ -13,7 +13,7 @@ import { dateLong, rupees, signed, time } from "@/lib/format";
  * on a phone, where "a CSV in Downloads" means nothing to most people, it is
  * rendered as a PDF and handed to the share sheet.
  */
-export async function exportStatement(entries: WalletEntry[], holder: string): Promise<boolean> {
+export async function exportStatement(entries: WalletEntry[], holder: string, demo = false): Promise<boolean> {
   if (Platform.OS === "web") {
     const blob = new Blob([statementCsv(entries)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -42,7 +42,7 @@ td{padding:9px 0;border-top:1px solid #e3ddd1;vertical-align:top}td:last-child{t
 </style></head><body><div style="letter-spacing:4px;font-weight:600">LAWFIC</div><h1>Wallet statement</h1>
 <div class="d">${esc(holder || "LAWFIC customer")} · generated ${dateLong(new Date().toISOString())}</div>
 <table>${rows}</table><div class="b">Closing balance ${rupees(bal)}</div>
-<div class="p">Demo statement — generated from sample data. Not a record of real payments.</div></body></html>`;
+${demo ? `<div class="p">Demo statement — generated from sample data. Not a record of real payments.</div>` : ""}</body></html>`;
   const { uri } = await Print.printToFileAsync({ html });
   if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" });
   return true;

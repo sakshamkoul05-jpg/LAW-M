@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
+import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconName } from "@/icons/Icon";
 import { useDevice } from "@/components/AppWidth";
 import { FlyerCarousel } from "@/components/FlyerCarousel";
@@ -33,7 +35,33 @@ const ASKS = ["Do I need GST to sell online?", "What does Udyam cost?", "My PAN 
 export default function Home() {
   const router = useRouter();
   const { width, short } = useDevice();
-  const { state, status, unread } = useStore();
+  const { state, status, unread, refresh, mode } = useStore();
+  const insets = useSafeAreaInsets();
+  const y = useSharedValue(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refresh();
+    setTimeout(() => setRefreshing(false), 500);
+  };
+  /* Pull down and Panda peeks in from the top, a little further the harder
+     you pull, with a small wave of the head. */
+  const peek = useAnimatedStyle(() => {
+    const pull = Math.max(0, -y.value);
+    return {
+      opacity: interpolate(pull, [10, 60], [0, 1], Extrapolation.CLAMP),
+      transform: [
+        { translateY: interpolate(pull, [0, 120], [-50, 30], Extrapolation.CLAMP) },
+        { rotate: `${interpolate(pull, [40, 120], [-8, 8], Extrapolation.CLAMP)}deg` },
+        { scale: interpolate(pull, [0, 120], [0.7, 1.05], Extrapolation.CLAMP) },
+      ],
+    };
+  });
+  const pandaPeek = (
+    <Animated.View pointerEvents="none" style={[{ position: "absolute", top: insets.top, alignSelf: "center" }, peek]}>
+      <Panda size={52} />
+    </Animated.View>
+  );
   const pass = usePassData();
   const [entry, setEntry] = useState<WalletEntry | null>(null);
 
@@ -58,6 +86,11 @@ export default function Home() {
         <T v="headline" numberOfLines={1}>
           {name ?? "Welcome to LAWFIC"}
         </T>
+        {mode === "demo" && (
+          <T v="micro" tone="gold">
+            Demo account
+          </T>
+        )}
       </View>
       <IconButton icon="bell" label={`Notifications${unread ? `, ${unread} unread` : ""}`} badge={unread || false} onPress={() => router.push("/notifications")} />
     </Reveal>
@@ -85,7 +118,7 @@ export default function Home() {
   ];
 
   return (
-    <Screen tabbed header={header}>
+    <Screen tabbed header={header} scrollY={y} onRefresh={onRefresh} refreshing={refreshing} overlay={pandaPeek}>
       {/* The wallet */}
       <Reveal i={0} style={{ alignItems: "center" }}>
         <Pass kind="wallet" width={inner} data={pass} onPress={() => router.push("/wallet")} />

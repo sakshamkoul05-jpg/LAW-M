@@ -27,7 +27,8 @@ export default function DocumentViewer() {
   const router = useRouter();
   const layout = useLayout();
   const toast = useToast();
-  const { state, removeUpload } = useStore();
+  const { state, removeUpload, mode } = useStore();
+  const demo = mode === "demo";
   const vault = useMemo(() => vaultFor(state), [state]);
   const idx = vault.findIndex((d) => d.id === id);
   const item = vault[idx];
@@ -128,7 +129,7 @@ export default function DocumentViewer() {
             <GestureDetector gesture={Gesture.Simultaneous(pinch, pan, double)}>
               <Animated.View key={item.id} entering={rise()} style={[styles.pageShadow, page]}>
                 {receipt ? (
-                  <ReceiptPaper item={item} customer={customer} />
+                  <ReceiptPaper item={item} customer={customer} demo={demo} />
                 ) : (
                   <View style={styles.photoPage}>
                     <Image source={{ uri: item.upload.uri }} style={{ width: "100%", aspectRatio: 0.75 }} resizeMode="contain" />
@@ -167,7 +168,7 @@ export default function DocumentViewer() {
           </Surface>
 
           <View style={{ gap: space.sm }}>
-            {receipt && <Button label="Download PDF" icon="download" successLabel="Ready" onPress={() => saveReceiptPdf({ item, customer })} />}
+            {receipt && <Button label="Download PDF" icon="download" successLabel="Ready" onPress={() => saveReceiptPdf({ item, customer, demo })} />}
             <Button
               label="Share"
               icon="share"

@@ -72,6 +72,8 @@ function Fold() {
 type ReceiptProps = {
   item: Extract<VaultItem, { kind: "receipt" }>;
   customer: string;
+  /** Demo documents say so on the page; a live account's are the real thing. */
+  demo?: boolean;
 };
 
 /**
@@ -79,7 +81,7 @@ type ReceiptProps = {
  * document you might print or forward should look like one — the dark theme
  * is the app, not the paperwork.
  */
-export function ReceiptPaper({ item, customer }: ReceiptProps) {
+export function ReceiptPaper({ item, customer, demo }: ReceiptProps) {
   const inv = item.invoice;
   const sup = supplierParty();
   const note = taxDisclaimer(inv);
@@ -140,9 +142,11 @@ export function ReceiptPaper({ item, customer }: ReceiptProps) {
       </View>
 
       {note && <T style={{ fontFamily: font.regular, fontSize: 10.5, lineHeight: 15, color: INK_DIM, marginTop: space.lg }}>{note}</T>}
-      <T style={{ fontFamily: font.medium, fontSize: 10, color: "#9C7A3C", marginTop: space.md }}>
-        Demo document — generated from sample data. Not a record of a real payment.
-      </T>
+      {demo && (
+        <T style={{ fontFamily: font.medium, fontSize: 10, color: "#9C7A3C", marginTop: space.md }}>
+          Demo document — generated from sample data. Not a record of a real payment.
+        </T>
+      )}
     </View>
   );
 }
@@ -150,7 +154,7 @@ export function ReceiptPaper({ item, customer }: ReceiptProps) {
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
 /** The same receipt as HTML, for printing or saving as a PDF. */
-export function receiptHtml({ item, customer }: ReceiptProps): string {
+export function receiptHtml({ item, customer, demo }: ReceiptProps): string {
   const inv = item.invoice;
   const sup = supplierParty();
   const note = taxDisclaimer(inv);
@@ -169,7 +173,7 @@ tr.t td{border-top:1.5px solid #17120A;font-weight:600}.n{margin-top:20px;color:
 <div style="text-align:right"><div class="k">${item.order ? "FILING" : "FOR"}</div><div>${esc(item.order ? `${serviceName(item.order.service_slug)} · ${item.order.reference}` : "Money added to your LAWFIC wallet")}</div></div></div>
 <table><tr><td class="k">DESCRIPTION</td><td class="k">AMOUNT</td></tr><tr><td>${esc(inv.narration)}</td><td></td></tr>
 ${rows.map((r, i) => `<tr class="${i === rows.length - 1 ? "t" : ""}"><td>${esc(r.label)}</td><td>${esc(r.value)}</td></tr>`).join("")}</table>
-${note ? `<div class="n">${esc(note)}</div>` : ""}<div class="p">Demo document — generated from sample data. Not a record of a real payment.</div>
+${note ? `<div class="n">${esc(note)}</div>` : ""}${demo ? `<div class="p">Demo document — generated from sample data. Not a record of a real payment.</div>` : ""}
 ${company.supportEmail ? `<div class="n">Questions: ${esc(company.supportEmail)}</div>` : ""}
 </body></html>`;
 }

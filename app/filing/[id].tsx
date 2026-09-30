@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, TextInput, View, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
@@ -34,6 +34,10 @@ export default function FilingWorkspace() {
   const [attach, setAttach] = useState(false);
 
   const order = state.orders.find((o) => o.id === id);
+  /* Opening the thread marks the team's replies read — on lawfic.pro too. */
+  useEffect(() => {
+    if (tab === "messages" && id) store.markThreadRead(id);
+  }, [tab, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const messages = useMemo(() => state.messages.filter((m) => m.order_id === id), [state.messages, id]);
   const docs = useMemo(() => vaultFor(state).filter((d) => d.order?.id === id), [state, id]);
   const payments = state.entries.filter((e) => e.order_id === id);
@@ -60,7 +64,7 @@ export default function FilingWorkspace() {
       const ok = await lock.unlock();
       if (!ok) return false;
     }
-    const r = store.payOrder(order.id);
+    const r = await store.payOrder(order.id);
     if (!r.ok) {
       toast({ title: "Not paid", body: r.error, tone: "bad" });
       return false;
@@ -290,8 +294,8 @@ function Thread({ orderId }: { orderId: string }) {
   const input = useRef<TextInput>(null);
   const messages = state.messages.filter((m) => m.order_id === orderId).sort((a, b) => a.created_at.localeCompare(b.created_at));
 
-  const send = () => {
-    const r = sendMessage(orderId, draft);
+  const send = async () => {
+    const r = await sendMessage(orderId, draft);
     if (!r.ok) return toast({ title: r.error, tone: "bad" });
     setDraft("");
   };

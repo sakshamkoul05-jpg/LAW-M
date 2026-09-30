@@ -56,8 +56,11 @@ export default function RequestService() {
       .filter((f) => values[f.name]?.trim())
       .map((f) => `${f.label}: ${values[f.name]!.trim()}`)
       .join("\n");
-    const r = request(slug, details);
-    if (!r.ok) return false;
+    const r = await request(slug, details);
+    if (!r.ok) {
+      setErrors({ _form: r.error });
+      return false;
+    }
     setTimeout(() => {
       buzz("success");
       setSent(r.value);
@@ -155,6 +158,11 @@ export default function RequestService() {
             )}
           </Reveal>
         ))}
+        {errors._form && (
+          <T v="callout" color={C.red} accessibilityRole="alert">
+            {errors._form}
+          </T>
+        )}
         <T v="caption">We never ask for an Aadhaar number, PAN or document scans on a request. Those are collected later, privately, once you accept a quote.</T>
       </View>
     </Screen>

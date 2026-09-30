@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Icon } from "@/icons/Icon";
 import { Press, Screen, Segmented, T } from "@/ui";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/ui";
 import { Callout, Choices, Field, Sent, StepHead, StepNav, Stepper, Take, digits, mobileError } from "@/components/apply";
 import { color as C, radius, space } from "@/theme";
 import {
@@ -26,6 +27,7 @@ type Mode = "enrol" | "update";
 
 export default function AadhaarApply() {
   const { request } = useStore();
+  const toast = useToast();
   const [mode, setMode] = useState<Mode>("enrol");
   const [step, setStep] = useState(0);
   const [sent, setSent] = useState<string | null>(null);
@@ -66,13 +68,14 @@ export default function AadhaarApply() {
   }
 
   /* Notes carry what prices the file and books the slot — never Aadhaar digits. */
-  const send = () => {
+  const send = async () => {
     const lines =
       mode === "enrol"
         ? ["New enrolment", `For: ${path?.label ?? "—"}`, `Identity proof: ${poi.join(", ") || "—"}`, `Address proof: ${noPoa ? "Head of family route" : poa.join(", ") || "—"}`, `City: ${city || "—"}`]
         : ["Correction", `Fields: ${chosen.map((f) => f.label).join(", ")}`, `City: ${city || "—"}`];
-    const r = request("aadhaar", lines.join("\n"));
+    const r = await request("aadhaar", lines.join("\n"));
     if (r.ok) setSent(r.value.id);
+    else toast({ title: "Not sent", body: r.error, tone: "bad" });
   };
 
   const steps = mode === "enrol" ? ["Who", "Proofs", "You", "Review"] : ["What", "Check", "You", "Review"];

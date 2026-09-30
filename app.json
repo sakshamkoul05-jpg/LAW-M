@@ -51,7 +51,8 @@
           "photosPermission": "LAWFIC lets you choose documents and a profile photo from your photos.",
           "cameraPermission": "LAWFIC uses the camera to photograph documents and your profile photo."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

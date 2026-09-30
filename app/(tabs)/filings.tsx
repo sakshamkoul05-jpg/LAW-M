@@ -20,7 +20,8 @@ type Tab = "active" | "done" | "all";
 export default function Filings() {
   const router = useRouter();
   const layout = useLayout();
-  const { state, status } = useStore();
+  const { state, status, refresh } = useStore();
+  const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<Tab>("active");
 
   const active = state.orders.filter(isActive);
@@ -32,6 +33,12 @@ export default function Filings() {
   return (
     <Screen
       tabbed
+      onRefresh={async () => {
+        setRefreshing(true);
+        await refresh();
+        setRefreshing(false);
+      }}
+      refreshing={refreshing}
       title="Filings"
       subtitle="Every registration, correction and certificate LAWFIC is handling for you — where it is, and what happens next."
       right={<IconButton icon="plus" label="New filing" tone="gold" onPress={() => router.push("/services")} />}

@@ -1,11 +1,13 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isActive, useMembership, useStore } from "@/lib/store";
 import { useLock } from "@/lib/lock";
 import type { PassData } from "./Pass";
 
 /** Everything the passes show, from the store and the lock. */
 export function usePassData(): PassData {
-  const { state, balance } = useStore();
+  const { state, balance, onLive } = useStore();
+  const [flash, setFlash] = useState(0);
+  useEffect(() => onLive((e) => e.kind === "credit" && setFlash((n) => n + 1)), [onLive]);
   const lock = useLock();
   const { plan, benefit } = useMembership();
   return useMemo(
@@ -20,7 +22,8 @@ export function usePassData(): PassData {
       plan: plan?.name ?? null,
       discount: benefit?.discountPercent ?? null,
       holder: state.profile.fullName || null,
+      flash,
     }),
-    [balance, state, lock.enabled, lock.unlocked, plan, benefit],
+    [balance, state, lock.enabled, lock.unlocked, plan, benefit, flash],
   );
 }

@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { Screen, Surface, T } from "@/ui";
 import { useStore } from "@/lib/store";
+import { useToast } from "@/ui";
 import { Callout, Choices, Field, Sent, StepHead, StepNav, Stepper, digits, gstinError, mobileError, panError } from "@/components/apply";
 import { color as C, font, gradient, motion, radius, space } from "@/theme";
 import {
@@ -27,6 +28,7 @@ const STEPS = ["Business", "Size", "Details", "Review"];
 
 export default function UdyamApply() {
   const { request } = useStore();
+  const toast = useToast();
   const [step, setStep] = useState(0);
   const [org, setOrg] = useState("");
   const [activity, setActivity] = useState("");
@@ -61,12 +63,13 @@ export default function UdyamApply() {
 
   /* The filing's notes carry what prices it — never the PAN or Aadhaar digits,
      which go to the portal from you when LAWFIC files. */
-  const send = () => {
-    const r = request(
+  const send = async () => {
+    const r = await request(
       "msme-udyam",
       [`Enterprise: ${name.trim()}`, `Constitution: ${orgChoice?.label ?? "—"}`, `Activity: ${ACTIVITIES.find((a) => a.id === activity)?.label ?? "—"}`, `Estimated class: ${result?.label ?? "—"}`, `GST registered: ${gstin ? "yes" : "no"}`].join("\n"),
     );
     if (r.ok) setSent(r.value.id);
+    else toast({ title: "Not sent", body: r.error, tone: "bad" });
   };
 
   return (

@@ -15,7 +15,7 @@ import { color as C, radius as R, space } from "@/theme";
 export default function EditProfile() {
   const router = useRouter();
   const toast = useToast();
-  const { state, updateProfile } = useStore();
+  const { state, updateProfile, mode } = useStore();
   const p = state.profile;
   const [v, setV] = useState({ fullName: p.fullName, phone: p.phone, email: p.email, website: p.website, city: p.city, qualification: p.qualification });
   const [exams, setExams] = useState<string[]>(p.examsPreparing);
@@ -31,8 +31,12 @@ export default function EditProfile() {
     setErr(e);
     if (Object.values(e).some(Boolean)) return false;
     await new Promise((r) => setTimeout(r, 400));
-    updateProfile({ ...v, fullName: v.fullName.trim(), examsPreparing: exams, jobsLooking: jobs });
-    toast({ title: "Profile saved" });
+    const r = await updateProfile({ ...v, fullName: v.fullName.trim(), examsPreparing: exams, jobsLooking: jobs });
+    if (!r.ok) {
+      toast({ title: "Not saved", body: r.error, tone: "bad" });
+      return false;
+    }
+    toast({ title: "Profile saved", body: mode === "live" ? "Also updated on lawfic.pro." : undefined });
     setTimeout(() => router.back(), 700);
     return true;
   };

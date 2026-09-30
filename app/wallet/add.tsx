@@ -7,10 +7,11 @@ import Svg, { Circle, Path } from "react-native-svg";
 import { MAX_TOPUP_PAISE, MIN_TOPUP_PAISE } from "@/lawfic/money";
 import { Icon, type IconName } from "@/icons/Icon";
 import { useStore } from "@/lib/store";
+import { reconcile, startTopUp } from "@/lib/live";
 import { useLock } from "@/lib/lock";
 import { groupIndian, rupees } from "@/lib/format";
 import { useDevice, useLayout } from "@/components/AppWidth";
-import { AnimatedMoney, Button, Glow, IconButton, Press, T, buzz } from "@/ui";
+import { AnimatedMoney, Button, Dots, Field, Glow, IconButton, Press, Sheet, T, buzz } from "@/ui";
 import { color as C, font, motion, radius as R, space } from "@/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -41,12 +42,19 @@ export default function AddMoney() {
   const layout = useLayout();
   const { short } = useDevice();
   const insets = useSafeAreaInsets();
-  const { topUp, balance } = useStore();
+  const { topUp, balance, mode, refresh, onLive } = useStore();
+  const live = mode === "live";
   const lock = useLock();
   const [amount, setAmount] = useState(params.amount ? String(Math.min(Number(params.amount) || 0, MAX_TOPUP_PAISE / 100)) : "");
   const [method, setMethod] = useState("UPI");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<number | null>(null);
+  /* Live: waiting for Cashfree to confirm, and the phone number Cashfree
+     needs on its receipt when the profile has none. */
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [askPhone, setAskPhone] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [phoneErr, setPhoneErr] = useState<string | null>(null);
   const shake = useSharedValue(0);
 
   const rupeesN = Number(amount || "0");
@@ -88,6 +96,7 @@ export default function AddMoney() {
       return false;
     }
     if (lock.enabled && !lock.unlocked && !(await lock.unlock())) return false;
+    if (live) return payLive();
     await new Promise((r) => setTimeout(r, 900));
     const r = topUp(paise, method);
     if (!r.ok) {
@@ -97,6 +106,65 @@ export default function AddMoney() {
     setTimeout(() => setDone(paise), 500);
     return true;
   };
+
+  /**
+   * A real top-up. The website opens the Cashfree order; Cashfree's own
+   * checkout takes the payment in an in-app browser; then the app asks the
+   * website to confirm it with Cashfree. The wallet is only ever credited by
+   * the website — the webhook, or this reconcile — never by the app.
+   */
+  const payLive = async (withPhone?: string): Promise<boolean> => {
+    const r = await startTopUp(rupeesN, withPhone);
+    if (!r.ok) {
+      if (r.needsPhone) {
+        setAskPhone(true);
+        setPhoneErr(withPhone ? r.error : null);
+        return false;
+      }
+      refuse(r.error);
+      return false;
+    }
+    setAskPhone(false);
+    void confirm(r.value.orderId);
+    return true;
+  };
+
+  const confirm = async (orderId: string) => {
+    setConfirming(orderId);
+    const before = balance;
+    let landed = false;
+    const off = onLive((e) => {
+      if (e.kind === "credit") landed = true;
+    });
+    for (let i = 0; i < 40 && !landed; i++) {
+      const state = await reconcile(orderId);
+      if (state === "credited") landed = true;
+      else if (state === "unknown") break;
+      else await new Promise((res) => setTimeout(res, 2500));
+    }
+    off();
+    await refresh();
+    setConfirming(null);
+    if (landed) setDone(paise);
+    else refuse("Not confirmed yet. If you paid, it will reach your wallet on its own within a few minutes.");
+    void before;
+  };
+
+  if (confirming) {
+    return (
+      <View style={{ flex: 1, backgroundColor: C.bg, alignItems: "center", justifyContent: "center", padding: space.xl, paddingTop: insets.top }}>
+        <Glow height={520} strength={1.3} />
+        <Dots color={C.gold} size={8} />
+        <T v="title3" center style={{ marginTop: space.xl }}>
+          Confirming with Cashfree
+        </T>
+        <T v="callout" center style={{ marginTop: 6, maxWidth: 320 }}>
+          Finish paying in the window that opened. Your wallet updates the moment Cashfree confirms.
+        </T>
+        <Button label="I've closed the payment window" variant="ghost" onPress={() => void reconcile(confirming).then((s) => s === "credited" && setDone(paise))} style={{ marginTop: space.xxl }} full={false} />
+      </View>
+    );
+  }
 
   if (done !== null) return <Success paise={done} balance={balance} onDone={() => (router.canGoBack() ? router.back() : router.replace("/wallet"))} />;
 
@@ -157,6 +225,15 @@ export default function AddMoney() {
           ))}
         </View>
 
+        {live ? (
+          <View style={[styles.cashfree, short && { marginTop: space.md }]}>
+            <Icon name="shield" size={18} color={C.gold} />
+            <View style={{ flex: 1 }}>
+              <T v="calloutMedium">Cashfree secure checkout</T>
+              <T v="caption">UPI, cards and net banking. Your payment details go to Cashfree, never to LAWFIC.</T>
+            </View>
+          </View>
+        ) : (
         <View style={[styles.methods, short && { marginTop: space.md }]} accessibilityRole="radiogroup">
           {METHODS.map((m) => {
             const on = method === m.id;
@@ -176,6 +253,7 @@ export default function AddMoney() {
             );
           })}
         </View>
+        )}
 
         <View style={{ flex: 1 }} />
 
@@ -195,12 +273,19 @@ export default function AddMoney() {
         )}
 
         <View style={{ paddingBottom: Math.max(insets.bottom, space.lg), gap: 8 }}>
-          <Button label={ok ? `Add ${rupees(paise)} with ${method}` : "Enter an amount"} icon={lock.enabled ? "faceid" : undefined} onPress={pay} disabled={!amount} />
+          <Button label={ok ? (live ? `Pay ${rupees(paise)} securely` : `Add ${rupees(paise)} with ${method}`) : "Enter an amount"} icon={lock.enabled ? "faceid" : live ? "lock" : undefined} onPress={pay} disabled={!amount} />
           <T v="caption" center>
-            Demo · no payment is taken
+            {live ? "Credited to your LAWFIC wallet on lawfic.pro and in the app" : "Demo · no payment is taken"}
           </T>
         </View>
       </View>
+
+      <Sheet open={askPhone} onClose={() => setAskPhone(false)} title="A mobile number for the receipt" subtitle="Cashfree needs one on every payment. It is saved to your profile so you are asked only once.">
+        <View style={{ gap: space.md }}>
+          <Field label="Mobile number" prefix="+91" value={phone} onChangeText={(t) => { setPhone(t.replace(/\D/g, "").slice(0, 10)); setPhoneErr(null); }} keyboardType="phone-pad" error={phoneErr} />
+          <Button label={`Continue to pay ${rupees(paise)}`} onPress={() => (/^[6-9]\d{9}$/.test(phone) ? payLive(phone) : (setPhoneErr("Ten digits, starting 6, 7, 8 or 9."), false))} />
+        </View>
+      </Sheet>
     </View>
   );
 }
@@ -265,6 +350,7 @@ const styles = StyleSheet.create({
   methods: { flexDirection: "row", gap: space.sm, marginTop: space.xl },
   method: { flex: 1, alignItems: "center", gap: 4, paddingVertical: space.md, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
   methodOn: { borderColor: C.gold, backgroundColor: "#15120C" },
+  cashfree: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.xl, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   tick: { position: "absolute", top: 6, right: 6, width: 16, height: 16, borderRadius: 8, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
   pad: { flexDirection: "row", flexWrap: "wrap", marginBottom: space.md },
   key: { width: "33.33%", height: 58, alignItems: "center", justifyContent: "center" },

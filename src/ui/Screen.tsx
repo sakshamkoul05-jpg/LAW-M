@@ -55,6 +55,7 @@ export function Screen({
   glow = true,
   scrollY: externalY,
   large = true,
+  overlay,
 }: {
   title?: string;
   kicker?: string;
@@ -76,6 +77,8 @@ export function Screen({
   scrollY?: SharedValue<number>;
   /** False when the screen draws its own hero: the title then lives only in the bar. */
   large?: boolean;
+  /** Drawn over the scroll view, under the bar — Home's pull-to-refresh panda. */
+  overlay?: React.ReactNode;
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -143,6 +146,8 @@ export function Screen({
           </Animated.View>
         </View>
       </Animated.ScrollView>
+
+      {overlay}
 
       {hasBar && (
         <View style={[styles.bar, { height: barH, paddingTop: insets.top }]} pointerEvents="box-none">

@@ -8,6 +8,7 @@ import { company } from "@/lawfic/company";
 import { Icon, type IconName } from "@/icons/Icon";
 import { useStore, useMembership } from "@/lib/store";
 import { useLock } from "@/lib/lock";
+import { useAuth } from "@/lib/auth";
 import { dateLong, rupees } from "@/lib/format";
 import { Avatar, Badge, Button, Chip, Group, Press, Reveal, Row, Screen, SectionHeader, Sheet, Surface, Switch, T, useToast } from "@/ui";
 import { color as C, radius as R, space } from "@/theme";
@@ -42,7 +43,9 @@ const GROUP_ICON: Record<string, IconName> = {
 export default function Profile() {
   const router = useRouter();
   const toast = useToast();
-  const { state, balance, updateProfile, reset } = useStore();
+  const { state, balance, updateProfile, reset, mode } = useStore();
+  const auth = useAuth();
+  const router_ = router;
   const { entitled, plan, sub } = useMembership();
   const lock = useLock();
   const [photo, setPhoto] = useState(false);
@@ -182,18 +185,33 @@ export default function Profile() {
       </Reveal>
 
       <Reveal style={{ marginTop: space.xxl, gap: space.sm }}>
-        <Button label="Reset demo data" icon="reset" variant="secondary" onPress={() => setConfirmReset(true)} />
+        {mode === "demo" && (
+          <Surface tone="gold" style={{ gap: space.md, marginBottom: space.sm }}>
+            <T v="headline">You are exploring the demo</T>
+            <T v="callout">Sign in to your LAWFIC account to see your real filings, wallet and documents — the same account as lawfic.pro.</T>
+            <Button
+              label="Sign in or create an account"
+              size="md"
+              onPress={() => {
+                auth.leaveDemo();
+                router_.replace("/welcome");
+              }}
+            />
+          </Surface>
+        )}
+        {mode === "demo" && <Button label="Reset demo data" icon="reset" variant="secondary" onPress={() => setConfirmReset(true)} />}
         <Button
-          label="Sign out"
+          label={mode === "demo" ? "Leave the demo" : "Sign out"}
           icon="logout"
           variant="danger"
-          onPress={() => {
+          onPress={async () => {
             lock.relock();
-            updateProfile({ onboarded: false });
+            await auth.signOut();
+            router_.replace("/welcome");
           }}
         />
         <T v="caption" center style={{ marginTop: space.sm }}>
-          LAWFIC · demo account, kept on this phone
+          {mode === "live" ? `Signed in as ${auth.email} · synced with lawfic.pro` : "LAWFIC · demo data, kept on this phone"}
         </T>
       </Reveal>
 

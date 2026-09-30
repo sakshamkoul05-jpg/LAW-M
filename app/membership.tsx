@@ -39,7 +39,7 @@ export default function Membership() {
 
   const join = async (p: Plan) => {
     if (lock.enabled && !lock.unlocked && !(await lock.unlock())) return false;
-    const r = subscribe(p.id, period);
+    const r = await subscribe(p.id, period);
     if (!r.ok) {
       toast({ title: "Not joined", body: r.error, tone: "bad" });
       return false;
