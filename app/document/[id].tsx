@@ -19,7 +19,7 @@ import { color as C, motion, radius as R, space } from "@/theme";
  * The page arrives rising and settling like a sheet laid on a desk. Pinch or
  * use the buttons to zoom; drag to move around a zoomed page; the arrows walk
  * through the rest of the vault. Download is a real PDF, Share is the system
- * share sheet, and "Summarise" asks LAWFiC AI — the website's assistant — to
+ * share sheet, and "Summarise" asks Panda AI — the website's assistant — to
  * explain the document in plain words.
  */
 export default function DocumentViewer() {
@@ -148,7 +148,7 @@ export default function DocumentViewer() {
 
         <View style={{ flex: 1, gap: space.lg }}>
           <Surface>
-            <T v="label">{receipt ? "Issued by LAWFiC" : "Added by you"}</T>
+            <T v="label">{receipt ? "Issued by LAWFIC" : "Added by you"}</T>
             <T v="title3" style={{ marginTop: 6 }}>
               {item.title}
             </T>
@@ -161,7 +161,7 @@ export default function DocumentViewer() {
             </View>
             {!receipt && (
               <T v="caption" style={{ marginTop: space.md }}>
-                Nobody at LAWFiC has looked at this yet. When it is attached to a filing, the team checks it before anything is submitted.
+                Nobody at LAWFIC has looked at this yet. When it is attached to a filing, the team checks it before anything is submitted.
               </T>
             )}
           </Surface>
@@ -180,14 +180,14 @@ export default function DocumentViewer() {
                 }
               }}
             />
-            {receipt && <Button label="Summarise with LAWFiC AI" icon="panda" variant="secondary" onPress={summarise} />}
+            {receipt && <Button label="Summarise with Panda AI" icon="panda" variant="secondary" onPress={summarise} />}
             {item.order && <Button label="Open the filing" variant="ghost" onPress={() => router.push(`/filing/${item.order!.id}`)} />}
             {!receipt && <Button label="Remove from vault" icon="trash" variant="danger" onPress={() => setConfirm(true)} />}
           </View>
         </View>
       </View>
 
-      <Sheet open={summary.open} onClose={() => setSummary((s) => ({ ...s, open: false }))} title="In plain words" subtitle="From LAWFiC AI · not legal advice">
+      <Sheet open={summary.open} onClose={() => setSummary((s) => ({ ...s, open: false }))} title="In plain words" subtitle="From Panda AI · not legal advice">
         <View style={{ minHeight: 80 }}>
           {summary.text ? (
             <Animated.View entering={FadeIn}>
@@ -200,7 +200,7 @@ export default function DocumentViewer() {
           ) : null}
           {summary.error && (
             <T v="callout" color={C.red} style={{ marginTop: space.md }}>
-              LAWFiC AI could not be reached{summary.error === "blocked" ? " from this browser preview yet — it works in the installed app" : ""}.
+              Panda AI could not be reached{summary.error === "blocked" ? " from this browser preview yet — it works in the installed app" : ""}.
             </T>
           )}
         </View>

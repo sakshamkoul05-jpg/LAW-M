@@ -32,7 +32,7 @@ export default function Support() {
   const faqs = liveServices.flatMap((s) => s.faq.map((f) => ({ ...f, service: s.name })));
 
   return (
-    <Screen back title="Talk to the team" kicker="Support" subtitle={company.supportHours}>
+    <Screen back title="Talk to the team" subtitle={company.supportHours}>
       <View style={styles.channels}>
         {channels
           .filter((c) => c.url)
@@ -71,11 +71,11 @@ export default function Support() {
       </Reveal>
 
       <Reveal i={4} style={{ marginTop: space.md }}>
-        <Press onPress={() => router.push("/ai")} radius={R.xl} accessibilityLabel="Ask LAWFiC AI" style={[styles.row, styles.ai]}>
+        <Press onPress={() => router.push("/ai")} radius={R.xl} accessibilityLabel="Ask Panda AI" style={[styles.row, styles.ai]}>
           <Icon name="panda" size={20} color={C.gold} />
           <View style={{ flex: 1 }}>
-            <T v="calloutMedium">Ask LAWFiC AI first</T>
-            <T v="caption">Answers straight away, any hour, from LAWFiC's own service pages.</T>
+            <T v="calloutMedium">Ask Panda AI first</T>
+            <T v="caption">Answers straight away, any hour, from LAWFIC's own service pages.</T>
           </View>
           <Icon name="chevron" size={16} color={C.textMuted} />
         </Press>

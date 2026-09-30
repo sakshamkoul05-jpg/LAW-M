@@ -1,95 +1,74 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Platform, StyleSheet, View, useWindowDimensions } from "react-native";
-import { Button, T, Wordmark } from "@/ui";
-import { color as C, space } from "@/theme";
+import React from "react";
+import { Image, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
+import { T } from "@/ui/Text";
+import { color as C, font, space } from "@/theme";
 
 /**
- * The browser preview's two ways of looking at the app.
+ * The web preview's phone.
  *
- *   desktop (default)  the app lays itself out for the window — side rail,
- *                      wide columns, hover states. This is how LAWFiC looks on
- *                      a laptop.
- *   phone              the app at phone width inside a device frame, for
- *                      showing somebody what the mobile app looks like without
- *                      handing them a phone.
+ * LAWFIC is a phone app, for iPhone and Galaxy. On a computer the browser
+ * shows it the way it will be used — inside a phone, at phone size — rather
+ * than stretching a phone layout across a monitor. Narrow the browser below
+ * 600px and the frame drops away, because the window is then the phone.
  *
- * On iOS and Android none of this exists; the component is a passthrough.
+ * On iOS and Android this is a passthrough; nothing here exists.
  */
-type Mode = "desktop" | "phone";
-const Ctx = createContext<{ mode: Mode; setMode: (m: Mode) => void; canFrame: boolean }>({ mode: "desktop", setMode: () => {}, canFrame: false });
-
-const KEY = "lawfic:view-mode";
-const PHONE_W = 400;
-const FRAME_AT = 760;
-
-export function useViewMode() {
-  return useContext(Ctx);
-}
+const PHONE_W = 393; // iPhone 15/16 and Galaxy S-series are all within a few points of this
+const RATIO = 852 / 393;
+const FRAME_AT = 600;
 
 export function PhoneFrame({ children }: { children: React.ReactNode }) {
   const { width, height } = useWindowDimensions();
-  const [mode, setModeState] = useState<Mode>("desktop");
-  const canFrame = Platform.OS === "web" && width >= FRAME_AT;
+  if (Platform.OS !== "web" || width < FRAME_AT) return <>{children}</>;
 
-  useEffect(() => {
-    if (Platform.OS !== "web") return;
-    try {
-      const saved = window.localStorage.getItem(KEY);
-      if (saved === "phone") setModeState("phone");
-    } catch {
-      /* storage blocked: stay on desktop */
-    }
-  }, []);
-
-  const setMode = (m: Mode) => {
-    setModeState(m);
-    try {
-      window.localStorage.setItem(KEY, m);
-    } catch {
-      /* ignore */
-    }
-  };
-
-  const ctx = { mode, setMode, canFrame };
-
-  if (!canFrame || mode === "desktop") return <Ctx.Provider value={ctx}>{children}</Ctx.Provider>;
-
-  const phoneH = Math.min(PHONE_W * 2.16, height - space.xxl * 2);
-  const phoneW = Math.min(PHONE_W, phoneH / 2.16);
+  const phoneH = Math.min(PHONE_W * RATIO, height - space.xxl * 2);
+  const phoneW = Math.min(PHONE_W, phoneH / RATIO);
+  const showAside = width >= 980;
 
   return (
-    <Ctx.Provider value={ctx}>
-      <View style={styles.stage}>
+    <View style={styles.stage}>
+      {showAside && (
         <View style={styles.aside}>
-          <Wordmark size={18} />
-          <T v="title3" style={{ marginTop: space.lg }}>
-            The mobile app, at phone size.
+          <Image source={require("../../assets/brand/lawfic-mark.png")} style={{ width: 40, height: 62 }} resizeMode="contain" />
+          <T style={{ fontFamily: font.semibold, fontSize: 15, letterSpacing: 5, color: C.text, marginTop: space.xl }}>LAWFIC</T>
+          <T v="title2" style={{ marginTop: space.md }}>
+            Your legal wallet, on your phone.
           </T>
-          <T v="callout">Everything here works — the passes, the filings, the wallet, LAWFiC AI. Haptics and the native blur need a real phone.</T>
-          <T v="caption">Preview mode: balances, filings and dates are sample data stored in this browser. No payment is taken.</T>
-          <Button label="Back to desktop view" icon="devices" variant="secondary" size="md" full={false} onPress={() => setMode("desktop")} style={{ marginTop: space.lg }} />
+          <T v="callout" style={{ marginTop: space.sm }}>
+            Built for iPhone and Samsung Galaxy. Filings, documents, payments and Panda AI — in one place.
+          </T>
+          <T v="caption" style={{ marginTop: space.lg }}>
+            Shown here at phone size. Figures are demo data kept in this browser; no payment is taken.
+          </T>
         </View>
-        <View style={[styles.phone, { width: phoneW, height: phoneH }]}>
-          <View style={styles.screen}>{children}</View>
-        </View>
+      )}
+      <View style={[styles.phone, { width: phoneW + 20, height: phoneH + 20 }]}>
+        <View style={styles.button} />
+        <View style={styles.screen}>{children}</View>
       </View>
-    </Ctx.Provider>
+    </View>
   );
 }
 
+/** Kept for callers from the old desktop/phone toggle; the app is phone-only now. */
+export function useViewMode() {
+  return { mode: "phone" as const, setMode: (_m: "phone" | "desktop") => {}, canFrame: false };
+}
+
 const styles = StyleSheet.create({
-  stage: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: space.hero, backgroundColor: "#030303", padding: space.xxl },
-  aside: { maxWidth: 320, flexShrink: 1, gap: space.sm },
+  stage: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 96, backgroundColor: "#030303", padding: space.xxl },
+  aside: { width: 300 },
   phone: {
-    borderRadius: 48,
+    borderRadius: 58,
     padding: 10,
-    backgroundColor: "#121212",
-    borderWidth: 1,
-    borderColor: "#262626",
+    backgroundColor: "#0C0C0C",
+    borderWidth: 1.5,
+    borderColor: "#2B2B2B",
     shadowColor: "#000",
-    shadowOpacity: 0.8,
-    shadowRadius: 60,
-    shadowOffset: { width: 0, height: 30 },
+    shadowOpacity: 0.9,
+    shadowRadius: 70,
+    shadowOffset: { width: 0, height: 34 },
   },
-  screen: { flex: 1, borderRadius: 38, overflow: "hidden", backgroundColor: C.bg },
+  button: { position: "absolute", right: -3, top: 180, width: 3, height: 80, borderRadius: 2, backgroundColor: "#2B2B2B" },
+  screen: { flex: 1, borderRadius: 48, overflow: "hidden", backgroundColor: C.bg },
 });

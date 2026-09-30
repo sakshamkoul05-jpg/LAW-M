@@ -13,10 +13,11 @@ import { color as C, elevation, font, space } from "@/theme";
  * drifts against the swipe — a parallax of a few pixels, which is what makes a
  * banner feel placed rather than pasted.
  */
-export function FlyerCarousel({ width, onOpen }: { width: number; onOpen: (f: Flyer) => void }) {
-  const perView = width >= 900 ? 2 : 1;
+export function FlyerCarousel({ width, inset = 0, onOpen }: { width: number; inset?: number; onOpen: (f: Flyer) => void }) {
   const gap = space.md;
-  const card = Math.floor((width - gap * (perView - 1)) / perView);
+  /* The next banner peeks in from the edge — the cue that there is more,
+     without dots. */
+  const card = Math.floor(width - inset * 2 - (inset ? 28 : 0));
   const stride = card + gap;
   const x = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
@@ -31,7 +32,7 @@ export function FlyerCarousel({ width, onOpen }: { width: number; onOpen: (f: Fl
       showsHorizontalScrollIndicator={false}
       onScroll={onScroll}
       scrollEventThrottle={16}
-      contentContainerStyle={{ gap }}
+      contentContainerStyle={{ gap, paddingHorizontal: inset }}
     >
       {flyers.map((f, i) => (
         <FlyerCard key={f.id} flyer={f} i={i} width={card} stride={stride} x={x} onPress={() => onOpen(f)} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { StyleSheet, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Defs, LinearGradient as SvgLinear, Path, RadialGradient, Rect, Stop } from "react-native-svg";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -17,12 +17,12 @@ import Animated, {
   type SharedValue,
 } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
-import { AnimatedMoney, T, Mark, buzz } from "@/ui";
+import { AnimatedMoney, T, buzz } from "@/ui";
 import { pad2 } from "@/lib/format";
 import { color as C, elevation, font, motion } from "@/theme";
 
 /**
- * The LAWFiC pass.
+ * The LAWFIC pass.
  *
  * WHAT IT IS, AND WHAT IT IS NOT
  *
@@ -297,23 +297,23 @@ function Stat({ value, label, m, icon }: { value: string; label: string; m: Mate
 function Top({ m, title }: { m: Material; title: string }) {
   return (
     <View style={styles.top}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
         <MarkOn m={m} />
-        <T style={{ fontFamily: font.semibold, fontSize: 13, letterSpacing: 2.8, color: m.ink }}>
-          LAWF<T style={{ fontFamily: font.medium, fontSize: 13, letterSpacing: 2.8, color: m.accent }}>i</T>C
-        </T>
+        <T style={{ fontFamily: font.semibold, fontSize: 13, letterSpacing: 3.4, color: m.ink }}>LAWFIC</T>
       </View>
       <T style={{ fontFamily: font.semibold, fontSize: 9, letterSpacing: 1.6, color: m.dim }}>{title}</T>
     </View>
   );
 }
 
+/** The brand mark. On the champagne pass it is set in ink, or gold would vanish into gold. */
 function MarkOn({ m }: { m: Material }) {
-  if (m.accent === C.gold) return <Mark size={20} />;
   return (
-    <View style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1.2, borderColor: m.accent, alignItems: "center", justifyContent: "center" }}>
-      <View style={{ width: 6, height: 8.5, borderLeftWidth: 1.6, borderBottomWidth: 1.6, borderColor: m.accent, marginLeft: 1 }} />
-    </View>
+    <Image
+      source={require("../../assets/brand/lawfic-mark.png")}
+      style={[{ width: 14, height: 22 }, m.accent !== C.gold && m.accent !== C.goldLight && { tintColor: m.accent }]}
+      resizeMode="contain"
+    />
   );
 }
 
@@ -399,7 +399,7 @@ export function Pass({
                   </T>
                 </View>
                 <View style={styles.bottom}>
-                  <Stat value={pad2(data.verified)} label="Issued by LAWFiC" m={m} icon="verified" />
+                  <Stat value={pad2(data.verified)} label="Issued by LAWFIC" m={m} icon="verified" />
                   <View style={{ flex: 1 }} />
                   <Icon name="vault" size={18} color={m.dim} />
                 </View>

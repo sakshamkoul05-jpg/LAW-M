@@ -33,8 +33,7 @@ export default function Filings() {
     <Screen
       tabbed
       title="Filings"
-      kicker="Your legal matters"
-      subtitle="Every registration, correction and certificate LAWFiC is handling for you — where it is, and what happens next."
+      subtitle="Every registration, correction and certificate LAWFIC is handling for you — where it is, and what happens next."
       right={<IconButton icon="plus" label="New filing" tone="gold" onPress={() => router.push("/services")} />}
     >
       <View style={{ gap: space.xl }}>

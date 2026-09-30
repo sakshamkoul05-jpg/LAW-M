@@ -9,7 +9,7 @@ import { Icon, type IconName } from "@/icons/Icon";
 import { useStore } from "@/lib/store";
 import { useLock } from "@/lib/lock";
 import { groupIndian, rupees } from "@/lib/format";
-import { useLayout } from "@/components/AppWidth";
+import { useDevice, useLayout } from "@/components/AppWidth";
 import { AnimatedMoney, Button, Glow, IconButton, Press, T, buzz } from "@/ui";
 import { color as C, font, motion, radius as R, space } from "@/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,6 +39,7 @@ export default function AddMoney() {
   const router = useRouter();
   const params = useLocalSearchParams<{ amount?: string }>();
   const layout = useLayout();
+  const { short } = useDevice();
   const insets = useSafeAreaInsets();
   const { topUp, balance } = useStore();
   const lock = useLock();
@@ -112,12 +113,12 @@ export default function AddMoney() {
       </View>
 
       <View style={[styles.body, { maxWidth: 520 }]}>
-        <View style={{ alignItems: "center", marginTop: wide ? space.section : space.xl }}>
+        <View style={{ alignItems: "center", marginTop: short ? space.sm : wide ? space.section : space.xl }}>
           <T v="label">Amount</T>
           <Animated.View style={[styles.amount, shakeStyle]} accessibilityLabel={`${digits} rupees`} accessibilityLiveRegion="polite">
             <T style={{ fontFamily: font.medium, fontSize: 30, color: C.textDim, marginTop: 10, marginRight: 4 }}>₹</T>
             {digits.split("").map((ch, i) => (
-              <Animated.Text key={`${i}-${digits.length}`} entering={i === digits.length - 1 && amount ? pop() : undefined} style={[styles.digit, !amount && { color: C.textMuted }]}>
+              <Animated.Text key={`${i}-${digits.length}`} entering={i === digits.length - 1 && amount ? pop() : undefined} style={[styles.digit, short && { fontSize: 50 }, !amount && { color: C.textMuted }]}>
                 {ch}
               </Animated.Text>
             ))}
@@ -136,7 +137,7 @@ export default function AddMoney() {
           )}
         </View>
 
-        <View style={styles.presets}>
+        <View style={[styles.presets, short && { marginTop: space.md }]}>
           {PRESETS.map((p) => (
             <Press
               key={p}
@@ -147,7 +148,7 @@ export default function AddMoney() {
               haptic="select"
               radius={R.pill}
               accessibilityLabel={`${p} rupees`}
-              style={[styles.preset, rupeesN === p && styles.presetOn]}
+              style={[styles.preset, { flex: 1 }, rupeesN === p && styles.presetOn]}
             >
               <T v="calloutMedium" num color={rupeesN === p ? C.gold : C.text}>
                 {rupees(p * 100)}
@@ -156,7 +157,7 @@ export default function AddMoney() {
           ))}
         </View>
 
-        <View style={styles.methods} accessibilityRole="radiogroup">
+        <View style={[styles.methods, short && { marginTop: space.md }]} accessibilityRole="radiogroup">
           {METHODS.map((m) => {
             const on = method === m.id;
             return (
@@ -181,7 +182,7 @@ export default function AddMoney() {
         {!wide && (
           <View style={styles.pad}>
             {["1", "2", "3", "4", "5", "6", "7", "8", "9", "00", "0", "del"].map((k) => (
-              <Press key={k} onPress={() => press(k)} lift={false} haptic="none" radius={R.lg} accessibilityLabel={k === "del" ? "Delete" : k} style={styles.key}>
+              <Press key={k} onPress={() => press(k)} lift={false} haptic="none" radius={R.lg} accessibilityLabel={k === "del" ? "Delete" : k} style={[styles.key, short && { height: 46 }]}>
                 {k === "del" ? <Icon name="chevronLeft" size={24} color={C.text} /> : <T style={{ fontFamily: font.medium, fontSize: 26, color: C.text }}>{k}</T>}
               </Press>
             ))}
@@ -196,7 +197,7 @@ export default function AddMoney() {
         <View style={{ paddingBottom: Math.max(insets.bottom, space.lg), gap: 8 }}>
           <Button label={ok ? `Add ${rupees(paise)} with ${method}` : "Enter an amount"} icon={lock.enabled ? "faceid" : undefined} onPress={pay} disabled={!amount} />
           <T v="caption" center>
-            Preview · no payment is taken, sample money is added
+            Demo · no payment is taken
           </T>
         </View>
       </View>
@@ -258,8 +259,8 @@ const styles = StyleSheet.create({
   body: { flex: 1, width: "100%", alignSelf: "center", paddingHorizontal: space.xl },
   amount: { flexDirection: "row", alignItems: "flex-start", marginVertical: space.md, minHeight: 72 },
   digit: { fontFamily: font.semibold, fontSize: 62, letterSpacing: -2.4, color: C.text, fontVariant: ["tabular-nums"] },
-  presets: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginTop: space.xl, flexWrap: "wrap" },
-  preset: { height: 38, paddingHorizontal: 16, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
+  presets: { flexDirection: "row", justifyContent: "center", gap: space.sm, marginTop: space.xl },
+  preset: { height: 38, paddingHorizontal: 6, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
   presetOn: { borderColor: C.gold, backgroundColor: C.goldWash },
   methods: { flexDirection: "row", gap: space.sm, marginTop: space.xl },
   method: { flex: 1, alignItems: "center", gap: 4, paddingVertical: space.md, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },

@@ -11,7 +11,7 @@ import { space } from "@/theme";
  * what the app is for.
  */
 const SECTIONS: { key: keyof Prefs["homeSections"]; title: string; sub: string }[] = [
-  { key: "promotions", title: "Offers and banners", sub: "LAWFiC's current promotions" },
+  { key: "promotions", title: "Offers and banners", sub: "LAWFIC's current promotions" },
   { key: "forYou", title: "For you", sub: "Services picked from your interests" },
   { key: "services", title: "Popular services", sub: "The four you can start today" },
   { key: "activity", title: "Recent activity", sub: "Your latest wallet movements" },
@@ -46,7 +46,7 @@ export default function Preferences() {
           />
         </Group>
         <View style={{ marginTop: space.md, marginHorizontal: 4 }}>
-          <T v="caption">Who can see your details is managed with your account on lawfic.pro. Nothing in this preview leaves this device except what you ask LAWFiC AI.</T>
+          <T v="caption">Who can see your details is managed with your account on lawfic.pro. Nothing in this demo leaves your phone except what you ask Panda.</T>
         </View>
       </Reveal>
     </Screen>

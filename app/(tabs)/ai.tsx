@@ -1,16 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import { useRouter } from "expo-router";
-import Animated, { Easing, FadeIn, FadeInDown, FadeInUp, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import Animated, { FadeIn, FadeInDown, FadeInUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle, Defs, LinearGradient, RadialGradient, Stop } from "react-native-svg";
 import { STATUS_META } from "@/lawfic/orders";
 import { Icon } from "@/icons/Icon";
 import { useLayout } from "@/components/AppWidth";
 import { isActive, useStore } from "@/lib/store";
 import { askPanda, appPathFor, PANDA_ERROR_COPY, type PandaError, type Turn } from "@/lib/panda";
 import { serviceName } from "@/data/catalogue";
-import { Dots, Glow, IconButton, Press, T } from "@/ui";
+import { Dots, Glow, IconButton, Panda, Press, T } from "@/ui";
 import { color as C, font, radius as R, space, text } from "@/theme";
 
 type Msg = Turn & { id: string; error?: PandaError; context?: string };
@@ -23,7 +22,7 @@ const STARTERS = [
 ];
 
 /**
- * LAWFiC AI.
+ * Panda AI.
  *
  * The same assistant as the website's Panda, answering from the website's own
  * catalogue, fees and rules — it is the website's endpoint. It explains; it
@@ -38,6 +37,7 @@ const STARTERS = [
  */
 export default function Assistant() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ q?: string }>();
   const layout = useLayout();
   const insets = useSafeAreaInsets();
   const { state } = useStore();
@@ -48,6 +48,20 @@ export default function Assistant() {
   const scroll = useRef<ScrollView>(null);
 
   const mine = state.orders.filter(isActive).slice(0, 2);
+
+  /* A question tapped on Home arrives as ?q= and is asked straight away,
+     once — then the param is cleared so going back and forth does not ask it
+     again. */
+  const asked = useRef<string | null>(null);
+  useEffect(() => {
+    const q = typeof params.q === "string" ? params.q : null;
+    if (q && asked.current !== q) {
+      asked.current = q;
+      setMsgs([]);
+      void send(q);
+      router.setParams({ q: undefined });
+    }
+  }, [params.q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const t = setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 60);
@@ -97,11 +111,10 @@ export default function Assistant() {
         <View style={[styles.top, { paddingTop: insets.top + space.sm }]}>
           <View style={styles.column}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.xl }}>
+              <Panda size={34} ring still={busy === false && !empty} />
               <View style={{ flex: 1 }}>
-                <T v="label" tone="gold">
-                  Assistant
-                </T>
-                <T v="title3">LAWFiC AI</T>
+                <T v="title3">Panda AI</T>
+                <T v="caption">{busy ? "Writing…" : "LAWFIC's assistant"}</T>
               </View>
               {!empty && <IconButton icon="refresh" label="New conversation" onPress={() => (busy ? stop() : setMsgs([]))} />}
             </View>
@@ -111,16 +124,16 @@ export default function Assistant() {
         <ScrollView ref={scroll} contentContainerStyle={[styles.column, { padding: space.xl, paddingBottom: space.xl, flexGrow: 1 }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           {empty ? (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: space.section }}>
-              <Orb size={wide ? 150 : 128} />
+              <Panda size={wide ? 140 : 120} halo />
               <Animated.View entering={FadeInDown.delay(150).duration(500)} style={{ alignItems: "center", marginTop: space.xxl }}>
                 <T v="label" tone="gold">
-                  Ask LAWFiC AI
+                  Hello, I'm Panda
                 </T>
                 <T v={wide ? "display" : "title1"} center style={{ marginTop: 8, maxWidth: 520 }}>
-                  What can we help you file?
+                  What can I help you file?
                 </T>
                 <T v="body" center style={{ marginTop: 8, maxWidth: 440 }}>
-                  Which registration you need, what it costs, what to keep ready. Answers come from LAWFiC's own service catalogue.
+                  Which registration you need, what it costs, what to keep ready. Answers come from LAWFIC's own service catalogue.
                 </T>
               </Animated.View>
 
@@ -135,7 +148,7 @@ export default function Assistant() {
                         icon="filings"
                         text={`What happens next with my ${serviceName(o.service_slug)}?`}
                         onPress={() =>
-                          send(`What happens next with my ${serviceName(o.service_slug)}, and is there anything I should do?`, `About my filing: ${serviceName(o.service_slug)} — status "${STATUS_META[o.status].label}" (${STATUS_META[o.status].blurb})`)
+                          void send(`What happens next with my ${serviceName(o.service_slug)}, and is there anything I should do?`, `About my filing: ${serviceName(o.service_slug)} — status "${STATUS_META[o.status].label}" (${STATUS_META[o.status].blurb})`)
                         }
                       />
                     </Animated.View>
@@ -175,7 +188,7 @@ export default function Assistant() {
                   </Animated.View>
                 ) : (
                   <Animated.View key={m.id} entering={FadeIn.duration(260)} style={{ flexDirection: "row", gap: space.md }}>
-                    <Orb size={30} still />
+                    <Panda size={30} ring still />
                     <View style={{ flex: 1, paddingTop: 4 }}>
                       {m.error ? (
                         <View style={styles.err}>
@@ -219,7 +232,7 @@ export default function Assistant() {
               maxLength={2000}
               onSubmitEditing={() => send(draft)}
               blurOnSubmit
-              accessibilityLabel="Ask LAWFiC AI"
+              accessibilityLabel="Ask Panda AI"
               style={[styles.input, Platform.OS === "web" && ({ outlineStyle: "none" } as object)]}
             />
             <Press
@@ -234,7 +247,7 @@ export default function Assistant() {
             </Press>
           </View>
           <T v="micro" center style={{ marginTop: 8 }}>
-            LAWFiC AI explains LAWFiC's services. It is not legal advice — for your case, talk to the team.
+            Panda AI explains LAWFIC's services. It is not legal advice — for your case, talk to the team.
           </T>
         </View>
       </KeyboardAvoidingView>
@@ -292,68 +305,6 @@ function labelFor(path: string): string {
   if (path.startsWith("/services/") || path.startsWith("/document/")) return serviceName(slug);
   const map: Record<string, string> = { pricing: "Membership plans", "instant-help": "Talk to the team", contact: "Contact", wallet: "Wallet", topup: "Add money", services: "All services", document: "Documents" };
   return map[slug] ?? slug.replace(/-/g, " ");
-}
-
-/**
- * The orb: a sphere of warm light that breathes. Slow — a four-second breath —
- * because an assistant that pulses quickly reads as anxious.
- */
-function Orb({ size, still }: { size: number; still?: boolean }) {
-  const b = useSharedValue(0);
-  const r = useSharedValue(0);
-  useEffect(() => {
-    if (still) return;
-    b.value = withRepeat(withSequence(withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.sin) }), withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.sin) })), -1);
-    r.value = withRepeat(withTiming(1, { duration: 14000, easing: Easing.linear }), -1);
-  }, [still, b, r]);
-  const breathe = useAnimatedStyle(() => ({ transform: [{ scale: 1 + b.value * 0.04 }] }));
-  const halo = useAnimatedStyle(() => ({ opacity: 0.35 + b.value * 0.35, transform: [{ scale: 1.15 + b.value * 0.1 }] }));
-  const spin = useAnimatedStyle(() => ({ transform: [{ rotate: `${r.value * 360}deg` }] }));
-
-  return (
-    <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }} accessibilityElementsHidden>
-      {!still && (
-        <Animated.View style={[StyleSheet.absoluteFill, halo]}>
-          <Svg width={size} height={size}>
-            <Defs>
-              <RadialGradient id="halo" cx="50%" cy="50%" r="50%">
-                <Stop offset="0.55" stopColor="#C6A15B" stopOpacity={0.22} />
-                <Stop offset="1" stopColor="#C6A15B" stopOpacity={0} />
-              </RadialGradient>
-            </Defs>
-            <Circle cx={size / 2} cy={size / 2} r={size / 2} fill="url(#halo)" />
-          </Svg>
-        </Animated.View>
-      )}
-      <Animated.View style={[{ width: size * 0.78, height: size * 0.78 }, breathe]}>
-        <Svg width={size * 0.78} height={size * 0.78}>
-          <Defs>
-            <RadialGradient id={`core${size}`} cx="35%" cy="30%" r="75%">
-              <Stop offset="0" stopColor="#FFF1CF" />
-              <Stop offset="0.35" stopColor="#E0C783" />
-              <Stop offset="0.75" stopColor="#8F6E32" />
-              <Stop offset="1" stopColor="#2A1F0E" />
-            </RadialGradient>
-          </Defs>
-          <Circle cx={size * 0.39} cy={size * 0.39} r={size * 0.39} fill={`url(#core${size})`} />
-        </Svg>
-        {!still && (
-          <Animated.View style={[StyleSheet.absoluteFill, spin]}>
-            <Svg width={size * 0.78} height={size * 0.78}>
-              <Defs>
-                <LinearGradient id="band" x1="0" y1="0" x2="1" y2="1">
-                  <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0} />
-                  <Stop offset="0.5" stopColor="#FFFFFF" stopOpacity={0.28} />
-                  <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
-                </LinearGradient>
-              </Defs>
-              <Circle cx={size * 0.39} cy={size * 0.39} r={size * 0.3} stroke="url(#band)" strokeWidth={size * 0.05} fill="none" />
-            </Svg>
-          </Animated.View>
-        )}
-      </Animated.View>
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({

@@ -14,7 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
-import { useLayout } from "@/components/AppWidth";
+import { PHONE_COLUMN, useDevice, useLayout } from "@/components/AppWidth";
 import { color as C, gradient, MAX_CONTENT, space } from "@/theme";
 import { IconButton } from "./Button";
 import { T } from "./Text";
@@ -102,7 +102,8 @@ export function Screen({
   }));
 
   const barH = insets.top + 56;
-  const side = layout === "expanded" ? space.section : wide ? space.xxxl : space.xl;
+  const { narrow } = useDevice();
+  const side = narrow ? space.lg : space.xl;
   const goBack = typeof back === "function" ? back : () => (router.canGoBack() ? router.back() : router.replace("/"));
   const hasBar = !!(back || right || title);
 
@@ -198,7 +199,7 @@ export function Glow({ height = 460, strength = 1 }: { height?: number; strength
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: C.bg },
-  column: { width: "100%", maxWidth: MAX_CONTENT, alignSelf: "center" },
+  column: { width: "100%", maxWidth: PHONE_COLUMN, alignSelf: "center" },
   large: { marginBottom: space.xxl, marginTop: space.xs },
   bar: { position: "absolute", left: 0, right: 0, top: 0 },
   barRule: { position: "absolute", left: 0, right: 0, bottom: 0, height: StyleSheet.hairlineWidth, backgroundColor: C.line },

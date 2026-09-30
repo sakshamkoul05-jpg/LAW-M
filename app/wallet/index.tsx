@@ -91,7 +91,6 @@ export default function Wallet() {
     <Screen
       back
       title="Wallet"
-      kicker="Legal wallet"
       right={
         <IconButton
           icon={state.prefs.hideBalance ? "eye" : "eyeOff"}
@@ -153,7 +152,7 @@ export default function Wallet() {
             <Press onPress={() => router.push("/membership")} radius={R.lg} accessibilityLabel="Membership" style={styles.strip}>
               <Icon name="crown" size={18} color={C.gold} />
               <T v="callout" tone="dim" style={{ flex: 1 }}>
-                {entitled ? `${plan?.name} member — your discount comes off LAWFiC's fee automatically.` : "Members save 5–18% on LAWFiC's fee for every filing."}
+                {entitled ? `${plan?.name} member — your discount comes off LAWFIC's fee automatically.` : "Members save 5–18% on LAWFIC's fee for every filing."}
               </T>
               <Icon name="chevron" size={15} color={C.textMuted} />
             </Press>
@@ -163,7 +162,7 @@ export default function Wallet() {
             <View style={styles.note}>
               <Icon name="shield" size={16} color={C.textMuted} />
               <T v="caption" style={{ flex: 1 }}>
-                A closed wallet. It pays for LAWFiC services and takes refunds back — it cannot send money to another person or be withdrawn as cash. Preview mode: no payment is taken.
+                A closed wallet. It pays for LAWFIC services and takes refunds back — it cannot send money to another person or be withdrawn as cash.
               </T>
             </View>
           </Reveal>

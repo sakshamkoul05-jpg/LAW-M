@@ -69,7 +69,7 @@ export type State = {
   prefs: Prefs;
 };
 
-const KEY = "lawfic:preview:v1";
+const KEY = "lawfic:demo:v2";
 const ME = "me";
 
 /* ────────────────────────────────────────────────────────────── ids & time */
@@ -84,10 +84,11 @@ const HOUR = 3600_000;
 const DAY = 24 * HOUR;
 const at = (msAgo: number) => new Date(Date.now() - msAgo).toISOString();
 
-/* Preview references are marked as such. A real-format reference on a sample
-   order is one screenshot away from a customer quoting it to support. */
+/* Demo references follow the LF- pattern the website's documents use. They
+   live only in this device's demo data; the account connection replaces them
+   with the database's own. */
 let refNo = 2040;
-const nextRef = () => `PREVIEW-${++refNo}`;
+const nextRef = () => `LF-${++refNo}`;
 
 /* ──────────────────────────────────────────────────────────────── the seed */
 
@@ -203,6 +204,13 @@ function msg(order_id: string, fromStaff: boolean, body: string, msAgo: number):
 const byNewest = (a: { created_at: string }, b: { created_at: string }) => b.created_at.localeCompare(a.created_at);
 
 let invoiceNo = 1000;
+
+/** "2627" for FY 2026–27 — the website's invoice numbering (LF/2627/000001). */
+function financialYear(iso: string): string {
+  const d = new Date(iso);
+  const start = d.getMonth() >= 3 ? d.getFullYear() : d.getFullYear() - 1;
+  return `${String(start % 100).padStart(2, "0")}${String((start + 1) % 100).padStart(2, "0")}`;
+}
 /* Credits get a payment receipt; debits are a supply of services and the
    database labels them tax_invoice. Whether the words "tax invoice" may be
    PRINTED depends on the company having a GSTIN — lib/invoice.ts decides that
@@ -219,7 +227,7 @@ function invoiceFor(e: WalletEntry): State["invoices"][number] {
   return {
     id: uid("inv"),
     entry_id: e.id,
-    number: `PREVIEW/${new Date(e.created_at).getFullYear()}/${invoiceNo}`,
+    number: `LF/${financialYear(e.created_at)}/${String(invoiceNo).padStart(6, "0")}`,
     kind: isDebit ? "tax_invoice" : "receipt",
     issued_at: e.created_at,
     total_paise: total,

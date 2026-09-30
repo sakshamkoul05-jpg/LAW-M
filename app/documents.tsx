@@ -13,12 +13,12 @@ import { color as C, radius as R, space } from "@/theme";
 type Filter = "all" | "receipts" | "uploads";
 
 /**
- * Documents: what you hold, and what LAWFiC can prepare.
+ * Documents: what you hold, and what LAWFIC can prepare.
  *
- * The vault is every paper LAWFiC issued you (from the ledger) and every page
+ * The vault is every paper LAWFIC issued you (from the ledger) and every page
  * you added. The catalogue below is the website's Document tab, verbatim, in its
  * four groups — each one requestable, because the quote step is
- * where LAWFiC decides what it can do.
+ * where LAWFIC decides what it can do.
  */
 export default function Documents() {
   const router = useRouter();
@@ -40,14 +40,14 @@ export default function Documents() {
   };
 
   return (
-    <Screen back title="Documents" kicker="Your vault" subtitle="Receipts LAWFiC issued you and papers you added, kept in one place." right={<IconButton icon="upload" label="Add a document" tone="gold" onPress={() => setAdding(true)} />}>
+    <Screen back title="Documents" subtitle="Receipts LAWFIC issued you and papers you added, kept in one place." right={<IconButton icon="upload" label="Add a document" tone="gold" onPress={() => setAdding(true)} />}>
       <View style={{ gap: space.lg }}>
         <Segmented<Filter>
           value={filter}
           onChange={setFilter}
           options={[
             { id: "all", label: "All" },
-            { id: "receipts", label: "From LAWFiC" },
+            { id: "receipts", label: "From LAWFIC" },
             { id: "uploads", label: "Yours" },
           ]}
           counts={{ all: vaultFor(state).length }}
@@ -71,7 +71,7 @@ export default function Documents() {
       </View>
 
       <View style={{ marginTop: space.section }}>
-        <SectionHeader kicker={`${documents.length} documents`} title="What LAWFiC prepares" />
+        <SectionHeader kicker={`${documents.length} documents`} title="What LAWFIC prepares" />
         <View style={{ gap: space.xl }}>
           {DOC_GROUPS.map((g, gi) => {
             const items = documents.filter((d) => d.group === g.id);

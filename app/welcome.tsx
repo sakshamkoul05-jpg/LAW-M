@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import Animated, { Easing, FadeIn, FadeInDown, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { isValidPhone } from "@/lawfic/profile";
-import { useAppWidth, useLayout } from "@/components/AppWidth";
+import { useAppWidth, useDevice, useLayout } from "@/components/AppWidth";
 import { useStore } from "@/lib/store";
 import { Pass } from "@/wallet/Pass";
 import { usePassData } from "@/wallet/usePassData";
@@ -57,7 +57,8 @@ export default function Welcome() {
     return true;
   };
 
-  const passW = Math.min(wide ? 420 : width - 72, 420);
+  const { short } = useDevice();
+  const passW = Math.min(wide ? 420 : width - 72, short ? 260 : 420);
 
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
@@ -68,7 +69,7 @@ export default function Welcome() {
             <Animated.View entering={FadeIn.duration(600)} style={{ alignItems: wide ? "flex-start" : "center", alignSelf: "stretch" }}>
               <Wordmark size={15} />
             </Animated.View>
-            <Animated.View entering={FadeInDown.delay(150).duration(800)} style={[{ alignItems: "center", marginTop: wide ? space.hero : space.section, marginBottom: space.section }, float]}>
+            <Animated.View entering={FadeInDown.delay(150).duration(800)} style={[{ alignItems: "center", marginTop: short ? space.xl : wide ? space.hero : space.section, marginBottom: short ? space.xl : space.section }, float]}>
               <Pass kind="wallet" width={passW} data={{ ...pass, hidden: true }} interactive={false} />
             </Animated.View>
           </View>
@@ -76,7 +77,7 @@ export default function Welcome() {
           <View style={[{ gap: space.lg }, wide && { flex: 1, maxWidth: 440 }]}>
             <Animated.View entering={FadeInDown.delay(300).duration(600)}>
               <T v="label" tone="gold">
-                LAWFiC
+                LAWFIC
               </T>
               <T v={wide ? "display" : "title1"} style={{ marginTop: 6 }}>
                 Your legal wallet.
@@ -92,12 +93,12 @@ export default function Welcome() {
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(600).duration(600)} style={{ gap: space.sm }}>
-              <Button label="Continue in preview" icon="forward" onPress={() => go()} successLabel="Welcome" />
+              <Button label="Continue" icon="forward" onPress={() => go()} successLabel="Welcome" />
               <Button label="Look around first" variant="ghost" onPress={() => go(true)} />
               <View style={styles.note}>
                 <Icon name="shield" size={15} color={C.textMuted} />
                 <T v="caption" style={{ flex: 1 }}>
-                  In the live app a one-time code is sent to this number — there is no password. This preview skips the code and keeps everything on this device. LAWFiC will never ask for your OTP or Aadhaar photocopy.
+                  A one-time code confirms your number — there is no password. This demo skips the code and keeps everything on your phone. LAWFIC will never ask for your OTP or an Aadhaar photocopy.
                 </T>
               </View>
             </Animated.View>

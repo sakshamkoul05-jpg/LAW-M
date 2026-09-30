@@ -48,7 +48,7 @@ export function QuickActions({ open, onClose }: { open: boolean; onClose: () => 
     quoted
       ? { icon: "bolt", title: "Pay a quote", sub: `${serviceName(quoted.service_slug)} · ${rupees(orderTotalPaise(quoted))}`, onPress: () => go(`/filing/${quoted.id}`) }
       : { icon: "vault", title: "Your documents", sub: "Receipts and uploads", onPress: () => go("/documents") },
-    { icon: "panda", title: "Ask LAWFiC AI", sub: "Which filing do I need?", onPress: () => go("/ai") },
+    { icon: "panda", title: "Ask Panda AI", sub: "Which filing do I need?", onPress: () => go("/ai") },
     { icon: "support", title: "Talk to the team", sub: "WhatsApp, call or email", onPress: () => go("/support") },
   ];
 

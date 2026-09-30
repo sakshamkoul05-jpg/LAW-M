@@ -16,7 +16,7 @@ import { color as C, font, radius as R, space } from "@/theme";
  * Documents as files, not rows.
  *
  * Every card has the shape of a sheet of paper — a folded corner, a type, a
- * date, a page count and who vouches for it. "Issued by LAWFiC" is only ever
+ * date, a page count and who vouches for it. "Issued by LAWFIC" is only ever
  * said of a paper LAWFIC generated from its own ledger. Something the customer
  * uploaded says plainly that nobody has checked it yet.
  */
@@ -50,7 +50,7 @@ export function DocumentCard({ item, onPress, compact }: { item: VaultItem; onPr
           {dateLong(item.at)} · 1 page
         </T>
         <View style={{ marginTop: 4 }}>
-          {receipt ? <Badge label="Issued by LAWFiC" tone="gold" icon="verified" /> : <Badge label="Not checked yet" tone="neutral" />}
+          {receipt ? <Badge label="Issued by LAWFIC" tone="gold" icon="verified" /> : <Badge label="Not checked yet" tone="neutral" />}
         </View>
       </View>
     </Press>
@@ -88,9 +88,10 @@ export function ReceiptPaper({ item, customer }: ReceiptProps) {
     <View style={paper.page} accessible accessibilityLabel={`${documentTitle(inv)} ${inv.number}`}>
       <View style={paper.head}>
         <View>
-          <T style={{ fontFamily: font.semibold, fontSize: 15, letterSpacing: 3, color: INK }}>
-            LAWF<T style={{ fontFamily: font.medium, fontSize: 15, letterSpacing: 3, color: "#9C7A3C" }}>i</T>C
-          </T>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Image source={require("../../assets/brand/lawfic-mark.png")} style={{ width: 13, height: 20 }} resizeMode="contain" />
+            <T style={{ fontFamily: font.semibold, fontSize: 15, letterSpacing: 3, color: INK }}>LAWFIC</T>
+          </View>
           <T style={{ fontFamily: font.regular, fontSize: 10.5, color: INK_DIM, marginTop: 4 }}>{sup.name}</T>
           {sup.lines.map((l) => (
             <T key={l} style={{ fontFamily: font.regular, fontSize: 10.5, color: INK_DIM }}>
@@ -140,7 +141,7 @@ export function ReceiptPaper({ item, customer }: ReceiptProps) {
 
       {note && <T style={{ fontFamily: font.regular, fontSize: 10.5, lineHeight: 15, color: INK_DIM, marginTop: space.lg }}>{note}</T>}
       <T style={{ fontFamily: font.medium, fontSize: 10, color: "#9C7A3C", marginTop: space.md }}>
-        Preview document — generated on this device from sample data. Not a record of a real payment.
+        Demo document — generated from sample data. Not a record of a real payment.
       </T>
     </View>
   );
@@ -162,13 +163,13 @@ hr{border:0;border-top:1px solid #e3ddd1;margin:24px 0}.k{font-size:10px;letter-
 table{width:100%;border-collapse:collapse;margin-top:24px}td{padding:10px 0;border-top:1px solid #e3ddd1}td:last-child{text-align:right;font-weight:600}
 tr.t td{border-top:1.5px solid #17120A;font-weight:600}.n{margin-top:20px;color:#6b645a;font-size:11px;line-height:1.5}.p{color:#9C7A3C;font-size:11px;margin-top:10px}
 </style></head><body>
-<div class="h"><div><div class="b">LAWFiC</div><div class="d">${esc(sup.name)}</div>${sup.lines.map((l) => `<div class="d">${esc(l)}</div>`).join("")}</div>
+<div class="h"><div><div class="b">LAWFIC</div><div class="d">${esc(sup.name)}</div>${sup.lines.map((l) => `<div class="d">${esc(l)}</div>`).join("")}</div>
 <div style="text-align:right"><div style="font-size:18px;font-weight:600">${esc(documentTitle(inv))}</div><div class="d">${esc(inv.number)}</div><div class="d">${esc(issuedOn(inv.issued_at))}</div></div></div>
 <hr><div class="h"><div><div class="k">BILLED TO</div><div>${esc(customer || "LAWFIC customer")}</div></div>
 <div style="text-align:right"><div class="k">${item.order ? "FILING" : "FOR"}</div><div>${esc(item.order ? `${serviceName(item.order.service_slug)} · ${item.order.reference}` : "Money added to your LAWFIC wallet")}</div></div></div>
 <table><tr><td class="k">DESCRIPTION</td><td class="k">AMOUNT</td></tr><tr><td>${esc(inv.narration)}</td><td></td></tr>
 ${rows.map((r, i) => `<tr class="${i === rows.length - 1 ? "t" : ""}"><td>${esc(r.label)}</td><td>${esc(r.value)}</td></tr>`).join("")}</table>
-${note ? `<div class="n">${esc(note)}</div>` : ""}<div class="p">Preview document — generated from sample data. Not a record of a real payment.</div>
+${note ? `<div class="n">${esc(note)}</div>` : ""}<div class="p">Demo document — generated from sample data. Not a record of a real payment.</div>
 ${company.supportEmail ? `<div class="n">Questions: ${esc(company.supportEmail)}</div>` : ""}
 </body></html>`;
 }
@@ -197,7 +198,7 @@ export async function saveReceiptPdf(p: ReceiptProps): Promise<boolean> {
   return true;
 }
 
-/** Plain-text summary, for Share and for asking LAWFIC AI about it. */
+/** Plain-text summary, for Share and for asking Panda AI about it. */
 export function receiptText({ item, customer }: ReceiptProps): string {
   const inv = item.invoice;
   const rows = amountRows(inv).map((r) => `${r.label}: ${r.value}`).join("\n");

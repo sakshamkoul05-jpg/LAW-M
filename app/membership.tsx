@@ -50,7 +50,7 @@ export default function Membership() {
   };
 
   return (
-    <Screen back title="Membership" kicker="Plans" subtitle="Pay per filing, or join a plan for a discount on every filing and the standing benefits that come with it.">
+    <Screen back title="Membership" subtitle="Pay per filing, or join a plan for a discount on every filing and the standing benefits that come with it.">
       {entitled && sub && current && (
         <Reveal fade>
           <Surface tone="gold" raised style={{ padding: space.xl, marginBottom: space.xl }}>
@@ -175,7 +175,7 @@ export default function Membership() {
         )}
       </Reveal>
 
-      <Sheet open={!!confirm} onClose={() => setConfirm(null)} title={confirm ? `Join ${confirm.name}` : ""} subtitle="Charged from your LAWFiC wallet, like any other payment.">
+      <Sheet open={!!confirm} onClose={() => setConfirm(null)} title={confirm ? `Join ${confirm.name}` : ""} subtitle="Charged from your LAWFIC wallet, like any other payment.">
         {confirm &&
           confirm.monthlyPaise != null &&
           (() => {
@@ -191,7 +191,7 @@ export default function Membership() {
                   {autopayable(confirm.monthlyPaise, period)
                     ? "Renews automatically at the same price. Cancel in one tap, any time."
                     : "An annual plan over ₹15,000 is taken as one authenticated payment, not a standing instruction — you will be asked before each renewal."}{" "}
-                  Wallet balance {rupees(balance)}. Preview: no money moves.
+                  Wallet balance {rupees(balance)}.
                 </T>
                 {price.totalPaise > balance ? (
                   <Button label={`Add ${rupees(price.totalPaise - balance)} first`} icon="plus" onPress={() => { setConfirm(null); router.push(`/wallet/add?amount=${Math.ceil((price.totalPaise - balance) / 100)}`); }} />

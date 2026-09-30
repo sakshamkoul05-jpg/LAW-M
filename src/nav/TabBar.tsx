@@ -7,14 +7,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconName } from "@/icons/Icon";
 import { useAppWidth, useLayout } from "@/components/AppWidth";
 import { useStore } from "@/lib/store";
-import { Glass, Press, T } from "@/ui";
+import { Glass, Panda, Press, T } from "@/ui";
 import { color as C, elevation, font, gradient, motion } from "@/theme";
 import { QuickActions } from "./QuickActions";
 
 /**
  * The bottom navigation, on a phone.
  *
- * Home, Filings, the "+", LAWFiC AI, Profile. It floats — glass over the
+ * Home, Filings, the "+", Panda AI, Profile. It floats — glass over the
  * content, inset from the edges — so the page runs underneath it rather than
  * stopping at a grey band. The selected tab's icon turns gold and a short gold
  * bar slides under it on a spring; the "+" is raised, gold, and turns into an
@@ -25,7 +25,7 @@ import { QuickActions } from "./QuickActions";
 const TABS: Record<string, { label: string; icon: IconName }> = {
   index: { label: "Home", icon: "home" },
   filings: { label: "Filings", icon: "filings" },
-  ai: { label: "LAWFiC AI", icon: "panda" },
+  ai: { label: "Panda", icon: "panda" },
   profile: { label: "Profile", icon: "account" },
 };
 
@@ -78,7 +78,13 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
         style={[styles.tab, { width: slotW }]}
       >
         <View>
-          <Icon name={meta.icon} size={22} active={focused} color={focused ? C.gold : C.textMuted} />
+          {route.name === "ai" ? (
+            <View style={[styles.pandaTab, focused && styles.pandaTabOn, { opacity: focused ? 1 : 0.72 }]}>
+              <Panda size={24} still={!focused} />
+            </View>
+          ) : (
+            <Icon name={meta.icon} size={22} active={focused} color={focused ? C.gold : C.textMuted} />
+          )}
           {route.name === "filings" && awaiting > 0 && <View style={styles.dot} />}
         </View>
         <T v="micro" color={focused ? C.text : C.textMuted} style={{ fontFamily: focused ? font.semibold : font.medium, marginTop: 3 }} numberOfLines={1}>
@@ -122,6 +128,8 @@ const styles = StyleSheet.create({
   row: { flex: 1, flexDirection: "row", alignItems: "center" },
   tab: { height: 66, alignItems: "center", justifyContent: "center" },
   indicator: { position: "absolute", bottom: 7, left: 0, width: 20, height: 3, borderRadius: 2, backgroundColor: C.gold },
+  pandaTab: { width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center", marginTop: -3, marginBottom: -3 },
+  pandaTabOn: { borderWidth: 1.5, borderColor: C.gold, backgroundColor: C.goldWash },
   dot: { position: "absolute", right: -3, top: -2, width: 8, height: 8, borderRadius: 4, backgroundColor: C.gold, borderWidth: 1.5, borderColor: C.surface },
   fabSlot: { position: "absolute", top: -18, alignItems: "center" },
   fab: { width: 58, height: 58, borderRadius: 29, alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: C.bg },

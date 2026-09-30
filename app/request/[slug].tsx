@@ -80,7 +80,7 @@ export default function RequestService() {
               We will price it
             </T>
             <T v="body" center style={{ marginTop: 8, maxWidth: 380 }}>
-              You will get a quote for {name} with the government fee and LAWFiC's fee on separate lines. Nothing is owed until you accept it.
+              You will get a quote for {name} with the government fee and LAWFIC's fee on separate lines. Nothing is owed until you accept it.
             </T>
           </Animated.View>
           <Animated.View entering={FadeInDown.delay(400)} style={{ width: "100%", maxWidth: 420, marginTop: space.section, gap: space.sm }}>

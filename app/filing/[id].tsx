@@ -41,7 +41,7 @@ export default function FilingWorkspace() {
   if (!order) {
     return (
       <Screen back title="Filing">
-        <EmptyState icon="filings" title="This filing is not here" body="It may have been removed when the preview data was reset." cta="Your filings" onCta={() => router.replace("/filings")} />
+        <EmptyState icon="filings" title="This filing is not here" body="It may have been removed when the demo data was reset." cta="Your filings" onCta={() => router.replace("/filings")} />
       </Screen>
     );
   }
@@ -94,7 +94,7 @@ export default function FilingWorkspace() {
               <Button label={`Pay ${rupees(total)} from wallet`} icon={lock.enabled ? "faceid" : "wallet"} onPress={pay} successLabel="Paid" />
             )}
             <T v="caption" center>
-              Wallet balance {rupees(balance)} · preview, no money moves
+              Wallet balance {rupees(balance)}
             </T>
           </View>
         ) : undefined
@@ -161,12 +161,12 @@ export default function FilingWorkspace() {
                 </View>
                 {order.status === "submitted" ? (
                   <View style={{ padding: space.lg, paddingTop: 0 }}>
-                    <T v="callout">Being priced. You will see the government fee and LAWFiC's fee on separate lines, and nothing is charged until you accept.</T>
+                    <T v="callout">Being priced. You will see the government fee and LAWFIC's fee on separate lines, and nothing is charged until you accept.</T>
                   </View>
                 ) : (
                   <>
                     <FeeLine k="Government fee" v={gov ? rupees(gov) : "None"} note="Passed through at cost" />
-                    <FeeLine k="LAWFiC fee" v={rupees(pro)} />
+                    <FeeLine k="LAWFIC fee" v={rupees(pro)} />
                     {discount > 0 && <FeeLine k={`${plan?.name} member saving`} v={`− ${rupees(discount)}`} gold />}
                     <Divider />
                     <FeeLine k={order.status === "quoted" ? "To pay" : "Paid"} v={rupees(total)} strong />
@@ -309,7 +309,7 @@ function Thread({ orderId }: { orderId: string }) {
           <View style={[styles.bubble, m.from_staff ? styles.bubbleStaff : styles.bubbleMe]}>
             {m.from_staff && (
               <T v="label" tone="gold" style={{ fontSize: 9.5, marginBottom: 4 }}>
-                LAWFiC team
+                LAWFIC team
               </T>
             )}
             <T v="callout" tone="text">
@@ -339,7 +339,7 @@ function Thread({ orderId }: { orderId: string }) {
         </Press>
       </View>
       <T v="caption" center>
-        Preview: messages stay on this device. Replies from the team need the account connection.
+        Messages are kept on this phone until your LAWFIC account is connected.
       </T>
     </View>
   );

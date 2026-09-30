@@ -39,10 +39,10 @@ body{font-family:-apple-system,Helvetica,Arial,sans-serif;color:#17120A;margin:4
 h1{font-size:20px;margin:0}.d{color:#6b645a}table{width:100%;border-collapse:collapse;margin-top:24px}
 td{padding:9px 0;border-top:1px solid #e3ddd1;vertical-align:top}td:last-child{text-align:right;font-weight:600}.credit{color:#23794a}
 .b{margin-top:18px;font-size:14px;font-weight:600}.p{color:#9C7A3C;font-size:10px;margin-top:16px}
-</style></head><body><div style="letter-spacing:4px;font-weight:600">LAWFiC</div><h1>Wallet statement</h1>
+</style></head><body><div style="letter-spacing:4px;font-weight:600">LAWFIC</div><h1>Wallet statement</h1>
 <div class="d">${esc(holder || "LAWFIC customer")} · generated ${dateLong(new Date().toISOString())}</div>
 <table>${rows}</table><div class="b">Closing balance ${rupees(bal)}</div>
-<div class="p">Preview statement — generated on this device from sample data.</div></body></html>`;
+<div class="p">Demo statement — generated from sample data. Not a record of real payments.</div></body></html>`;
   const { uri } = await Print.printToFileAsync({ html });
   if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: "application/pdf", UTI: "com.adobe.pdf" });
   return true;

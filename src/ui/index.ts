@@ -15,3 +15,4 @@ export { Sheet } from "./Sheet";
 export { ToastProvider, useToast } from "./Toast";
 export { Screen, Glow } from "./Screen";
 export { Switch } from "./Switch";
+export { Panda } from "./Panda";

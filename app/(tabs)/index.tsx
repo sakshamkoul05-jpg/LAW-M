@@ -1,340 +1,309 @@
-import React from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
-import { useAppWidth, useLayout } from "@/components/AppWidth";
+import { useDevice } from "@/components/AppWidth";
 import { FlyerCarousel } from "@/components/FlyerCarousel";
 import { isActive, useStore } from "@/lib/store";
-import { firstName, greeting, rupees } from "@/lib/format";
-import { orderTotalPaise } from "@/lawfic/orders";
-import { recommendedServiceSlugs } from "@/lawfic/profile";
-import { feePaise, getService, iconFor, liveServices, serviceName } from "@/data/catalogue";
-import { FilingCard } from "@/features/filings";
-import { TransactionList, TransactionSheet } from "@/features/money";
-import { PassCarousel } from "@/wallet/PassCarousel";
-import { Pass, type PassKind } from "@/wallet/Pass";
+import { ago, firstName, greeting, rupees } from "@/lib/format";
+import { STATUS_META, orderTotalPaise, timelineIndex, TIMELINE } from "@/lawfic/orders";
+import { feePaise, iconFor, liveServices, serviceName } from "@/data/catalogue";
+import { nextStep } from "@/features/filings";
+import { TransactionItem, TransactionSheet } from "@/features/money";
+import { Pass } from "@/wallet/Pass";
 import { usePassData } from "@/wallet/usePassData";
-import { Avatar, IconButton, IconTile, Press, Reveal, Screen, SectionHeader, SkeletonCard, SkeletonList, T, Skeleton } from "@/ui";
+import { Avatar, Divider, IconButton, IconTile, Mark, Panda, Press, Reveal, Screen, Skeleton, SkeletonCard, StepBar, T } from "@/ui";
 import { color as C, font, radius as R, space } from "@/theme";
 import type { WalletEntry } from "@/lawfic/wallet-entries";
 
+const ASKS = ["Do I need GST to sell online?", "What does Udyam cost?", "My PAN name is wrong"];
+
 /**
- * Home — the legal wallet.
+ * Home.
  *
- * Not a dashboard of eight equal cards. One thing leads: the passes, which say
- * in a glance what you hold (money, filings in motion, documents, membership).
- * Under them, the one action that is YOURS to take, if there is one; then the
- * filings in motion; then everything else in descending order of "you probably
- * came here for this".
+ * Classy is mostly restraint. One object leads — the wallet — and everything
+ * under it is arranged by how likely it is to be why you opened the app:
+ * money, then Panda, then the one thing waiting on you (only if there is one),
+ * then what LAWFIC is doing for you, then what you might start next.
  *
- * Which of the lower sections appear is the customer's choice — the website's
- * "home.sections" preference, set from Profile.
+ * Sections are titled in plain sentence case, not shouted in caps; there is
+ * one gold action on the screen; and there is more space between sections than
+ * inside them, which is what makes a screen read as composed rather than full.
  */
 export default function Home() {
   const router = useRouter();
-  const width = useAppWidth();
-  const layout = useLayout();
-  const wide = layout !== "compact";
+  const { width, short } = useDevice();
   const { state, status, unread } = useStore();
   const pass = usePassData();
-  const [entry, setEntry] = React.useState<WalletEntry | null>(null);
+  const [entry, setEntry] = useState<WalletEntry | null>(null);
 
+  const side = width < 360 ? space.lg : space.xl;
+  const inner = Math.min(width, 560) - side * 2;
   const name = firstName(state.profile.fullName);
   const active = state.orders.filter(isActive);
   const quote = state.orders.find((o) => o.status === "quoted");
   const sections = state.prefs.homeSections;
-  const forYou = recommendedServiceSlugs(state.profile).filter((s) => getService(s));
-
-  const side = layout === "expanded" ? space.section : wide ? space.xxxl : space.xl;
-  const column = Math.min(width - (wide ? (layout === "expanded" ? 232 : 76) : 0), 1180) - side * 2;
-
-  const openPass = (k: PassKind) =>
-    router.push(k === "wallet" ? "/wallet" : k === "filings" ? "/filings" : k === "vault" ? "/documents" : "/membership");
+  const gap = short ? space.xxl : space.xxxl;
+  const cardW = Math.min(inner * 0.86, 300);
 
   const header = (
     <Reveal fade style={styles.header}>
-      <Press onPress={() => router.push("/profile")} radius={22} accessibilityLabel="Your profile" lift={false}>
-        <Avatar name={state.profile.fullName} uri={state.profile.photoUri} size={44} ring />
+      <Press onPress={() => router.push("/profile")} radius={22} lift={false} accessibilityLabel="Your profile">
+        <Avatar name={state.profile.fullName} uri={state.profile.photoUri} size={42} ring />
       </Press>
       <View style={{ flex: 1 }}>
-        <T v="callout" tone="dim">
+        <T v="caption" tone="dim">
           {greeting()}
-          {name ? `, ${name}` : ""}
         </T>
-        <T v={wide ? "title1" : "title2"} accessibilityRole="header">
-          Your Legal Wallet
+        <T v="headline" numberOfLines={1}>
+          {name ?? "Welcome to LAWFIC"}
         </T>
       </View>
-      {!wide && <IconButton icon="bell" label={`Notifications${unread ? `, ${unread} unread` : ""}`} badge={unread || false} onPress={() => router.push("/notifications")} />}
-    </Reveal>
-  );
-
-  const actions: { icon: IconName; label: string; href: string; gold?: boolean }[] = [
-    { icon: "plus", label: "Add money", href: "/wallet/add", gold: true },
-    { icon: "filings", label: "New filing", href: "/services" },
-    { icon: "vault", label: "Documents", href: "/documents" },
-    { icon: "chart", label: "Insights", href: "/insights" },
-  ];
-
-  const actionRow = (
-    <View style={styles.actions}>
-      {actions.map((a, i) => (
-        <Reveal key={a.label} i={i + 2} style={{ flex: 1 }}>
-          <Press onPress={() => router.push(a.href as never)} radius={R.lg} accessibilityLabel={a.label} style={styles.action}>
-            <View style={[styles.actionIcon, a.gold && { backgroundColor: C.gold, borderColor: C.gold }]}>
-              <Icon name={a.icon} size={20} color={a.gold ? C.ink : C.gold} strokeWidth={1.8} />
-            </View>
-            <T v="captionMedium" tone="dim" numberOfLines={1}>
-              {a.label}
-            </T>
-          </Press>
-        </Reveal>
-      ))}
-    </View>
-  );
-
-  const quoteBanner = quote && (
-    <Reveal i={1}>
-      <Press onPress={() => router.push(`/filing/${quote.id}`)} radius={R.lg} accessibilityLabel={`Quote ready for ${serviceName(quote.service_slug)}`} style={styles.quote}>
-        <View style={styles.quoteIcon}>
-          <Icon name="bolt" size={18} color={C.ink} strokeWidth={2} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <T v="calloutMedium">Your quote is ready</T>
-          <T v="caption" tone="dim" numberOfLines={1}>
-            {serviceName(quote.service_slug)} · {rupees(orderTotalPaise(quote))} · pay to start
-          </T>
-        </View>
-        <T v="calloutMedium" tone="gold">
-          Pay
-        </T>
-        <Icon name="chevron" size={16} color={C.gold} />
-      </Press>
-    </Reveal>
-  );
-
-  const filings = (
-    <View>
-      <SectionHeader kicker={`${active.length} in motion`} title="Your filings" action="All filings" onAction={() => router.push("/filings")} />
-      {active.length === 0 ? (
-        <Press onPress={() => router.push("/services")} radius={R.xl} accessibilityLabel="Start a filing" style={styles.emptyFiling}>
-          <IconTile icon="filings" gold />
-          <View style={{ flex: 1 }}>
-            <T v="calloutMedium">No filings in motion</T>
-            <T v="caption">Start one — you owe nothing until we quote.</T>
-          </View>
-          <Icon name="chevron" size={16} color={C.textMuted} />
-        </Press>
-      ) : (
-        <View style={{ gap: space.md }}>
-          {active.slice(0, wide ? 3 : 2).map((o, i) => (
-            <Reveal key={o.id} i={i + 3}>
-              <FilingCard order={o} featured={o.status === "quoted"} onPress={() => router.push(`/filing/${o.id}`)} />
-            </Reveal>
-          ))}
-        </View>
-      )}
-    </View>
-  );
-
-  const services = sections.services && (
-    <View>
-      <SectionHeader kicker="Available now" title="Popular services" action="All 39" onAction={() => router.push("/services")} />
-      <View style={styles.grid}>
-        {liveServices.map((s, i) => (
-          <Reveal key={s.slug} i={i} style={{ width: wide ? (column - space.md * 3) / 4 : (column - space.md) / 2 }}>
-            <Press onPress={() => router.push(`/service/${s.slug}`)} radius={R.lg} accessibilityLabel={s.name} style={styles.svc}>
-              <IconTile icon={iconFor(s.slug)} />
-              <View style={{ marginTop: "auto" }}>
-                <T v="calloutMedium" numberOfLines={2}>
-                  {s.name}
-                </T>
-                <T v="caption" num style={{ marginTop: 3 }}>
-                  {feePaise(s.slug) ? `From ${rupees(feePaise(s.slug)!)}` : "Quoted"} · {s.turnaround}
-                </T>
-              </View>
-            </Press>
-          </Reveal>
-        ))}
-      </View>
-    </View>
-  );
-
-  const recommended = sections.forYou && forYou.length > 0 && (
-    <View>
-      <SectionHeader kicker="For you" title={state.profile.examsPreparing.length || state.profile.jobsLooking.length ? "Picked from your interests" : "Where most people start"} />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.md }}>
-        {forYou.map((slug) => {
-          const s = getService(slug)!;
-          return (
-            <Press key={slug} onPress={() => router.push(`/service/${slug}`)} radius={R.lg} accessibilityLabel={s.name} style={styles.forYou}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
-                <IconTile icon={iconFor(slug)} gold size={36} />
-                <T v="calloutMedium" style={{ flex: 1 }} numberOfLines={1}>
-                  {s.name}
-                </T>
-              </View>
-              <T v="caption" numberOfLines={2} style={{ marginTop: space.md }}>
-                {s.tagline}
-              </T>
-            </Press>
-          );
-        })}
-      </ScrollView>
-    </View>
-  );
-
-  const activity = sections.activity && (
-    <View>
-      <SectionHeader kicker="Wallet" title="Recent activity" action="Statement" onAction={() => router.push("/wallet")} />
-      <TransactionList entries={state.entries} limit={4} hidden={pass.hidden} onOpen={setEntry} />
-    </View>
-  );
-
-  const help = (
-    <Reveal>
-      <Press onPress={() => router.push("/ai")} radius={R.xl} accessibilityLabel="Ask LAWFiC AI" style={styles.ai}>
-        <View style={styles.orb}>
-          <Icon name="panda" size={20} color={C.gold} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <T v="label" tone="gold">
-            Ask LAWFiC AI
-          </T>
-          <T v="calloutMedium" style={{ marginTop: 3 }}>
-            “Do I need GST registration to sell online?”
-          </T>
-        </View>
-        <Icon name="forward" size={18} color={C.textDim} />
-      </Press>
+      <IconButton icon="bell" label={`Notifications${unread ? `, ${unread} unread` : ""}`} badge={unread || false} onPress={() => router.push("/notifications")} />
     </Reveal>
   );
 
   if (status === "loading") {
     return (
       <Screen tabbed header={header}>
-        <SkeletonCard height={210} />
-        <View style={{ flexDirection: "row", gap: space.md, marginTop: space.xl }}>
+        <SkeletonCard height={Math.round(inner / 1.586)} />
+        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: space.xl }}>
           {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} h={76} r={R.lg} style={{ flex: 1 }} />
+            <Skeleton key={i} w={56} h={56} r={28} />
           ))}
         </View>
-        <View style={{ marginTop: space.section }}>
-          <SkeletonList rows={3} />
-        </View>
+        <Skeleton h={56} r={28} style={{ marginTop: space.xxl }} />
       </Screen>
     );
   }
 
+  const actions: { icon: IconName; label: string; onPress: () => void; gold?: boolean }[] = [
+    { icon: "plus", label: "Add money", onPress: () => router.push("/wallet/add"), gold: true },
+    { icon: "bolt", label: "Pay", onPress: () => router.push(quote ? `/filing/${quote.id}` : "/wallet") },
+    { icon: "vault", label: "Documents", onPress: () => router.push("/documents") },
+    { icon: "services", label: "Services", onPress: () => router.push("/services") },
+  ];
+
   return (
     <Screen tabbed header={header}>
-      {wide ? (
-        <View style={{ gap: space.section }}>
-          <View style={{ flexDirection: "row", gap: space.xxxl, alignItems: "flex-start" }}>
-            <View style={{ width: Math.min(440, column * 0.44), gap: space.xl }}>
-              <Reveal i={0}>
-                <Pass kind="wallet" width={Math.min(440, column * 0.44)} data={pass} onPress={() => router.push("/wallet")} />
-              </Reveal>
-              {actionRow}
-              <View style={{ flexDirection: "row", gap: space.md }}>
-                {(["filings", "vault", "membership"] as PassKind[]).map((k) => (
-                  <MiniPass key={k} kind={k} pass={pass} onPress={() => openPass(k)} />
-                ))}
-              </View>
+      {/* The wallet */}
+      <Reveal i={0} style={{ alignItems: "center" }}>
+        <Pass kind="wallet" width={inner} data={pass} onPress={() => router.push("/wallet")} />
+      </Reveal>
+
+      <Reveal i={1} style={styles.actions}>
+        {actions.map((a) => (
+          <Press key={a.label} onPress={a.onPress} radius={30} lift={false} accessibilityLabel={a.label} style={styles.action}>
+            <View style={[styles.actionIcon, a.gold && styles.actionGold]}>
+              <Icon name={a.icon} size={21} color={a.gold ? C.ink : C.text} strokeWidth={1.7} />
             </View>
-            <View style={{ flex: 1, gap: space.xl }}>
-              {quoteBanner}
-              {filings}
+            <T v="captionMedium" tone="dim" numberOfLines={1}>
+              {a.label}
+            </T>
+          </Press>
+        ))}
+      </Reveal>
+
+      {/* Panda */}
+      <Reveal i={2} style={{ marginTop: gap }}>
+        <Press onPress={() => router.push("/ai")} radius={30} accessibilityLabel="Ask Panda" style={styles.ask}>
+          <Panda size={38} />
+          <View style={{ flex: 1 }}>
+            <T v="calloutMedium">Ask Panda</T>
+            <T v="caption" numberOfLines={1}>
+              Which filing you need, what it costs, what to keep ready
+            </T>
+          </View>
+          <View style={styles.askGo}>
+            <Icon name="arrowUpRight" size={16} color={C.gold} strokeWidth={2} />
+          </View>
+        </Press>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: space.md, marginHorizontal: -side }} contentContainerStyle={{ gap: space.sm, paddingHorizontal: side }}>
+          {ASKS.map((q) => (
+            <Press key={q} onPress={() => router.push({ pathname: "/ai", params: { q } })} radius={18} haptic="select" accessibilityLabel={q} style={styles.chip}>
+              <T v="captionMedium" tone="dim">
+                {q}
+              </T>
+            </Press>
+          ))}
+        </ScrollView>
+      </Reveal>
+
+      {/* The one thing waiting on you */}
+      {quote && (
+        <Reveal i={3} style={{ marginTop: gap }}>
+          <Press onPress={() => router.push(`/filing/${quote.id}`)} radius={R.xl} accessibilityLabel={`Pay ${serviceName(quote.service_slug)}`} style={styles.attention}>
+            <View style={styles.attentionBar} />
+            <View style={{ flex: 1 }}>
+              <T v="label" tone="gold" style={{ fontSize: 10 }}>
+                Waiting on you
+              </T>
+              <T v="bodyMedium" style={{ marginTop: 4 }}>
+                {serviceName(quote.service_slug)} is priced
+              </T>
+              <T v="caption" tone="dim" num>
+                {rupees(orderTotalPaise(quote))} · work starts when you pay
+              </T>
             </View>
-          </View>
-          {sections.promotions && <FlyerCarousel width={column} onOpen={(f) => router.push(`/service/${f.slug}`)} />}
-          {services}
-          <View style={{ flexDirection: "row", gap: space.xxxl }}>
-            <View style={{ flex: 1.2 }}>{activity}</View>
-            <View style={{ flex: 1, gap: space.xl }}>
-              {recommended}
-              {help}
+            <View style={styles.payPill}>
+              <T v="captionMedium" color={C.ink} style={{ fontFamily: font.semibold }}>
+                Pay
+              </T>
             </View>
-          </View>
-        </View>
-      ) : (
-        <View style={{ gap: space.xxl }}>
-          <View style={{ marginHorizontal: -side }}>
-            <PassCarousel width={width} kinds={["wallet", "filings", "vault", "membership"]} data={pass} onOpen={openPass} />
-          </View>
-          {actionRow}
-          {quoteBanner}
-          <View style={{ marginTop: space.sm }}>{filings}</View>
-          {sections.promotions && <FlyerCarousel width={column} onOpen={(f) => router.push(`/service/${f.slug}`)} />}
-          {recommended}
-          {services}
-          {activity}
-          {help}
-        </View>
+          </Press>
+        </Reveal>
       )}
-      <Animated.View entering={FadeInDown.delay(400)}>
-        <T v="caption" center style={{ marginTop: space.section }}>
-          Preview mode · sample data on this device · no payment is taken
+
+      {/* In progress */}
+      <Reveal i={4} style={{ marginTop: gap }}>
+        <Head title="In progress" action={active.length ? "All filings" : undefined} onAction={() => router.push("/filings")} />
+        {active.length === 0 ? (
+          <Press onPress={() => router.push("/services")} radius={R.xl} accessibilityLabel="Start a filing" style={styles.empty}>
+            <IconTile icon="filings" gold size={38} />
+            <View style={{ flex: 1 }}>
+              <T v="calloutMedium">Nothing in progress</T>
+              <T v="caption">Start a filing — you owe nothing until we quote.</T>
+            </View>
+            <Icon name="chevron" size={16} color={C.textMuted} />
+          </Press>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} snapToInterval={cardW + space.md} decelerationRate="fast" style={{ marginHorizontal: -side }} contentContainerStyle={{ gap: space.md, paddingHorizontal: side }}>
+            {active.map((o) => {
+              const next = nextStep(o);
+              return (
+                <Press key={o.id} onPress={() => router.push(`/filing/${o.id}`)} radius={R.xl} accessibilityLabel={`${serviceName(o.service_slug)}, ${STATUS_META[o.status].label}`} style={[styles.filing, { width: cardW }]}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
+                    <IconTile icon={iconFor(o.service_slug)} size={36} gold={next.yours} />
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <T v="calloutMedium" numberOfLines={1}>
+                        {serviceName(o.service_slug)}
+                      </T>
+                      <T v="caption" num>
+                        {o.reference} · {ago(o.quoted_at ?? o.created_at)}
+                      </T>
+                    </View>
+                  </View>
+                  <View style={{ marginTop: space.lg }}>
+                    <StepBar steps={TIMELINE.length} current={timelineIndex(o.status)} />
+                  </View>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: space.md, gap: space.sm }}>
+                    <T v="captionMedium" color={next.yours ? C.goldLight : C.text} numberOfLines={1} style={{ flex: 1 }}>
+                      {STATUS_META[o.status].label}
+                    </T>
+                    <T v="caption" num>
+                      Step {timelineIndex(o.status) + 1} of {TIMELINE.length}
+                    </T>
+                  </View>
+                  <T v="caption" numberOfLines={1} style={{ marginTop: 2 }}>
+                    {next.text}
+                  </T>
+                </Press>
+              );
+            })}
+          </ScrollView>
+        )}
+      </Reveal>
+
+      {/* From LAWFIC */}
+      {sections.promotions && (
+        <Reveal i={5} style={{ marginTop: gap }}>
+          <Head title="From LAWFIC" />
+          <View style={{ marginHorizontal: -side }}>
+            <FlyerCarousel width={Math.min(width, 560)} inset={side} onOpen={(f) => router.push(`/service/${f.slug}`)} />
+          </View>
+        </Reveal>
+      )}
+
+      {/* Start something */}
+      {sections.services && (
+        <Reveal i={6} style={{ marginTop: gap }}>
+          <Head title="Start today" action="All 39" onAction={() => router.push("/services")} />
+          <View style={styles.group}>
+            {liveServices.map((s, i) => (
+              <View key={s.slug}>
+                {i > 0 && <Divider inset={66} />}
+                <Press onPress={() => router.push(`/service/${s.slug}`)} radius={0} scaleTo={0.99} accessibilityLabel={s.name} style={styles.svc}>
+                  <IconTile icon={iconFor(s.slug)} size={38} />
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <T v="bodyMedium" numberOfLines={1}>
+                      {s.name}
+                    </T>
+                    <T v="caption" numberOfLines={1}>
+                      {s.turnaround}
+                    </T>
+                  </View>
+                  <T v="calloutMedium" num>
+                    {feePaise(s.slug) ? rupees(feePaise(s.slug)!) : "Quoted"}
+                  </T>
+                  <Icon name="chevron" size={15} color={C.textMuted} />
+                </Press>
+              </View>
+            ))}
+          </View>
+        </Reveal>
+      )}
+
+      {/* Recent activity */}
+      {sections.activity && state.entries.length > 0 && (
+        <Reveal i={7} style={{ marginTop: gap }}>
+          <Head title="Recent activity" action="Wallet" onAction={() => router.push("/wallet")} />
+          <View style={styles.group}>
+            {state.entries.slice(0, 3).map((e, i) => (
+              <View key={e.id}>
+                {i > 0 && <Divider inset={64} />}
+                <TransactionItem entry={e} hidden={pass.hidden} onPress={() => setEntry(e)} />
+              </View>
+            ))}
+          </View>
+        </Reveal>
+      )}
+
+      {/* Sign-off */}
+      <View style={styles.signoff}>
+        <Mark size={26} />
+        <T style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 4, color: C.textDim, marginTop: space.md }}>LAWFIC</T>
+        <T v="caption" style={{ marginTop: 4 }}>
+          Quality service, with love
         </T>
-      </Animated.View>
+      </View>
+
       <TransactionSheet entry={entry} onClose={() => setEntry(null)} />
     </Screen>
   );
 }
 
-/** A small pass tile under the wallet on desktop. */
-function MiniPass({ kind, pass, onPress }: { kind: PassKind; pass: ReturnType<typeof usePassData>; onPress: () => void }) {
-  const meta =
-    kind === "filings"
-      ? { icon: "filings" as IconName, k: "Filings", v: `${pass.active} active` }
-      : kind === "vault"
-        ? { icon: "vault" as IconName, k: "Vault", v: `${pass.documents} documents` }
-        : { icon: "crown" as IconName, k: "Membership", v: pass.plan ?? "Pay per filing" };
+function Head({ title, action, onAction }: { title: string; action?: string; onAction?: () => void }) {
   return (
-    <Press onPress={onPress} radius={R.lg} accessibilityLabel={meta.k} style={[styles.mini]}>
-      <Icon name={meta.icon} size={18} color={C.gold} />
-      <T v="label" style={{ marginTop: space.md }}>
-        {meta.k}
-      </T>
-      <T v="calloutMedium" numberOfLines={1} style={{ fontFamily: font.semibold, marginTop: 2 }}>
-        {meta.v}
-      </T>
-    </Press>
+    <View style={styles.head}>
+      <T v="title3">{title}</T>
+      {action && onAction && (
+        <Press onPress={onAction} radius={10} haptic="select" accessibilityLabel={action} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+          <T v="calloutMedium" tone="gold">
+            {action}
+          </T>
+          <Icon name="chevron" size={14} color={C.gold} />
+        </Press>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.xxl },
-  actions: { flexDirection: "row", gap: space.sm },
-  action: { alignItems: "center", gap: 8, paddingVertical: space.md, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
-  actionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: C.goldWash,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: C.goldLine,
-  },
-  quote: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    padding: space.md,
-    paddingRight: space.lg,
-    borderRadius: R.lg,
-    backgroundColor: "#15120C",
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: C.goldLine,
-  },
-  quoteIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
-  emptyFiling: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: space.md },
-  svc: { height: 138, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
-  forYou: { width: 250, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
-  ai: { flexDirection: "row", alignItems: "center", gap: space.lg, padding: space.lg, borderRadius: R.xl, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
-  orb: { width: 48, height: 48, borderRadius: 24, backgroundColor: C.goldWash, borderWidth: 1, borderColor: C.goldLine, alignItems: "center", justifyContent: "center" },
-  mini: { flex: 1, padding: space.md, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
+  header: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.xl },
+  actions: { flexDirection: "row", justifyContent: "space-between", marginTop: space.xl, paddingHorizontal: space.xs },
+  action: { alignItems: "center", gap: 8, width: 76 },
+  actionIcon: { width: 56, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.lineStrong },
+  actionGold: { backgroundColor: C.gold, borderColor: C.gold, shadowColor: C.gold, shadowOpacity: 0.3, shadowRadius: 14, shadowOffset: { width: 0, height: 4 } },
+  ask: { flexDirection: "row", alignItems: "center", gap: space.md, paddingVertical: 10, paddingLeft: 10, paddingRight: 12, borderRadius: 30, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
+  askGo: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", backgroundColor: C.goldWash },
+  chip: { height: 34, paddingHorizontal: 14, borderRadius: 17, justifyContent: "center", backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
+  attention: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, paddingLeft: space.lg + 4, borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine, overflow: "hidden" },
+  attentionBar: { position: "absolute", left: 0, top: 0, bottom: 0, width: 3, backgroundColor: C.gold },
+  payPill: { height: 34, paddingHorizontal: 18, borderRadius: 17, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
+  head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.md },
+  empty: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
+  filing: { padding: space.lg, borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
+  group: { borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
+  svc: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 13 },
+  signoff: { alignItems: "center", marginTop: space.hero, marginBottom: space.lg, opacity: 0.8 },
 });

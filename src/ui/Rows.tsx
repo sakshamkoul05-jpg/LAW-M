@@ -157,25 +157,19 @@ export function Avatar({ name, uri, size = 40, ring }: { name?: string | null; u
   );
 }
 
-/** The LAWFiC wordmark: the brand, set with care rather than drawn. */
+/** The LAWFIC wordmark: the brand's own mark, and the name set wide. */
 export function Wordmark({ size = 15, color = C.text }: { size?: number; color?: string }) {
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: size * 0.45 }} accessibilityLabel="LAWFiC">
-      <Mark size={size * 1.35} />
-      <T style={{ fontFamily: font.semibold, fontSize: size, letterSpacing: size * 0.22, color }}>
-        LAWF<T style={{ fontFamily: font.medium, fontSize: size, letterSpacing: size * 0.22, color: C.gold }}>i</T>C
-      </T>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: size * 0.55 }} accessibilityLabel="LAWFIC">
+      <Mark size={size * 1.6} />
+      <T style={{ fontFamily: font.semibold, fontSize: size, letterSpacing: size * 0.3, color }}>LAWFIC</T>
     </View>
   );
 }
 
-/** The mark: a thin gold ring around a precise "L". */
+/** The LAWFIC mark — the gold folded panels from the brand artwork. `size` is its height. */
 export function Mark({ size = 20 }: { size?: number }) {
-  return (
-    <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 1.2, borderColor: C.gold, alignItems: "center", justifyContent: "center" }}>
-      <View style={{ width: size * 0.3, height: size * 0.42, borderLeftWidth: 1.6, borderBottomWidth: 1.6, borderColor: C.goldLight, marginLeft: size * 0.06, marginBottom: size * 0.04 }} />
-    </View>
-  );
+  return <Image source={require("../../assets/brand/lawfic-mark.png")} style={{ width: size * 0.64, height: size }} resizeMode="contain" accessibilityIgnoresInvertColors />;
 }
 
 const styles = StyleSheet.create({

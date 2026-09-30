@@ -16,7 +16,7 @@ import { color as C, elevation, font, radius as R, space, text } from "@/theme";
  * then anywhere; live services first on a tie).
  *
  * Four are "available now" with a full page. The rest are "on request": they
- * can be asked for and LAWFiC quotes them, exactly as on lawfic.pro. Nothing
+ * can be asked for and LAWFIC quotes them, exactly as on lawfic.pro. Nothing
  * here is invented, and no service is shown as bookable that is not.
  */
 export default function Services() {
@@ -30,7 +30,7 @@ export default function Services() {
   const active = cat ? categories.find((c) => c.id === cat) : null;
 
   return (
-    <Screen back title="Services" kicker={`${allServices.length} services · ${liveServices.length} available now`} subtitle="Registrations, licences, filings and legal documents — prepared, checked and filed in your name.">
+    <Screen back title="Services" subtitle={`${allServices.length} registrations, licences and legal documents — ${liveServices.length} ready to start today.`}>
       <Reveal fade>
         <View style={[styles.search, focus && styles.searchOn]}>
           <Icon name="search" size={18} color={focus ? C.gold : C.textMuted} />
@@ -60,7 +60,7 @@ export default function Services() {
             {results.length} {results.length === 1 ? "result" : "results"}
           </T>
           {results.length === 0 ? (
-            <EmptyState icon="search" title="Nothing matches that" body="Try another word — or describe what you need to LAWFiC AI and it will point you to the right service." cta="Ask LAWFiC AI" onCta={() => router.push("/ai")} />
+            <EmptyState icon="search" title="Nothing matches that" body="Try another word — or describe what you need to Panda AI and it will point you to the right service." cta="Ask Panda AI" onCta={() => router.push("/ai")} />
           ) : (
             <View style={styles.list}>
               {results.map((s, i) => (
@@ -92,7 +92,7 @@ export default function Services() {
                     </T>
                     <View style={styles.featureFoot}>
                       <View>
-                        <T v="micro">LAWFiC fee</T>
+                        <T v="micro">LAWFIC fee</T>
                         <T v="headline" num>
                           {feePaise(s.slug) ? rupees(feePaise(s.slug)!) : "Quoted"}
                         </T>

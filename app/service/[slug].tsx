@@ -16,11 +16,11 @@ import { color as C, font, motion, radius as R, space } from "@/theme";
  *
  * A LIVE service carries the website's full write-up — who it is for, what to
  * keep ready, how it goes, the questions people actually ask — and the fee
- * split the website insists on: the government's fee and LAWFiC's fee on
+ * split the website insists on: the government's fee and LAWFIC's fee on
  * separate lines, always.
  *
  * Anything else in the catalogue or the document list is ON REQUEST: the page
- * says what it is and that LAWFiC quotes it, and the button asks for a quote.
+ * says what it is and that LAWFIC quotes it, and the button asks for a quote.
  * It does not pretend to a price or a turnaround nobody has published.
  */
 export default function ServiceDetail() {
@@ -52,7 +52,7 @@ export default function ServiceDetail() {
   const right = (
     <>
       <Heart saved={saved} onPress={() => toggleWishlist(slug)} />
-      <IconButton icon="share" label="Share" onPress={() => Share.share({ message: `${name} — LAWFiC\nhttps://lawfic.pro${live ? `/services/${slug}` : doc ? doc.href : "/services"}` }).catch(() => {})} />
+      <IconButton icon="share" label="Share" onPress={() => Share.share({ message: `${name} — LAWFIC\nhttps://lawfic.pro${live ? `/services/${slug}` : doc ? doc.href : "/services"}` }).catch(() => {})} />
     </>
   );
 
@@ -66,7 +66,7 @@ export default function ServiceDetail() {
         <View style={{ gap: 6 }}>
           <Button label={cta} icon="forward" onPress={() => router.push(requestHref(slug) as never)} />
           <T v="caption" center>
-            {live ? "You owe nothing until we quote — decline and pay nothing." : "LAWFiC prices it for you first. Nothing is charged until you accept."}
+            {live ? "You owe nothing until we quote — decline and pay nothing." : "LAWFIC prices it for you first. Nothing is charged until you accept."}
           </T>
         </View>
       }
@@ -100,7 +100,7 @@ export default function ServiceDetail() {
                 <View style={styles.note}>
                   <Icon name="info" size={16} color={C.gold} />
                   <T v="callout" style={{ flex: 1 }}>
-                    LAWFiC prepares the paperwork and books the visit. The official act — biometrics, the update itself — happens at an authorised centre, in person.
+                    LAWFIC prepares the paperwork and books the visit. The official act — biometrics, the update itself — happens at an authorised centre, in person.
                   </T>
                 </View>
               )}
@@ -156,7 +156,7 @@ export default function ServiceDetail() {
                 <T v="label">Fees</T>
                 <View style={styles.feeRow}>
                   <View style={{ flex: 1 }}>
-                    <T v="callout">LAWFiC fee</T>
+                    <T v="callout">LAWFIC fee</T>
                     {member && member.discountPaise > 0 && <T v="caption" tone="gold">{`${plan?.name} member price`}</T>}
                   </View>
                   <View style={{ alignItems: "flex-end" }}>
@@ -185,7 +185,7 @@ export default function ServiceDetail() {
                   <T v="calloutMedium">{live.turnaround}</T>
                 </View>
                 <T v="caption" style={{ marginTop: space.md }}>
-                  The government fee is passed through at cost and never bundled into LAWFiC's price.
+                  The government fee is passed through at cost and never bundled into LAWFIC's price.
                 </T>
               </Surface>
             </Reveal>
@@ -194,7 +194,7 @@ export default function ServiceDetail() {
                 <Press onPress={() => router.push("/membership")} radius={R.lg} accessibilityLabel="Membership plans" style={styles.memberStrip}>
                   <Icon name="crown" size={18} color={C.gold} />
                   <T v="callout" tone="dim" style={{ flex: 1 }}>
-                    Members save 5–18% on LAWFiC's fee.
+                    Members save 5–18% on LAWFIC's fee.
                   </T>
                   <Icon name="chevron" size={15} color={C.textMuted} />
                 </Press>
@@ -208,10 +208,10 @@ export default function ServiceDetail() {
             <Surface style={{ padding: space.xl }}>
               <T v="label">How this works</T>
               <T v="body" tone="text" style={{ marginTop: 6 }}>
-                {cat?.summary ?? "LAWFiC prepares this document, checks it, and files or registers it where that is what makes it valid."}
+                {cat?.summary ?? "LAWFIC prepares this document, checks it, and files or registers it where that is what makes it valid."}
               </T>
               <View style={{ gap: space.md, marginTop: space.xl }}>
-                {["Tell us what you need — a few questions, no documents yet.", "We quote it: the government fee and LAWFiC's fee on separate lines.", "Accept and pay from your wallet, and the work starts."].map((t, i) => (
+                {["Tell us what you need — a few questions, no documents yet.", "We quote it: the government fee and LAWFIC's fee on separate lines.", "Accept and pay from your wallet, and the work starts."].map((t, i) => (
                   <View key={t} style={{ flexDirection: "row", gap: space.md, alignItems: "flex-start" }}>
                     <View style={styles.num}>
                       <T v="captionMedium" tone="gold" num>

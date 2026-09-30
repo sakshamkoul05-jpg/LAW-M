@@ -4,7 +4,7 @@ import { TabBar } from "@/nav/TabBar";
 import { color as C } from "@/theme";
 
 /**
- * Four tabs and a "+": Home, Filings, (+), LAWFiC AI, Profile.
+ * Four tabs and a "+": Home, Filings, (+), Panda AI, Profile.
  *
  * Wallet, documents and services are one tap from Home (the passes and the
  * shortcuts) and one tap from the "+", which is where somebody who opened the

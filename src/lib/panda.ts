@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 import { fetch as expoFetch } from "expo/fetch";
 
 /**
- * LAWFIC AI — the same assistant as the website, on the same endpoint.
+ * Panda AI — the same assistant as the website, on the same endpoint.
  *
  * The app does not carry a model key and never will: a key inside an app
  * binary is a key published to anyone who unzips it. It calls lawfic.pro's
@@ -23,10 +23,10 @@ export type Turn = { role: "user" | "assistant"; content: string };
 export type PandaError = "not_configured" | "rate_limited" | "offline" | "blocked" | "upstream" | "aborted";
 
 export const PANDA_ERROR_COPY: Record<PandaError, string> = {
-  not_configured: "LAWFIC AI is switched off on the server right now. The team has been told — WhatsApp or call us in the meantime.",
+  not_configured: "Panda AI is switched off on the server right now. The team has been told — WhatsApp or call us in the meantime.",
   rate_limited: "That is a lot of questions in a few minutes. Give it a moment and ask again.",
   offline: "No connection. Check your network and try again.",
-  blocked: "This browser preview is not yet allowed to reach LAWFIC AI. It works in the installed app, and here once lawfic.pro allows it.",
+  blocked: "This web preview is not yet allowed to reach Panda AI. It works in the installed app, and here once lawfic.pro allows it.",
   upstream: "Something went wrong on our side. Please try again.",
   aborted: "Stopped.",
 };

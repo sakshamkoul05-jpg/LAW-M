@@ -8,7 +8,6 @@ import { company } from "@/lawfic/company";
 import { Icon, type IconName } from "@/icons/Icon";
 import { useStore, useMembership } from "@/lib/store";
 import { useLock } from "@/lib/lock";
-import { useViewMode } from "@/components/PhoneFrame";
 import { dateLong, rupees } from "@/lib/format";
 import { Avatar, Badge, Button, Chip, Group, Press, Reveal, Row, Screen, SectionHeader, Sheet, Surface, Switch, T, useToast } from "@/ui";
 import { color as C, radius as R, space } from "@/theme";
@@ -46,7 +45,6 @@ export default function Profile() {
   const { state, balance, updateProfile, reset } = useStore();
   const { entitled, plan, sub } = useMembership();
   const lock = useLock();
-  const view = useViewMode();
   const [photo, setPhoto] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const p = state.profile;
@@ -97,7 +95,7 @@ export default function Profile() {
             {p.fullName || "Add your name"}
           </T>
           <T v="caption" center style={{ marginTop: 4 }}>
-            With LAWFiC since {dateLong(p.memberSince)}
+            With LAWFIC since {dateLong(p.memberSince)}
           </T>
           <View style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginTop: space.md }}>
             <Badge label={entitled ? `${plan?.name} member` : "Pay per filing"} tone={entitled ? "gold" : "neutral"} icon={entitled ? "crown" : undefined} />
@@ -144,7 +142,7 @@ export default function Profile() {
           )}
         </Group>
         <T v="caption" style={{ marginTop: space.sm, marginHorizontal: 4 }}>
-          LAWFiC can only show its own wallet. Reading a bank or deposit balance needs an RBI-licensed Account Aggregator and your consent, which LAWFiC does not have — so those rows stay empty rather than guess.
+          LAWFIC can only show its own wallet. Reading a bank or deposit balance needs an RBI-licensed Account Aggregator and your consent, which LAWFIC does not have — so those rows stay empty rather than guess.
         </T>
       </Reveal>
 
@@ -180,12 +178,11 @@ export default function Profile() {
           <Row icon="star" title="Reviews" onPress={() => router.push("/reviews")} />
           <Row icon="settings" title="Home & privacy preferences" onPress={() => router.push("/preferences")} />
           <Row icon="scale" title="Terms of service" trailingNode={<Icon name="external" size={15} color={C.textMuted} />} onPress={() => Linking.openURL("https://lawfic.pro/legal/terms")} />
-          {Platform.OS === "web" && view.canFrame && <Row icon="devices" title="Show as a phone" subtitle="Preview the mobile app at phone size" onPress={() => view.setMode("phone")} />}
         </Group>
       </Reveal>
 
       <Reveal style={{ marginTop: space.xxl, gap: space.sm }}>
-        <Button label="Reset preview data" icon="reset" variant="secondary" onPress={() => setConfirmReset(true)} />
+        <Button label="Reset demo data" icon="reset" variant="secondary" onPress={() => setConfirmReset(true)} />
         <Button
           label="Sign out"
           icon="logout"
@@ -196,7 +193,7 @@ export default function Profile() {
           }}
         />
         <T v="caption" center style={{ marginTop: space.sm }}>
-          LAWFiC app · preview build
+          LAWFIC · demo account, kept on this phone
         </T>
       </Reveal>
 
@@ -218,7 +215,7 @@ export default function Profile() {
         </View>
       </Sheet>
 
-      <Sheet open={confirmReset} onClose={() => setConfirmReset(false)} title="Reset the preview?" subtitle="Filings, wallet entries, messages and uploads go back to the starting sample. Your name and photo stay.">
+      <Sheet open={confirmReset} onClose={() => setConfirmReset(false)} title="Reset demo data?" subtitle="Filings, wallet entries, messages and uploads go back to the starting sample. Your name and photo stay.">
         <View style={{ gap: space.sm }}>
           <Button
             label="Reset"
@@ -226,7 +223,7 @@ export default function Profile() {
             onPress={() => {
               reset();
               setConfirmReset(false);
-              toast({ title: "Preview reset" });
+              toast({ title: "Demo data reset" });
             }}
           />
           <Button label="Keep everything" variant="ghost" onPress={() => setConfirmReset(false)} />

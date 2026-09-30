@@ -8,23 +8,50 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "backgroundColor": "#08090C",
+      "image": "./assets/brand/splash.png",
+      "backgroundColor": "#050505",
       "resizeMode": "contain"
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "pro.lawfic.app"
+      "bundleIdentifier": "pro.lawfic.app",
+      "requireFullScreen": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "LAWFIC uses Face ID to keep your wallet balance and payments private to you.",
+        "NSCameraUsageDescription": "LAWFIC uses the camera to photograph documents and your profile photo.",
+        "NSPhotoLibraryUsageDescription": "LAWFIC lets you choose documents and a profile photo from your photos."
+      }
     },
     "android": {
       "package": "pro.lawfic.app",
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
-        "backgroundColor": "#08090C"
-      }
+        "foregroundImage": "./assets/brand/adaptive-foreground.png",
+        "backgroundColor": "#050505"
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ],
+      "softwareKeyboardLayoutMode": "pan"
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "LAWFIC uses Face ID to keep your wallet balance and payments private to you."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "LAWFIC lets you choose documents and a profile photo from your photos.",
+          "cameraPermission": "LAWFIC uses the camera to photograph documents and your profile photo."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -34,8 +61,10 @@
       "output": "single",
       "name": "LAWFIC",
       "shortName": "LAWFIC",
-      "backgroundColor": "#08090C",
-      "themeColor": "#08090C"
-    }
+      "backgroundColor": "#050505",
+      "themeColor": "#050505",
+      "favicon": "./assets/brand/icon.png"
+    },
+    "icon": "./assets/brand/icon.png"
   }
 }
