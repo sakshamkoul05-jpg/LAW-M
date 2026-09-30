@@ -306,14 +306,16 @@ function Top({ m, title }: { m: Material; title: string }) {
   );
 }
 
-/** The brand mark. On the champagne pass it is set in ink, or gold would vanish into gold. */
+/**
+ * The LAWFIC badge. On the champagne pass it sits on a small dark disc, or its
+ * gold would vanish into the card's gold.
+ */
 function MarkOn({ m }: { m: Material }) {
+  const onGold = m.accent !== C.gold && m.accent !== C.goldLight;
   return (
-    <Image
-      source={require("../../assets/brand/lawfic-mark.png")}
-      style={[{ width: 14, height: 22 }, m.accent !== C.gold && m.accent !== C.goldLight && { tintColor: m.accent }]}
-      resizeMode="contain"
-    />
+    <View style={onGold ? { width: 30, height: 30, borderRadius: 15, backgroundColor: "#0E0C08", alignItems: "center", justifyContent: "center" } : undefined}>
+      <Image source={require("../../assets/brand/lawfic-logo.png")} style={{ width: onGold ? 26 : 30, height: onGold ? 24 : 27 }} resizeMode="contain" />
+    </View>
   );
 }
 

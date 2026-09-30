@@ -14,7 +14,7 @@ import { DocumentCard } from "@/features/documents";
 import { TransactionItem, TransactionSheet } from "@/features/money";
 import { pickDocument } from "@/features/upload";
 import { dateLong, rupees, time } from "@/lib/format";
-import { Button, Divider, EmptyState, IconTile, Mark, Press, ProgressRing, Reveal, Screen, Segmented, Sheet, Surface, T, useToast } from "@/ui";
+import { Button, Divider, EmptyState, IconTile, Logo, Press, ProgressRing, Reveal, Screen, Segmented, Sheet, Surface, T, useToast } from "@/ui";
 import { color as C, font, radius as R, space, text } from "@/theme";
 import type { WalletEntry } from "@/lawfic/wallet-entries";
 
@@ -303,7 +303,7 @@ function Thread({ orderId }: { orderId: string }) {
         <Animated.View key={m.id} entering={(m.from_staff ? FadeInDown : FadeInUp).delay(Math.min(i, 6) * 40).duration(300)} style={[styles.msgRow, !m.from_staff && { justifyContent: "flex-end" }]}>
           {m.from_staff && (
             <View style={styles.staff}>
-              <Mark size={16} />
+              <Logo size={24} />
             </View>
           )}
           <View style={[styles.bubble, m.from_staff ? styles.bubbleStaff : styles.bubbleMe]}>

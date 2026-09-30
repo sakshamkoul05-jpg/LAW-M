@@ -29,8 +29,7 @@ export function PhoneFrame({ children }: { children: React.ReactNode }) {
     <View style={styles.stage}>
       {showAside && (
         <View style={styles.aside}>
-          <Image source={require("../../assets/brand/lawfic-mark.png")} style={{ width: 40, height: 62 }} resizeMode="contain" />
-          <T style={{ fontFamily: font.semibold, fontSize: 15, letterSpacing: 5, color: C.text, marginTop: space.xl }}>LAWFIC</T>
+          <Image source={require("../../assets/brand/lawfic-logo.png")} style={{ width: 120, height: 109 }} resizeMode="contain" />
           <T v="title2" style={{ marginTop: space.md }}>
             Your legal wallet, on your phone.
           </T>

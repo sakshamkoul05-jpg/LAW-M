@@ -9,7 +9,7 @@ export { Skeleton, SkeletonRow, SkeletonCard, SkeletonList } from "./Skeleton";
 export { EmptyState, ErrorState } from "./States";
 export { Field } from "./Input";
 export { Segmented } from "./Segmented";
-export { SectionHeader, IconTile, Row, Group, Avatar, Wordmark, Mark } from "./Rows";
+export { SectionHeader, IconTile, Row, Group, Avatar, Wordmark, Mark, Logo } from "./Rows";
 export { Reveal } from "./Reveal";
 export { Sheet } from "./Sheet";
 export { ToastProvider, useToast } from "./Toast";

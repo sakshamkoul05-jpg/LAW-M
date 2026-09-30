@@ -69,7 +69,9 @@ export function Field({
     <View>
       <Animated.View style={[styles.box, { minHeight: h }, box]}>
         {icon && <Icon name={icon} size={18} color={focused ? C.gold : C.textMuted} />}
-        {prefix && (
+        {/* The prefix appears with the typed value, once the label has floated
+            up — shown under a resting label it sits out of line with it. */}
+        {prefix && (focused || !!value) && (
           <T v="bodyMedium" tone="dim" style={{ marginTop: 14 }}>
             {prefix}
           </T>

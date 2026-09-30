@@ -12,7 +12,7 @@ import { nextStep } from "@/features/filings";
 import { TransactionItem, TransactionSheet } from "@/features/money";
 import { Pass } from "@/wallet/Pass";
 import { usePassData } from "@/wallet/usePassData";
-import { Avatar, Divider, IconButton, IconTile, Mark, Panda, Press, Reveal, Screen, Skeleton, SkeletonCard, StepBar, T } from "@/ui";
+import { Avatar, Divider, IconButton, IconTile, Logo, Panda, Press, Reveal, Screen, Skeleton, SkeletonCard, StepBar, T } from "@/ui";
 import { color as C, font, radius as R, space } from "@/theme";
 import type { WalletEntry } from "@/lawfic/wallet-entries";
 
@@ -260,11 +260,7 @@ export default function Home() {
 
       {/* Sign-off */}
       <View style={styles.signoff}>
-        <Mark size={26} />
-        <T style={{ fontFamily: font.semibold, fontSize: 11, letterSpacing: 4, color: C.textDim, marginTop: space.md }}>LAWFIC</T>
-        <T v="caption" style={{ marginTop: 4 }}>
-          Quality service, with love
-        </T>
+        <Logo size={96} />
       </View>
 
       <TransactionSheet entry={entry} onClose={() => setEntry(null)} />

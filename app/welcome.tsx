@@ -6,18 +6,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { isValidPhone } from "@/lawfic/profile";
 import { useAppWidth, useDevice, useLayout } from "@/components/AppWidth";
 import { useStore } from "@/lib/store";
-import { Pass } from "@/wallet/Pass";
-import { usePassData } from "@/wallet/usePassData";
-import { Button, Field, Glow, T, Wordmark } from "@/ui";
+import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
+import { Button, Field, Glow, Logo, T } from "@/ui";
 import { color as C, space } from "@/theme";
 import { Icon } from "@/icons/Icon";
 
 /**
  * Welcome.
  *
- * The pass floats — a slow drift and a degree of turn, like a card resting on
- * water — so the first thing anybody sees is the object the product is built
- * around. Then two fields and one button.
+ * The LAWFIC logo leads — the brand's own gold badge, drifting a few points on
+ * a slow breath with a warm light behind it. Then two fields and one button.
  *
  * On lawfic.pro, sign-in is a one-time code to the mobile number, with no
  * password. The preview has no account connection, so it cannot send a code;
@@ -29,7 +27,6 @@ export default function Welcome() {
   const layout = useLayout();
   const insets = useSafeAreaInsets();
   const { updateProfile, state } = useStore();
-  const pass = usePassData();
   const [name, setName] = useState(state.profile.fullName);
   const [phone, setPhone] = useState(state.profile.phone);
   const [err, setErr] = useState<{ name?: string; phone?: string }>({});
@@ -40,7 +37,7 @@ export default function Welcome() {
     drift.value = withRepeat(withSequence(withTiming(1, { duration: 3200, easing: Easing.inOut(Easing.sin) }), withTiming(0, { duration: 3200, easing: Easing.inOut(Easing.sin) })), -1);
   }, [drift]);
   const float = useAnimatedStyle(() => ({
-    transform: [{ perspective: 1000 }, { translateY: -8 * drift.value }, { rotateX: `${8 - drift.value * 3}deg` }, { rotateZ: `${-4 + drift.value * 1.5}deg` }],
+    transform: [{ translateY: -6 * drift.value }],
   }));
 
   const go = async (skip?: boolean) => {
@@ -58,7 +55,8 @@ export default function Welcome() {
   };
 
   const { short } = useDevice();
-  const passW = Math.min(wide ? 420 : width - 72, short ? 260 : 420);
+  const logoW = Math.min(width * 0.56, short ? 170 : 230);
+  const glow = useAnimatedStyle(() => ({ opacity: 0.6 + drift.value * 0.4 }));
 
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
@@ -66,23 +64,30 @@ export default function Welcome() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={[styles.wrap, { paddingTop: insets.top + space.xl, paddingBottom: insets.bottom + space.xl }, wide && styles.wide]} keyboardShouldPersistTaps="handled">
           <View style={[wide && { flex: 1, alignItems: "center" }]}>
-            <Animated.View entering={FadeIn.duration(600)} style={{ alignItems: wide ? "flex-start" : "center", alignSelf: "stretch" }}>
-              <Wordmark size={15} />
-            </Animated.View>
-            <Animated.View entering={FadeInDown.delay(150).duration(800)} style={[{ alignItems: "center", marginTop: short ? space.xl : wide ? space.hero : space.section, marginBottom: short ? space.xl : space.section }, float]}>
-              <Pass kind="wallet" width={passW} data={{ ...pass, hidden: true }} interactive={false} />
+            <Animated.View entering={FadeIn.duration(900)} style={{ alignItems: "center", justifyContent: "center", marginTop: short ? space.md : space.xxxl, marginBottom: short ? space.lg : space.xxxl }}>
+              <Animated.View style={[{ position: "absolute", width: logoW * 1.9, height: logoW * 1.9 }, glow]} pointerEvents="none">
+                <Svg width={logoW * 1.9} height={logoW * 1.9}>
+                  <Defs>
+                    <RadialGradient id="logoGlow" cx="50%" cy="50%" r="50%">
+                      <Stop offset="0.2" stopColor="#E0B83A" stopOpacity={0.16} />
+                      <Stop offset="1" stopColor="#E0B83A" stopOpacity={0} />
+                    </RadialGradient>
+                  </Defs>
+                  <Circle cx={logoW * 0.95} cy={logoW * 0.95} r={logoW * 0.95} fill="url(#logoGlow)" />
+                </Svg>
+              </Animated.View>
+              <Animated.View style={float}>
+                <Logo size={logoW} />
+              </Animated.View>
             </Animated.View>
           </View>
 
           <View style={[{ gap: space.lg }, wide && { flex: 1, maxWidth: 440 }]}>
             <Animated.View entering={FadeInDown.delay(300).duration(600)}>
-              <T v="label" tone="gold">
-                LAWFIC
-              </T>
-              <T v={wide ? "display" : "title1"} style={{ marginTop: 6 }}>
+              <T v={wide ? "display" : "title1"} center>
                 Your legal wallet.
               </T>
-              <T v="body" style={{ marginTop: 8 }}>
+              <T v="body" center style={{ marginTop: 8 }}>
                 Filings, documents and payments for your registrations and certificates — in one place, handled properly the first time.
               </T>
             </Animated.View>

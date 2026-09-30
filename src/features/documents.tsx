@@ -89,7 +89,7 @@ export function ReceiptPaper({ item, customer }: ReceiptProps) {
       <View style={paper.head}>
         <View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Image source={require("../../assets/brand/lawfic-mark.png")} style={{ width: 13, height: 20 }} resizeMode="contain" />
+            <Image source={require("../../assets/brand/lawfic-logo.png")} style={{ width: 34, height: 31 }} resizeMode="contain" />
             <T style={{ fontFamily: font.semibold, fontSize: 15, letterSpacing: 3, color: INK }}>LAWFIC</T>
           </View>
           <T style={{ fontFamily: font.regular, fontSize: 10.5, color: INK_DIM, marginTop: 4 }}>{sup.name}</T>

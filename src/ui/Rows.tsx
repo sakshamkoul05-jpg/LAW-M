@@ -157,19 +157,30 @@ export function Avatar({ name, uri, size = 40, ring }: { name?: string | null; u
   );
 }
 
-/** The LAWFIC wordmark: the brand's own mark, and the name set wide. */
+const LOGO = require("../../assets/brand/lawfic-logo.png");
+const LOGO_RATIO = 525 / 475;
+
+/**
+ * The LAWFIC logo — the brand's own gold badge (LAWFIC · EST 2026 · Quality
+ * Service With Love), exactly as on lawfic.pro. `size` is its width.
+ */
+export function Logo({ size = 120 }: { size?: number }) {
+  return <Image source={LOGO} style={{ width: size, height: size / LOGO_RATIO }} resizeMode="contain" accessibilityLabel="LAWFIC" accessibilityIgnoresInvertColors />;
+}
+
+/** The logo with the name beside it, for places a badge alone is too small to read. */
 export function Wordmark({ size = 15, color = C.text }: { size?: number; color?: string }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: size * 0.55 }} accessibilityLabel="LAWFIC">
-      <Mark size={size * 1.6} />
+      <Logo size={size * 2.2} />
       <T style={{ fontFamily: font.semibold, fontSize: size, letterSpacing: size * 0.3, color }}>LAWFIC</T>
     </View>
   );
 }
 
-/** The LAWFIC mark — the gold folded panels from the brand artwork. `size` is its height. */
+/** The logo at a given height — kept as `Mark` for the places sized by height. */
 export function Mark({ size = 20 }: { size?: number }) {
-  return <Image source={require("../../assets/brand/lawfic-mark.png")} style={{ width: size * 0.64, height: size }} resizeMode="contain" accessibilityIgnoresInvertColors />;
+  return <Logo size={size * LOGO_RATIO} />;
 }
 
 const styles = StyleSheet.create({
