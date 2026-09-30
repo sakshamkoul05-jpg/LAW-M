@@ -54,8 +54,8 @@ export function Donut({
           <Arc key={i} r={r} size={size} stroke={stroke} color={a.color} len={Math.max(0, a.len - 3)} offset={a.offset} circ={circ} delay={i * 120} />
         ))}
       </Svg>
-      <Text style={[text.label, { color: C.textFaint }]}>{centerLabel}</Text>
-      <Text style={{ fontFamily: font.displayBold, fontSize: 22, color: C.text, letterSpacing: -0.6, marginTop: 2 }}>
+      <Text style={[text.label, { color: C.textMuted }]}>{centerLabel}</Text>
+      <Text style={{ fontFamily: font.bold, fontSize: 22, color: C.text, letterSpacing: -0.6, marginTop: 2 }}>
         {centerValue}
       </Text>
     </View>
@@ -159,7 +159,7 @@ function Bar({
           ]}
         />
       </View>
-      <Text style={[text.tiny, { color: current ? C.text : C.textFaint }]}>{label}</Text>
+      <Text style={[text.caption, { color: current ? C.text : C.textMuted }]}>{label}</Text>
     </View>
   );
 }

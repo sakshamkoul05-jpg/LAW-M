@@ -1,121 +1,95 @@
-import React from "react";
-import { Platform, StyleSheet, Text, View, useWindowDimensions } from "react-native";
-import { color as C, font, radius, space } from "@/theme";
-
-/** Roughly a large phone. Wider than this and the layouts stop being layouts. */
-const PHONE_W = 414;
-/** Below this the browser window is already phone-shaped; no frame needed. */
-const FRAME_AT = 760;
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Platform, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Button, T, Wordmark } from "@/ui";
+import { color as C, space } from "@/theme";
 
 /**
- * The web preview's phone frame.
+ * The browser preview's two ways of looking at the app.
  *
- * WHY THIS EXISTS AT ALL
+ *   desktop (default)  the app lays itself out for the window — side rail,
+ *                      wide columns, hover states. This is how LAWFiC looks on
+ *                      a laptop.
+ *   phone              the app at phone width inside a device frame, for
+ *                      showing somebody what the mobile app looks like without
+ *                      handing them a phone.
  *
- * This is a phone app. On a laptop it renders into whatever width the browser
- * gives it, and a 1440px-wide column of 44pt list rows does not look like a
- * design decision — it looks broken, which is exactly what somebody opening the
- * preview link will report. Constraining it to phone width and centring it on a
- * dark ground is the difference between "the app" and "a broken website".
- *
- * NATIVE IS UNTOUCHED
- *
- * On iOS and Android this returns its children and nothing else. There is no
- * frame, no measurement, no extra view in the tree. The whole component
- * compiles away to a passthrough on the platforms that matter.
- *
- * It also reacts to the window: drag a browser narrow and the frame drops away
- * at 760px, because at that point the window IS the phone.
+ * On iOS and Android none of this exists; the component is a passthrough.
  */
+type Mode = "desktop" | "phone";
+const Ctx = createContext<{ mode: Mode; setMode: (m: Mode) => void; canFrame: boolean }>({ mode: "desktop", setMode: () => {}, canFrame: false });
+
+const KEY = "lawfic:view-mode";
+const PHONE_W = 400;
+const FRAME_AT = 760;
+
+export function useViewMode() {
+  return useContext(Ctx);
+}
+
 export function PhoneFrame({ children }: { children: React.ReactNode }) {
   const { width, height } = useWindowDimensions();
+  const [mode, setModeState] = useState<Mode>("desktop");
+  const canFrame = Platform.OS === "web" && width >= FRAME_AT;
 
-  if (Platform.OS !== "web" || width < FRAME_AT) {
-    return <>{children}</>;
-  }
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+    try {
+      const saved = window.localStorage.getItem(KEY);
+      if (saved === "phone") setModeState("phone");
+    } catch {
+      /* storage blocked: stay on desktop */
+    }
+  }, []);
 
-  /* The phone must fit the window. A fixed 880 looks right on a large monitor
-     and, on a laptop or a short browser pane, silently hangs the bottom of the
-     app below the fold — which looks like the screen rendered blank rather than
-     like a frame that is too tall. */
+  const setMode = (m: Mode) => {
+    setModeState(m);
+    try {
+      window.localStorage.setItem(KEY, m);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const ctx = { mode, setMode, canFrame };
+
+  if (!canFrame || mode === "desktop") return <Ctx.Provider value={ctx}>{children}</Ctx.Provider>;
+
   const phoneH = Math.min(PHONE_W * 2.16, height - space.xxl * 2);
   const phoneW = Math.min(PHONE_W, phoneH / 2.16);
 
   return (
-    <View style={styles.stage}>
-      <View style={styles.aside}>
-        <Text style={styles.title}>LAWFIC</Text>
-        <Text style={styles.sub}>
-          A front-end preview of the mobile app, running in a browser.
-        </Text>
-        <Text style={styles.note}>
-          Built for a phone, so it is shown at phone width. Haptics and the
-          native blur do not exist in a browser — the springs, the wallet and
-          the layouts all do.
-        </Text>
-        <Text style={styles.note}>
-          Every balance, order and date on these screens is a sample.
-        </Text>
+    <Ctx.Provider value={ctx}>
+      <View style={styles.stage}>
+        <View style={styles.aside}>
+          <Wordmark size={18} />
+          <T v="title3" style={{ marginTop: space.lg }}>
+            The mobile app, at phone size.
+          </T>
+          <T v="callout">Everything here works — the passes, the filings, the wallet, LAWFiC AI. Haptics and the native blur need a real phone.</T>
+          <T v="caption">Preview mode: balances, filings and dates are sample data stored in this browser. No payment is taken.</T>
+          <Button label="Back to desktop view" icon="devices" variant="secondary" size="md" full={false} onPress={() => setMode("desktop")} style={{ marginTop: space.lg }} />
+        </View>
+        <View style={[styles.phone, { width: phoneW, height: phoneH }]}>
+          <View style={styles.screen}>{children}</View>
+        </View>
       </View>
-
-      <View style={[styles.phone, { width: phoneW, height: phoneH }]}>
-        <View style={styles.screen}>{children}</View>
-      </View>
-    </View>
+    </Ctx.Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  stage: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: space.section,
-    backgroundColor: "#050609",
-    padding: space.xxl,
-  },
-  aside: {
-    maxWidth: 340,
-    /* Shrinks away before the phone does: the phone is the deliverable, the
-       explanation beside it is not. */
-    flexShrink: 1,
-    gap: space.md,
-  },
-  title: {
-    fontFamily: font.displayBold,
-    fontSize: 34,
-    letterSpacing: -0.8,
-    color: C.gold,
-  },
-  sub: {
-    fontFamily: font.body,
-    fontSize: 15,
-    lineHeight: 23,
-    color: C.text,
-  },
-  note: {
-    fontFamily: font.body,
-    fontSize: 12.5,
-    lineHeight: 19,
-    color: C.textFaint,
-  },
+  stage: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: space.hero, backgroundColor: "#030303", padding: space.xxl },
+  aside: { maxWidth: 320, flexShrink: 1, gap: space.sm },
   phone: {
-    /* Width and height are computed per window; see PhoneFrame. */
-    borderRadius: 46,
-    padding: 9,
-    backgroundColor: "#16181F",
+    borderRadius: 48,
+    padding: 10,
+    backgroundColor: "#121212",
     borderWidth: 1,
-    borderColor: "#2A2E39",
+    borderColor: "#262626",
     shadowColor: "#000",
-    shadowOpacity: 0.7,
+    shadowOpacity: 0.8,
     shadowRadius: 60,
     shadowOffset: { width: 0, height: 30 },
   },
-  screen: {
-    flex: 1,
-    borderRadius: 38,
-    overflow: "hidden",
-    backgroundColor: C.void,
-  },
+  screen: { flex: 1, borderRadius: 38, overflow: "hidden", backgroundColor: C.bg },
 });

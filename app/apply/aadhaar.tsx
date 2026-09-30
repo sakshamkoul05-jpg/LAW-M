@@ -1,13 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import Animated, { FadeIn } from "react-native-reanimated";
+import { StyleSheet, View } from "react-native";
 import { Icon } from "@/icons/Icon";
-import { Glass, Segmented, T, Touch } from "@/components/ui";
-import { Screen, StackHeader } from "@/components/Screen";
-import { Callout, Choices, Field, StepHead, StepNav, Stepper, digits, mobileError } from "@/components/apply";
-import { color as C, gradient, radius, space, text } from "@/theme";
+import { Press, Screen, Segmented, T } from "@/ui";
+import { useStore } from "@/lib/store";
+import { Callout, Choices, Field, Sent, StepHead, StepNav, Stepper, Take, digits, mobileError } from "@/components/apply";
+import { color as C, radius, space } from "@/theme";
 import {
   CENTRE_FEE_NOTE,
   ENROLMENT_FEE_NOTE,
@@ -28,10 +25,10 @@ import {
 type Mode = "enrol" | "update";
 
 export default function AadhaarApply() {
-  const router = useRouter();
+  const { request } = useStore();
   const [mode, setMode] = useState<Mode>("enrol");
   const [step, setStep] = useState(0);
-  const [sent, setSent] = useState(false);
+  const [sent, setSent] = useState<string | null>(null);
 
   /* enrol */
   const [who, setWho] = useState("");
@@ -62,30 +59,28 @@ export default function AadhaarApply() {
 
   if (sent) {
     return (
-      <Screen aurora="violet" tabbed={false}>
-        <StackHeader />
-        <Animated.View entering={FadeIn.duration(400)} style={[styles.pad, { alignItems: "center", marginTop: space.section }]}>
-          <View style={styles.doneOrb}>
-            <LinearGradient colors={gradient.violet} style={StyleSheet.absoluteFill} />
-            <Icon name="check" size={38} color="#fff" />
-          </View>
-          <T.Title style={{ marginTop: space.xl, textAlign: "center" }}>With the Aadhaar team</T.Title>
-          <T.Body style={{ textAlign: "center", marginTop: space.sm }}>
-            No appointment is booked yet. We check your file first and come back with anything missing.
-          </T.Body>
-          <StepNav onNext={() => router.replace("/(tabs)/orders")} nextLabel="See my orders" />
-        </Animated.View>
+      <Screen back>
+        <Sent title="With the Aadhaar team" body="No appointment is booked yet. We check your file first and come back with anything missing." orderId={sent} />
       </Screen>
     );
   }
 
+  /* Notes carry what prices the file and books the slot — never Aadhaar digits. */
+  const send = () => {
+    const lines =
+      mode === "enrol"
+        ? ["New enrolment", `For: ${path?.label ?? "—"}`, `Identity proof: ${poi.join(", ") || "—"}`, `Address proof: ${noPoa ? "Head of family route" : poa.join(", ") || "—"}`, `City: ${city || "—"}`]
+        : ["Correction", `Fields: ${chosen.map((f) => f.label).join(", ")}`, `City: ${city || "—"}`];
+    const r = request("aadhaar", lines.join("\n"));
+    if (r.ok) setSent(r.value.id);
+  };
+
   const steps = mode === "enrol" ? ["Who", "Proofs", "You", "Review"] : ["What", "Check", "You", "Review"];
 
   return (
-    <Screen aurora="violet" auroraHeight={360} tabbed={false}>
-      <StackHeader title="Aadhaar" />
-      <View style={[styles.pad, { gap: space.xl }]}>
-        <Segmented
+    <Screen back title="Aadhaar" kicker="Apply or correct">
+      <View style={{ gap: space.xl, maxWidth: 680 }}>
+        <Segmented<Mode>
           value={mode}
           onChange={switchMode}
           options={[
@@ -95,11 +90,11 @@ export default function AadhaarApply() {
         />
 
         <View style={styles.banner}>
-          <Icon name="fingerprint" size={16} color={C.violetHot} />
-          <Text style={[text.small, { color: C.textDim, flex: 1, lineHeight: 17 }]}>
-            <Text style={{ color: C.text }}>This does not issue or change an Aadhaar.</Text> That takes biometrics at an
+          <Icon name="fingerprint" size={16} color={C.gold} />
+          <T v="callout" style={{ flex: 1 }}>
+            <T v="callout" tone="text">This does not issue or change an Aadhaar.</T> That takes biometrics at an
             authorised centre. We make sure the file you take is right, and book the slot.
-          </Text>
+          </T>
         </View>
 
         <Stepper steps={steps} current={step} />
@@ -116,13 +111,13 @@ export default function AadhaarApply() {
         {mode === "enrol" && step === 1 && (
           <>
             <StepHead kicker="Step 2 of 4" title="What can you show?" blurb="One proof of identity and one of address. A passport does both." />
-            <T.Label>Proof of identity</T.Label>
+            <T v="label">Proof of identity</T>
             <Choices multiple columns={2} value={poi} onChange={setPoi} choices={POI_DOCS.map((d) => ({ id: d, label: d }))} />
-            <T.Label>Proof of address</T.Label>
+            <T v="label">Proof of address</T>
             <Choices multiple columns={2} value={poa} onChange={(v) => { setPoa(v); if (v.length) setNoPoa(false); }} choices={POA_DOCS.map((d) => ({ id: d, label: d }))} />
-            <Touch onPress={() => { setNoPoa(!noPoa); if (!noPoa) setPoa([]); }} haptic="select" accessibilityLabel="I have none of these" style={[styles.toggle, noPoa && styles.toggleOn]}>
-              <Text style={[text.bodySemi, { color: noPoa ? C.text : C.textDim }]}>I have none of these in my own name</Text>
-            </Touch>
+            <Press onPress={() => { setNoPoa(!noPoa); if (!noPoa) setPoa([]); }} haptic="select" radius={radius.lg} accessibilityRole="checkbox" accessibilityState={{ checked: noPoa }} accessibilityLabel="I have none of these" style={[styles.toggle, noPoa && styles.toggleOn]}>
+              <T v="bodyMedium" color={noPoa ? C.text : C.textDim}>I have none of these in my own name</T>
+            </Press>
             {noPoa && <Callout title="There is a route for that">{HEAD_OF_FAMILY_NOTE}</Callout>}
             {poi.includes("Passport") && <Callout tone="good" title="Your passport is enough on its own">It is accepted as identity and address together.</Callout>}
             <StepNav onBack={() => setStep(0)} onNext={() => setStep(2)} disabled={!poi.length || (!poa.length && !noPoa)} />
@@ -144,7 +139,7 @@ export default function AadhaarApply() {
             {noPoa ? <Callout title="Address — the family route">{HEAD_OF_FAMILY_NOTE}</Callout> : <Take title="Proof of address" items={poa} />}
             {path && path.extras.length > 0 && <Take title="Also required" items={path.extras} />}
             <Callout title="The fee, in full">{ENROLMENT_FEE_NOTE} LAWFIC&apos;s fee is ₹199, payable once we confirm your documents will be accepted.</Callout>
-            <StepNav onBack={() => setStep(2)} onNext={() => setSent(true)} nextLabel="Send to the team" />
+            <StepNav onBack={() => setStep(2)} onNext={send} nextLabel="Send to the team" />
           </>
         )}
 
@@ -169,16 +164,16 @@ export default function AadhaarApply() {
               const limit = f.lifetimeLimit ?? 0;
               return (
                 <View key={f.id} style={{ gap: space.sm }}>
-                  <T.Sub>{f.label} <Text style={[text.small, { color: C.textFaint }]}>· {limit === 1 ? "once in a lifetime" : `${limit} in a lifetime`}</Text></T.Sub>
+                  <T v="headline">{f.label} <T v="callout" tone="muted">· {limit === 1 ? "once in a lifetime" : `${limit} in a lifetime`}</T></T>
                   <View style={{ flexDirection: "row", gap: space.sm }}>
                     {Array.from({ length: limit + 1 }, (_, n) => {
                       const on = used[f.id] === n;
                       const left = limit - n;
                       return (
-                        <Touch key={n} haptic="select" onPress={() => setUsed({ ...used, [f.id]: n })} accessibilityLabel={`${n} times`} style={[styles.count, on && styles.countOn]}>
-                          <Text style={[text.bodySemi, { color: C.text }]}>{n === 0 ? "Never" : n === 1 ? "Once" : `${n}×`}</Text>
-                          <Text style={[text.tiny, { color: left === 0 ? C.red : C.textFaint, marginTop: 2 }]}>{left === 0 ? "none left" : `${left} left`}</Text>
-                        </Touch>
+                        <Press key={n} haptic="select" radius={radius.md} onPress={() => setUsed({ ...used, [f.id]: n })} accessibilityRole="radio" accessibilityState={{ checked: on }} accessibilityLabel={`${n} times`} style={[styles.count, on && styles.countOn]}>
+                          <T v="bodyMedium">{n === 0 ? "Never" : n === 1 ? "Once" : `${n}×`}</T>
+                          <T v="caption" color={left === 0 ? C.red : C.textMuted} style={{ marginTop: 2 }}>{left === 0 ? "none left" : `${left} left`}</T>
+                        </Press>
                       );
                     })}
                   </View>
@@ -207,7 +202,7 @@ export default function AadhaarApply() {
             <StepHead kicker="Step 4 of 4" title="What to take with you" />
             {chosen.map((f) => <Take key={f.id} title={f.label} items={f.proofs} />)}
             <Callout title="The fee, in full">{CENTRE_FEE_NOTE} LAWFIC&apos;s fee is ₹199, payable once we confirm your proof will be accepted.</Callout>
-            <StepNav onBack={() => setStep(2)} onNext={() => setSent(true)} nextLabel="Send to the team" />
+            <StepNav onBack={() => setStep(2)} onNext={send} nextLabel="Send to the team" />
           </>
         )}
       </View>
@@ -215,30 +210,10 @@ export default function AadhaarApply() {
   );
 }
 
-function Take({ title, items }: { title: string; items: string[] }) {
-  if (!items.length) return null;
-  return (
-    <Glass style={{ borderRadius: radius.lg }}>
-      <T.Sub>{title}</T.Sub>
-      <View style={{ gap: 6, marginTop: space.sm }}>
-        {items.map((d) => (
-          <View key={d} style={{ flexDirection: "row", gap: 8 }}>
-            <View style={styles.dot} />
-            <T.Small style={{ flex: 1 }}>{d}</T.Small>
-          </View>
-        ))}
-      </View>
-    </Glass>
-  );
-}
-
 const styles = StyleSheet.create({
-  pad: { paddingHorizontal: space.lg },
-  banner: { flexDirection: "row", gap: space.md, padding: space.lg, borderRadius: radius.lg, backgroundColor: "rgba(139,108,255,0.1)" },
-  toggle: { padding: space.lg, borderRadius: radius.lg, borderWidth: 1, borderColor: C.hairline, backgroundColor: C.glass },
-  toggleOn: { borderColor: C.violet, backgroundColor: "rgba(139,108,255,0.12)" },
-  count: { flex: 1, padding: space.md, borderRadius: radius.md, borderWidth: 1, borderColor: C.hairline, backgroundColor: C.glass },
-  countOn: { borderColor: C.gold, backgroundColor: "rgba(242,198,109,0.08)" },
-  dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: C.gold, marginTop: 7 },
-  doneOrb: { width: 88, height: 88, borderRadius: 44, overflow: "hidden", alignItems: "center", justifyContent: "center" },
+  banner: { flexDirection: "row", gap: space.md, padding: space.lg, borderRadius: radius.lg, backgroundColor: C.goldWash, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
+  toggle: { padding: space.lg, borderRadius: radius.lg, borderWidth: 1, borderColor: C.line, backgroundColor: C.surfaceHigh },
+  toggleOn: { borderColor: C.gold, backgroundColor: "#15120C" },
+  count: { flex: 1, padding: space.md, borderRadius: radius.md, borderWidth: 1, borderColor: C.line, backgroundColor: C.surfaceHigh },
+  countOn: { borderColor: C.gold, backgroundColor: "#15120C" },
 });

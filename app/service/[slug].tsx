@@ -1,145 +1,335 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Share, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
 import { Icon } from "@/icons/Icon";
-import { Button, Chip, Glass, T } from "@/components/ui";
-import { rupees } from "@/components/Money";
-import { Screen, StackHeader } from "@/components/Screen";
-import { color as C, font, gradient, radius, space, text } from "@/theme";
-import { getCategory, getService } from "@/data/catalogue";
-import { udyamDocuments, udyamSteps } from "@/data/sample";
+import { useLayout } from "@/components/AppWidth";
+import { useMembership, useStore } from "@/lib/store";
+import { savingOn } from "@/lawfic/subscription";
+import { allServices, categories, categoryOf, documents, feePaise, getService, iconFor, requestHref, serviceName } from "@/data/catalogue";
+import { rupees } from "@/lib/format";
+import { Badge, Button, EmptyState, IconButton, IconTile, Press, Reveal, Screen, SectionHeader, Surface, T, buzz } from "@/ui";
+import { color as C, font, motion, radius as R, space } from "@/theme";
 
-/** Services that have a bespoke application flow, like the website's ApplySlot. */
-const APPLY: Record<string, string> = { "msme-udyam": "/apply/udyam", aadhaar: "/apply/aadhaar" };
-
+/**
+ * One service.
+ *
+ * A LIVE service carries the website's full write-up — who it is for, what to
+ * keep ready, how it goes, the questions people actually ask — and the fee
+ * split the website insists on: the government's fee and LAWFiC's fee on
+ * separate lines, always.
+ *
+ * Anything else in the catalogue or the document list is ON REQUEST: the page
+ * says what it is and that LAWFiC quotes it, and the button asks for a quote.
+ * It does not pretend to a price or a turnaround nobody has published.
+ */
 export default function ServiceDetail() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const service = getService(String(slug));
+  const layout = useLayout();
+  const { state, toggleWishlist } = useStore();
+  const { entitled, sub, plan } = useMembership();
+  const live = getService(slug);
+  const entry = allServices.find((s) => s.slug === slug);
+  const doc = documents.find((d) => d.slug === slug);
+  const cat = categoryOf(slug);
+  const saved = state.wishlist.includes(slug);
 
-  if (!service) {
+  if (!live && !entry && !doc) {
     return (
-      <Screen tabbed={false}>
-        <StackHeader />
-        <T.Body style={{ textAlign: "center", marginTop: space.xxxl }}>That service does not exist.</T.Body>
+      <Screen back title="Service">
+        <EmptyState icon="search" title="We could not find that service" cta="All services" onCta={() => router.replace("/services")} />
       </Screen>
     );
   }
 
-  const cat = getCategory(service.categoryId)!;
-  const hasChecklist = service.slug === "msme-udyam";
-  const applyTo = APPLY[service.slug];
+  const name = serviceName(slug);
+  const fee = feePaise(slug);
+  const member = entitled && sub && fee ? savingOn(fee, sub.planId) : null;
+  const cta = live ? (requestHref(slug).startsWith("/apply") ? "Start application" : "Request this service") : "Request a quote";
+  const wide = layout !== "compact";
+
+  const right = (
+    <>
+      <Heart saved={saved} onPress={() => toggleWishlist(slug)} />
+      <IconButton icon="share" label="Share" onPress={() => Share.share({ message: `${name} — LAWFiC\nhttps://lawfic.pro${live ? `/services/${slug}` : doc ? doc.href : "/services"}` }).catch(() => {})} />
+    </>
+  );
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.void }}>
-      <Screen aurora="violet" auroraHeight={420} tabbed={false} contentStyle={{ paddingBottom: 140 }}>
-        <StackHeader right="star" rightLabel="Save" />
-
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.pad}>
-          <View style={styles.heroIcon}>
-            <LinearGradient colors={gradient.gold} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
-            <Icon name={cat.icon} size={30} color={C.goldInk} />
-          </View>
-          <T.Label style={{ marginTop: space.lg }}>{cat.name}</T.Label>
-          <T.Hero style={{ marginTop: 4 }}>{service.name}</T.Hero>
-          <T.Body style={{ marginTop: space.sm }}>{service.blurb}</T.Body>
-          <View style={{ flexDirection: "row", gap: space.sm, marginTop: space.lg }}>
-            <Chip tone="green" icon="check">Available</Chip>
-            {service.turnaround && <Chip tone="gold" icon="clock">{service.turnaround}</Chip>}
-          </View>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(70).duration(400)} style={[styles.pad, { marginTop: space.xxl }]}>
-          <Glass strong style={{ borderRadius: radius.xl }}>
-            <View style={styles.priceRow}>
-              <View>
-                <T.Label>LAWFIC fee</T.Label>
-                <Text style={{ fontFamily: font.displayBold, fontSize: 34, color: C.text, letterSpacing: -1, marginTop: 4 }}>
-                  {service.feePaise ? rupees(service.feePaise) : "On request"}
-                </Text>
-              </View>
-              <View style={{ alignItems: "flex-end" }}>
-                <T.Label>Government fee</T.Label>
-                <T.Sub style={{ marginTop: 6 }}>{service.slug === "msme-udyam" ? "Free" : "As applicable"}</T.Sub>
-              </View>
-            </View>
-          </Glass>
-        </Animated.View>
-
-        <Animated.View entering={FadeInDown.delay(140).duration(400)} style={[styles.pad, { marginTop: space.xxl }]}>
-          <T.Heading style={{ marginBottom: space.md }}>What we need from you</T.Heading>
-          <Glass style={{ borderRadius: radius.xl }}>
-            {hasChecklist ? (
-              udyamDocuments.map((d, i) => (
-                <View key={d} style={[styles.doc, i > 0 && styles.rule]}>
-                  <View style={styles.tick}>
-                    <Icon name="check" size={12} color={C.green} />
-                  </View>
-                  <T.Small tone={C.text} style={{ flex: 1 }}>{d}</T.Small>
-                </View>
-              ))
-            ) : (
-              <T.Small>
-                The document checklist for this service is not written up yet. Start and we will tell you exactly what to
-                send — or ask the Panda first.
-              </T.Small>
-            )}
-          </Glass>
-        </Animated.View>
-
-        {hasChecklist && (
-          <Animated.View entering={FadeInDown.delay(210).duration(400)} style={[styles.pad, { marginTop: space.xxl }]}>
-            <T.Heading style={{ marginBottom: space.md }}>How it runs</T.Heading>
-            {udyamSteps.map((s, i) => (
-              <View key={s.title} style={{ flexDirection: "row", gap: space.md, marginBottom: space.lg }}>
-                <View style={styles.stepNo}>
-                  <Text style={[text.smallSemi, { color: C.gold }]}>{i + 1}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <T.Sub>{s.title}</T.Sub>
-                  <T.Small style={{ marginTop: 2 }}>{s.body}</T.Small>
-                </View>
-              </View>
-            ))}
-          </Animated.View>
-        )}
-
-        <View style={[styles.pad, { marginTop: space.md }]}>
-          <Button label="Ask the Panda about this" variant="glass" icon="spark" onPress={() => router.push("/panda")} />
+    <Screen
+      back
+      large={false}
+      title={name}
+      right={right}
+      footer={
+        <View style={{ gap: 6 }}>
+          <Button label={cta} icon="forward" onPress={() => router.push(requestHref(slug) as never)} />
+          <T v="caption" center>
+            {live ? "You owe nothing until we quote — decline and pay nothing." : "LAWFiC prices it for you first. Nothing is charged until you accept."}
+          </T>
         </View>
-      </Screen>
+      }
+    >
+      <Reveal fade>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
+          <IconTile icon={iconFor(slug)} size={52} gold />
+          <View style={{ flex: 1 }}>
+            <T v="label" tone="gold">
+              {live?.category ?? cat?.name ?? doc?.group ?? "Service"}
+            </T>
+            {live ? <Badge label="Available now" tone="good" /> : <Badge label="On request" />}
+          </View>
+        </View>
+        <T v={wide ? "display" : "title1"} style={{ marginTop: space.lg }}>
+          {name}
+        </T>
+        <T v="body" style={{ marginTop: space.sm, maxWidth: 640 }}>
+          {live?.tagline ?? entry?.blurb ?? doc?.blurb}
+        </T>
+      </Reveal>
 
-      <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, space.lg) }]}>
-        <LinearGradient colors={["rgba(6,6,9,0)", "rgba(6,6,9,0.95)", C.void]} style={StyleSheet.absoluteFill} />
-        <Button
-          label={applyTo ? "Start application" : "Request this service"}
-          icon="arrowUp"
-          sub={service.feePaise ? `${rupees(service.feePaise)} · nothing charged until we check it` : "We will quote before you pay"}
-          onPress={() => router.push((applyTo ?? "/panda") as never)}
-        />
-      </View>
+      {live ? (
+        <View style={wide ? { flexDirection: "row", gap: space.xxxl, marginTop: space.xxl, alignItems: "flex-start" } : { marginTop: space.xxl, gap: space.xxl }}>
+          <View style={{ flex: 1.4, gap: space.xxl }}>
+            <Reveal i={1}>
+              <T v="body" tone="text">
+                {live.summary}
+              </T>
+              {live.advisoryOnly && (
+                <View style={styles.note}>
+                  <Icon name="info" size={16} color={C.gold} />
+                  <T v="callout" style={{ flex: 1 }}>
+                    LAWFiC prepares the paperwork and books the visit. The official act — biometrics, the update itself — happens at an authorised centre, in person.
+                  </T>
+                </View>
+              )}
+            </Reveal>
+
+            <Reveal i={2}>
+              <SectionHeader title="Who it is for" />
+              <Checklist items={live.who} icon="check" />
+            </Reveal>
+
+            <Reveal i={3}>
+              <SectionHeader title="What to keep ready" />
+              <Checklist items={live.documents} icon="document" />
+            </Reveal>
+
+            <Reveal i={4}>
+              <SectionHeader title="How it goes" />
+              <Surface style={{ padding: space.xl }}>
+                {live.steps.map((s, i) => (
+                  <View key={s.title} style={{ flexDirection: "row", gap: space.md, paddingBottom: i === live.steps.length - 1 ? 0 : space.xl }}>
+                    <View style={{ alignItems: "center" }}>
+                      <View style={styles.num}>
+                        <T v="captionMedium" tone="gold" num style={{ fontFamily: font.semibold }}>
+                          {i + 1}
+                        </T>
+                      </View>
+                      {i < live.steps.length - 1 && <View style={styles.numLine} />}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <T v="headline">{s.title}</T>
+                      <T v="callout" style={{ marginTop: 4 }}>
+                        {s.body}
+                      </T>
+                    </View>
+                  </View>
+                ))}
+              </Surface>
+            </Reveal>
+
+            <Reveal i={5}>
+              <SectionHeader title="Questions people ask" />
+              <View style={styles.faq}>
+                {live.faq.map((f, i) => (
+                  <Faq key={f.q} q={f.q} a={f.a} first={i === 0} />
+                ))}
+              </View>
+            </Reveal>
+          </View>
+
+          <View style={{ flex: 1, gap: space.lg }}>
+            <Reveal i={1}>
+              <Surface raised tone="gold" style={{ padding: space.xl }}>
+                <T v="label">Fees</T>
+                <View style={styles.feeRow}>
+                  <View style={{ flex: 1 }}>
+                    <T v="callout">LAWFiC fee</T>
+                    {member && member.discountPaise > 0 && <T v="caption" tone="gold">{`${plan?.name} member price`}</T>}
+                  </View>
+                  <View style={{ alignItems: "flex-end" }}>
+                    {member && member.discountPaise > 0 && (
+                      <T v="caption" num style={{ textDecorationLine: "line-through" }}>
+                        {live.fee.professional}
+                      </T>
+                    )}
+                    <T v="title2" num>
+                      {member && member.discountPaise > 0 ? rupees(member.payablePaise) : live.fee.professional}
+                    </T>
+                  </View>
+                </View>
+                <View style={styles.feeRow}>
+                  <T v="callout" style={{ flex: 1 }}>
+                    Government fee
+                  </T>
+                  <T v="calloutMedium" style={{ flex: 1.3, textAlign: "right" }}>
+                    {live.fee.government}
+                  </T>
+                </View>
+                <View style={[styles.feeRow, { borderBottomWidth: 0 }]}>
+                  <T v="callout" style={{ flex: 1 }}>
+                    Usual time
+                  </T>
+                  <T v="calloutMedium">{live.turnaround}</T>
+                </View>
+                <T v="caption" style={{ marginTop: space.md }}>
+                  The government fee is passed through at cost and never bundled into LAWFiC's price.
+                </T>
+              </Surface>
+            </Reveal>
+            {!entitled && (
+              <Reveal i={2}>
+                <Press onPress={() => router.push("/membership")} radius={R.lg} accessibilityLabel="Membership plans" style={styles.memberStrip}>
+                  <Icon name="crown" size={18} color={C.gold} />
+                  <T v="callout" tone="dim" style={{ flex: 1 }}>
+                    Members save 5–18% on LAWFiC's fee.
+                  </T>
+                  <Icon name="chevron" size={15} color={C.textMuted} />
+                </Press>
+              </Reveal>
+            )}
+          </View>
+        </View>
+      ) : (
+        <View style={{ marginTop: space.xxl, gap: space.lg }}>
+          <Reveal i={1}>
+            <Surface style={{ padding: space.xl }}>
+              <T v="label">How this works</T>
+              <T v="body" tone="text" style={{ marginTop: 6 }}>
+                {cat?.summary ?? "LAWFiC prepares this document, checks it, and files or registers it where that is what makes it valid."}
+              </T>
+              <View style={{ gap: space.md, marginTop: space.xl }}>
+                {["Tell us what you need — a few questions, no documents yet.", "We quote it: the government fee and LAWFiC's fee on separate lines.", "Accept and pay from your wallet, and the work starts."].map((t, i) => (
+                  <View key={t} style={{ flexDirection: "row", gap: space.md, alignItems: "flex-start" }}>
+                    <View style={styles.num}>
+                      <T v="captionMedium" tone="gold" num>
+                        {i + 1}
+                      </T>
+                    </View>
+                    <T v="callout" tone="text" style={{ flex: 1, marginTop: 3 }}>
+                      {t}
+                    </T>
+                  </View>
+                ))}
+              </View>
+            </Surface>
+          </Reveal>
+          {cat && (
+            <Reveal i={2}>
+              <SectionHeader title={`More in ${cat.name}`} />
+              <View style={styles.faq}>
+                {categories
+                  .find((c) => c.id === cat.id)!
+                  .services.filter((s) => s.slug !== slug)
+                  .slice(0, 5)
+                  .map((s, i) => (
+                    <Press key={s.slug} onPress={() => router.replace(`/service/${s.slug}`)} radius={0} scaleTo={0.99} accessibilityLabel={s.name} style={[styles.more, i > 0 && styles.rule]}>
+                      <T v="bodyMedium" style={{ flex: 1 }} numberOfLines={1}>
+                        {s.name}
+                      </T>
+                      {s.status === "live" && <Badge label="Available" tone="good" />}
+                      <Icon name="chevron" size={15} color={C.textMuted} />
+                    </Press>
+                  ))}
+              </View>
+            </Reveal>
+          )}
+        </View>
+      )}
+    </Screen>
+  );
+}
+
+function Checklist({ items, icon }: { items: string[]; icon: "check" | "document" }) {
+  return (
+    <Surface padded={false}>
+      {items.map((t, i) => (
+        <View key={t} style={[styles.check, i > 0 && styles.rule]}>
+          <View style={styles.checkIcon}>
+            <Icon name={icon} size={13} color={C.gold} strokeWidth={2} />
+          </View>
+          <T v="callout" tone="text" style={{ flex: 1 }}>
+            {t}
+          </T>
+        </View>
+      ))}
+    </Surface>
+  );
+}
+
+/** An accordion row: the chevron turns, the answer rises in. */
+function Faq({ q, a, first }: { q: string; a: string; first: boolean }) {
+  const [open, setOpen] = useState(false);
+  const turn = useSharedValue(0);
+  useEffect(() => {
+    turn.value = withSpring(open ? 1 : 0, motion.press);
+  }, [open, turn]);
+  const chev = useAnimatedStyle(() => ({ transform: [{ rotate: `${turn.value * 180}deg` }] }));
+  return (
+    <View style={!first && styles.rule}>
+      <Press onPress={() => setOpen((o) => !o)} radius={0} scaleTo={0.995} haptic="select" accessibilityLabel={q} accessibilityState={{ expanded: open }} style={styles.q}>
+        <T v="bodyMedium" style={{ flex: 1 }}>
+          {q}
+        </T>
+        <Animated.View style={chev}>
+          <Icon name="chevronDown" size={18} color={open ? C.gold : C.textMuted} />
+        </Animated.View>
+      </Press>
+      {open && (
+        <Animated.View entering={FadeInDown.duration(240)} style={{ paddingHorizontal: space.lg, paddingBottom: space.lg }}>
+          <T v="callout">{a}</T>
+        </Animated.View>
+      )}
     </View>
   );
 }
 
+/** Save: the heart pops, and a haptic confirms. */
+function Heart({ saved, onPress }: { saved: boolean; onPress: () => void }) {
+  const s = useSharedValue(1);
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
+  return (
+    <Press
+      onPress={() => {
+        s.value = withSequence(withTiming(0.7, { duration: 90 }), withSpring(1, { damping: 8, stiffness: 300 }));
+        buzz(saved ? "light" : "success");
+        onPress();
+      }}
+      radius={20}
+      accessibilityLabel={saved ? "Remove from wish list" : "Save to wish list"}
+      accessibilityState={{ selected: saved }}
+      style={styles.heart}
+    >
+      <Animated.View style={style}>
+        <Icon name="heart" size={18} color={saved ? C.gold : C.text} strokeWidth={saved ? 2.2 : 1.7} />
+      </Animated.View>
+    </Press>
+  );
+}
+
 const styles = StyleSheet.create({
-  pad: { paddingHorizontal: space.lg },
-  heroIcon: { width: 64, height: 64, borderRadius: 22, overflow: "hidden", alignItems: "center", justifyContent: "center", marginTop: space.lg },
-  priceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" },
-  doc: { flexDirection: "row", gap: space.md, alignItems: "center", paddingVertical: 11 },
-  rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.hairline },
-  tick: { width: 24, height: 24, borderRadius: 12, backgroundColor: C.greenWash, alignItems: "center", justifyContent: "center" },
-  stepNo: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(242,198,109,0.14)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bar: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: space.lg, paddingTop: space.xxl },
+  note: { flexDirection: "row", gap: space.md, marginTop: space.lg, padding: space.lg, borderRadius: R.lg, backgroundColor: C.goldWash, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
+  check: { flexDirection: "row", alignItems: "flex-start", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 13 },
+  checkIcon: { width: 24, height: 24, borderRadius: 8, backgroundColor: C.goldWash, alignItems: "center", justifyContent: "center", marginTop: -1 },
+  rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
+  num: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: C.goldLine, alignItems: "center", justifyContent: "center", backgroundColor: C.goldWash },
+  numLine: { flex: 1, width: 1, backgroundColor: C.goldLine, marginTop: 4 },
+  faq: { borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
+  q: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 15 },
+  feeRow: { flexDirection: "row", alignItems: "center", gap: space.md, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.line },
+  memberStrip: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
+  more: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 13 },
+  heart: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
 });

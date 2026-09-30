@@ -1,13 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { StyleSheet, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { Icon } from "@/icons/Icon";
-import { Glass, T } from "@/components/ui";
-import { Screen, StackHeader } from "@/components/Screen";
-import { Callout, Choices, Field, StepHead, StepNav, Stepper, digits, gstinError, mobileError, panError } from "@/components/apply";
-import { color as C, font, gradient, motion, radius, space, text } from "@/theme";
+import { Screen, Surface, T } from "@/ui";
+import { useStore } from "@/lib/store";
+import { Callout, Choices, Field, Sent, StepHead, StepNav, Stepper, digits, gstinError, mobileError, panError } from "@/components/apply";
+import { color as C, font, gradient, motion, radius, space } from "@/theme";
 import {
   ACTIVITIES,
   ORG_TYPES,
@@ -28,7 +26,7 @@ import {
 const STEPS = ["Business", "Size", "Details", "Review"];
 
 export default function UdyamApply() {
-  const router = useRouter();
+  const { request } = useStore();
   const [step, setStep] = useState(0);
   const [org, setOrg] = useState("");
   const [activity, setActivity] = useState("");
@@ -39,7 +37,7 @@ export default function UdyamApply() {
   const [aad, setAad] = useState("");
   const [mobile, setMobile] = useState("");
   const [gstin, setGstin] = useState("");
-  const [sent, setSent] = useState(false);
+  const [sent, setSent] = useState<string | null>(null);
 
   const investment = Number(inv) || 0;
   const turnover = Number(turn) || 0;
@@ -55,28 +53,25 @@ export default function UdyamApply() {
 
   if (sent) {
     return (
-      <Screen aurora="gold" tabbed={false}>
-        <StackHeader />
-        <Animated.View entering={FadeIn.duration(400)} style={[styles.pad, { alignItems: "center", marginTop: space.section }]}>
-          <View style={styles.doneOrb}>
-            <LinearGradient colors={gradient.gold} style={StyleSheet.absoluteFill} />
-            <Icon name="check" size={38} color={C.goldInk} />
-          </View>
-          <T.Title style={{ marginTop: space.xl, textAlign: "center" }}>With the Udyam team</T.Title>
-          <T.Body style={{ textAlign: "center", marginTop: space.sm }}>
-            Nothing has been filed and nothing charged. They check the classification against your accounts and come
-            back with anything missing.
-          </T.Body>
-          <StepNav onNext={() => router.replace("/(tabs)/orders")} nextLabel="See my orders" />
-        </Animated.View>
+      <Screen back>
+        <Sent title="With the Udyam team" body="Nothing has been filed and nothing charged. They check the classification against your accounts and come back with anything missing." orderId={sent} />
       </Screen>
     );
   }
 
+  /* The filing's notes carry what prices it — never the PAN or Aadhaar digits,
+     which go to the portal from you when LAWFIC files. */
+  const send = () => {
+    const r = request(
+      "msme-udyam",
+      [`Enterprise: ${name.trim()}`, `Constitution: ${orgChoice?.label ?? "—"}`, `Activity: ${ACTIVITIES.find((a) => a.id === activity)?.label ?? "—"}`, `Estimated class: ${result?.label ?? "—"}`, `GST registered: ${gstin ? "yes" : "no"}`].join("\n"),
+    );
+    if (r.ok) setSent(r.value.id);
+  };
+
   return (
-    <Screen aurora="gold" auroraHeight={360} tabbed={false}>
-      <StackHeader title="MSME Udyam" />
-      <View style={[styles.pad, { gap: space.xl }]}>
+    <Screen back title="MSME Udyam" kicker="Apply">
+      <View style={{ gap: space.xl, maxWidth: 680 }}>
         <Stepper steps={STEPS} current={step} />
 
         {step === 0 && (
@@ -88,11 +83,11 @@ export default function UdyamApply() {
               onChange={([v]) => setOrg(v ?? "")}
               choices={ORG_TYPES.map((o) => ({ id: o.id, label: o.label, hint: `Against ${o.aadhaarOf}'s Aadhaar`, icon: "business" }))}
             />
-            <T.Label>Main activity</T.Label>
+            <T v="label">Main activity</T>
             <Choices
               value={activity ? [activity] : []}
               onChange={([v]) => setActivity(v ?? "")}
-              choices={ACTIVITIES.map((a) => ({ id: a.id, label: a.label, hint: a.hint, icon: a.id === "trading" ? "orders" : a.id === "service" ? "settings" : "business" }))}
+              choices={ACTIVITIES.map((a) => ({ id: a.id, label: a.label, hint: a.hint, icon: a.id === "trading" ? "shop" : a.id === "service" ? "briefcase" : "business" }))}
             />
             {activity === "trading" && <Callout tone="warn" title="Traders get a narrower registration">{TRADING_CAVEAT}</Callout>}
             <Field label="Name of the enterprise" hint="Exactly as on the PAN — matched character for character." value={name} onChangeText={setName} placeholder="As printed on the PAN" />
@@ -123,12 +118,12 @@ export default function UdyamApply() {
             />
 
             {has && (
-              <Glass style={{ borderRadius: radius.xl }}>
-                <T.Label style={{ marginBottom: space.md }}>Where you sit</T.Label>
+              <Surface>
+                <T v="label" style={{ marginBottom: space.md }}>Where you sit</T>
                 <Band label="Investment" value={investment} max={SLABS[2]!.investmentMax} keyName="investmentMax" />
                 <Band label="Turnover" value={turnover} max={SLABS[2]!.turnoverMax} keyName="turnoverMax" />
-                <T.Tiny style={{ marginTop: space.sm }}>Whichever marker sits further right decides the class.</T.Tiny>
-              </Glass>
+                <T v="caption" style={{ marginTop: space.sm }}>Whichever marker sits further right decides the class.</T>
+              </Surface>
             )}
 
             {result &&
@@ -137,15 +132,15 @@ export default function UdyamApply() {
               ) : (
                 <Animated.View entering={FadeIn.duration(260)} key={result.result} style={styles.verdict}>
                   <LinearGradient colors={gradient.gold} style={StyleSheet.absoluteFill} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
-                  <Text style={[text.label, { color: C.goldInk, opacity: 0.7 }]}>On these figures you are</Text>
-                  <Text style={{ fontFamily: font.displayBold, fontSize: 40, color: C.goldInk, letterSpacing: -1.4, marginTop: 2 }}>
+                  <T v="label" color={C.ink} style={{ opacity: 0.7 }}>On these figures you are</T>
+                  <T style={{ fontFamily: font.bold, fontSize: 40, color: C.ink, letterSpacing: -1.4, marginTop: 2 }}>
                     {result.label}
-                  </Text>
-                  <Text style={[text.small, { color: C.goldInk, opacity: 0.75, marginTop: 4 }]}>{result.note}</Text>
+                  </T>
+                  <T v="callout" color={C.ink} style={{ opacity: 0.75, marginTop: 4 }}>{result.note}</T>
                 </Animated.View>
               ))}
 
-            <T.Tiny>Slabs as notified from {SLABS_EFFECTIVE_FROM}. An estimate on your figures — confirmed against your accounts before filing.</T.Tiny>
+            <T v="caption">Slabs as notified from {SLABS_EFFECTIVE_FROM}. An estimate on your figures — confirmed against your accounts before filing.</T>
             <StepNav onBack={() => setStep(0)} onNext={() => setStep(2)} disabled={!can[1]} />
           </>
         )}
@@ -176,7 +171,7 @@ export default function UdyamApply() {
         {step === 3 && (
           <>
             <StepHead kicker="Step 4 of 4" title="Check it before it goes" />
-            <Glass padded={false} style={{ borderRadius: radius.xl }}>
+            <Surface padded={false}>
               {[
                 ["Enterprise", name],
                 ["Constitution", orgChoice?.label ?? "—"],
@@ -190,16 +185,16 @@ export default function UdyamApply() {
                 ["GSTIN", gstin || "Not registered"],
               ].map(([k, v], i) => (
                 <View key={k} style={[styles.row, i > 0 && styles.rule]}>
-                  <T.Small style={{ width: 118 }}>{k}</T.Small>
-                  <Text style={[text.bodySemi, { color: k === "Classification" ? C.gold : C.text, flex: 1 }]}>{v}</Text>
+                  <T v="callout" tone="muted" style={{ width: 118 }}>{k}</T>
+                  <T v="bodyMedium" color={k === "Classification" ? C.gold : C.text} style={{ flex: 1 }}>{v}</T>
                 </View>
               ))}
-            </Glass>
+            </Surface>
             <Callout title="What happens when you send this">
               Nothing is filed. The Udyam team checks it and comes back with anything missing. You pay once they
               confirm — ₹499, and Udyam itself is free.
             </Callout>
-            <StepNav onBack={() => setStep(2)} onNext={() => setSent(true)} nextLabel="Send to the Udyam team" />
+            <StepNav onBack={() => setStep(2)} onNext={send} nextLabel="Send to the Udyam team" />
           </>
         )}
       </View>
@@ -220,21 +215,21 @@ function Band({ label, value, max, keyName }: { label: string; value: number; ma
   return (
     <View style={{ marginBottom: space.lg }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
-        <T.Small tone={C.text}>{label}</T.Small>
-        <T.Small>₹{inWords(value)}</T.Small>
+        <T v="calloutMedium">{label}</T>
+        <T v="callout">₹{inWords(value)}</T>
       </View>
       <View style={{ height: 22, justifyContent: "center" }}>
         <View style={styles.bandTrack}>
           {SLABS.map((s, i) => {
             const from = i === 0 ? 0 : pos(SLABS[i - 1]![keyName]);
-            return <View key={s.id} style={{ width: `${(pos(s[keyName]) - from) * 100}%`, height: "100%", backgroundColor: `rgba(242,198,109,${0.25 + i * 0.25})` }} />;
+            return <View key={s.id} style={{ width: `${(pos(s[keyName]) - from) * 100}%`, height: "100%", backgroundColor: `rgba(198,161,91,${0.25 + i * 0.25})` }} />;
           })}
         </View>
         <Animated.View style={[styles.marker, marker]} />
       </View>
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
         {SLABS.map((s) => (
-          <T.Tiny key={s.id}>{s.label}</T.Tiny>
+          <T v="micro" key={s.id}>{s.label}</T>
         ))}
       </View>
     </View>
@@ -242,11 +237,9 @@ function Band({ label, value, max, keyName }: { label: string; value: number; ma
 }
 
 const styles = StyleSheet.create({
-  pad: { paddingHorizontal: space.lg },
   verdict: { borderRadius: radius.xl, padding: space.xl, overflow: "hidden" },
   row: { flexDirection: "row", alignItems: "center", paddingHorizontal: space.lg, paddingVertical: 13 },
-  rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.hairline },
+  rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
   bandTrack: { flexDirection: "row", height: 10, borderRadius: 5, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.06)" },
   marker: { position: "absolute", width: 4, height: 22, marginLeft: -2, borderRadius: 2, backgroundColor: C.text },
-  doneOrb: { width: 88, height: 88, borderRadius: 44, overflow: "hidden", alignItems: "center", justifyContent: "center" },
 });

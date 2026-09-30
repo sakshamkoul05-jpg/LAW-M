@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AppState, Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as LocalAuthentication from "expo-local-authentication";
 
 /**
@@ -48,6 +49,8 @@ type LockState = {
   relock: () => void;
 };
 
+const LOCK_KEY = "lawfic:wallet-lock";
+
 const Ctx = createContext<LockState | null>(null);
 
 export function LockProvider({ children }: { children: React.ReactNode }) {
@@ -56,6 +59,16 @@ export function LockProvider({ children }: { children: React.ReactNode }) {
   const [enabled, setEnabled] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const background = useRef(false);
+
+  /* The setting survives a restart. A lock that quietly switches itself off
+     every time the app is killed is not a lock. */
+  useEffect(() => {
+    AsyncStorage.getItem(LOCK_KEY)
+      .then((v) => {
+        if (v === "on") setEnabled(true);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -128,6 +141,7 @@ export function LockProvider({ children }: { children: React.ReactNode }) {
     if (ok) {
       setEnabled(true);
       setUnlocked(true);
+      AsyncStorage.setItem(LOCK_KEY, "on").catch(() => {});
     }
     return ok;
   }, [prompt]);
@@ -135,6 +149,7 @@ export function LockProvider({ children }: { children: React.ReactNode }) {
   const disable = useCallback(() => {
     setEnabled(false);
     setUnlocked(false);
+    AsyncStorage.removeItem(LOCK_KEY).catch(() => {});
   }, []);
 
   const relock = useCallback(() => setUnlocked(false), []);

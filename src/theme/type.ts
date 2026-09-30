@@ -1,42 +1,40 @@
-import { Platform, type TextStyle } from "react-native";
+import type { TextStyle } from "react-native";
 
 /**
- * Two families. Sora carries every number worth looking at — balances are set
- * in it large and tight, the way Revolut and Apple Card set theirs, rather than
- * in a monospace that reads like a terminal. Manrope carries everything else.
- * Plex Mono survives only for identifiers: order numbers, PANs, card digits.
+ * Type: Inter, one family, five weights.
+ *
+ * Hierarchy comes from size and weight, never from a second decorative face.
+ * Large headings are tight (negative tracking) because big type set at its
+ * default spacing looks loose; small uppercase labels are open (positive
+ * tracking) because small caps set tight turn into a smudge.
+ *
+ * Every figure that is money, a count or a date uses tabular numerals, so a
+ * column of amounts lines up and a balance counting up does not jitter.
  */
 export const font = {
-  display: "Sora_600SemiBold",
-  displayBold: "Sora_700Bold",
-  body: "Manrope_500Medium",
-  bodySemi: "Manrope_600SemiBold",
-  bodyBold: "Manrope_700Bold",
-  mono: "IBMPlexMono_500Medium",
-  monoSemi: "IBMPlexMono_600SemiBold",
+  regular: "Inter_400Regular",
+  medium: "Inter_500Medium",
+  semibold: "Inter_600SemiBold",
+  bold: "Inter_700Bold",
 } as const;
 
-export const tabular: TextStyle = Platform.select({
-  ios: { fontVariant: ["tabular-nums"] },
-  default: { fontVariant: ["tabular-nums"] },
-}) as TextStyle;
+export const tabular: TextStyle = { fontVariant: ["tabular-nums"] };
 
 export const text = {
-  /** The one number on the screen. */
-  money: { fontFamily: font.displayBold, fontSize: 46, letterSpacing: -1.8, lineHeight: 52 },
-  hero: { fontFamily: font.displayBold, fontSize: 32, letterSpacing: -1, lineHeight: 38 },
-  title: { fontFamily: font.displayBold, fontSize: 26, letterSpacing: -0.6, lineHeight: 32 },
-  heading: { fontFamily: font.display, fontSize: 18, letterSpacing: -0.3, lineHeight: 24 },
-  subhead: { fontFamily: font.bodyBold, fontSize: 15, letterSpacing: -0.1, lineHeight: 20 },
-  body: { fontFamily: font.body, fontSize: 14.5, lineHeight: 21 },
-  bodySemi: { fontFamily: font.bodySemi, fontSize: 14.5, lineHeight: 21 },
-  small: { fontFamily: font.body, fontSize: 12.5, lineHeight: 17 },
-  smallSemi: { fontFamily: font.bodySemi, fontSize: 12.5, lineHeight: 17 },
-  tiny: { fontFamily: font.bodySemi, fontSize: 11, lineHeight: 14 },
-  label: {
-    fontFamily: font.bodyBold,
-    fontSize: 10.5,
-    letterSpacing: 1.4,
-    textTransform: "uppercase",
-  },
+  /** The balance on the wallet. */
+  money: { fontFamily: font.semibold, fontSize: 44, letterSpacing: -1.6, lineHeight: 50 },
+  display: { fontFamily: font.bold, fontSize: 34, letterSpacing: -1.1, lineHeight: 40 },
+  title1: { fontFamily: font.bold, fontSize: 28, letterSpacing: -0.8, lineHeight: 34 },
+  title2: { fontFamily: font.semibold, fontSize: 22, letterSpacing: -0.5, lineHeight: 28 },
+  title3: { fontFamily: font.semibold, fontSize: 18, letterSpacing: -0.3, lineHeight: 24 },
+  headline: { fontFamily: font.semibold, fontSize: 16, letterSpacing: -0.2, lineHeight: 22 },
+  body: { fontFamily: font.regular, fontSize: 15, letterSpacing: -0.1, lineHeight: 22 },
+  bodyMedium: { fontFamily: font.medium, fontSize: 15, letterSpacing: -0.1, lineHeight: 22 },
+  callout: { fontFamily: font.regular, fontSize: 14, lineHeight: 20 },
+  calloutMedium: { fontFamily: font.medium, fontSize: 14, lineHeight: 20 },
+  caption: { fontFamily: font.regular, fontSize: 12.5, lineHeight: 17 },
+  captionMedium: { fontFamily: font.medium, fontSize: 12.5, lineHeight: 17 },
+  /** Small uppercase labels over a value, and section kickers. */
+  label: { fontFamily: font.semibold, fontSize: 11, letterSpacing: 1.2, lineHeight: 14, textTransform: "uppercase" },
+  micro: { fontFamily: font.medium, fontSize: 10.5, letterSpacing: 0.3, lineHeight: 13 },
 } satisfies Record<string, TextStyle>;

@@ -1,27 +1,32 @@
-import React from "react";
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from "react-native";
-import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import React, { useEffect } from "react";
+import { pop } from "@/ui/enter";
+import { StyleSheet, View, type TextInputProps } from "react-native";
+import { useRouter } from "expo-router";
+import Animated, { FadeIn, FadeInDown, ZoomIn, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
-import { color as C, font, motion, radius, space, text } from "@/theme";
-import { Button, Touch } from "./ui";
+import { Button, Field as BaseField, Press, T, buzz } from "@/ui";
+import { color as C, font, motion, radius as R, space } from "@/theme";
 
 /**
- * The parts both application flows are built from. One decision per screen,
- * answers you press rather than options you reveal, and a form that says what
- * each answer means the moment you give it.
+ * The pieces the application flows are built from (Udyam, Aadhaar).
+ *
+ * A stepper whose bars fill on a spring, a heading per step, choice tiles that
+ * behave like radios or checkboxes, a callout for the one thing to know, and
+ * a Back / Continue pair. The rules each flow applies come from the website's
+ * own files (src/lib/msme.ts, src/lib/aadhaar.ts), not from here.
  */
 
 export function Stepper({ steps, current }: { steps: string[]; current: number }) {
   return (
     <View style={{ flexDirection: "row", gap: 6 }} accessibilityLabel={`Step ${current + 1} of ${steps.length}`}>
       {steps.map((s, i) => (
-        <View key={s} style={{ flex: 1, gap: 6 }}>
+        <View key={s} style={{ flex: 1, gap: 7 }}>
           <View style={styles.track}>
             <Fill pct={i < current ? 1 : i === current ? 0.5 : 0} />
           </View>
-          <Text style={[text.tiny, { fontSize: 10, letterSpacing: 0.6, color: i === current ? C.text : i < current ? C.textDim : C.textFaint }]}>
+          <T v="micro" color={i === current ? C.text : i < current ? C.textDim : C.textMuted} style={{ letterSpacing: 0.8, fontFamily: font.semibold }}>
             {s.toUpperCase()}
-          </Text>
+          </T>
         </View>
       ))}
     </View>
@@ -29,13 +34,11 @@ export function Stepper({ steps, current }: { steps: string[]; current: number }
 }
 
 function Fill({ pct }: { pct: number }) {
-  /* Animated as a number and written out as a percentage. Springing a "50%"
-     string directly is not something every platform interpolates. */
-  const v = useSharedValue(pct);
-  React.useEffect(() => {
+  const v = useSharedValue(0);
+  useEffect(() => {
     v.value = withSpring(pct, motion.arrive);
   }, [pct, v]);
-  const style = useAnimatedStyle(() => ({ width: `${Math.max(0, Math.min(1, v.value)) * 100}%` }));
+  const style = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.max(0, Math.min(1, v.value)) }] }));
   return <Animated.View style={[styles.fill, style]} />;
 }
 
@@ -56,93 +59,80 @@ export function Choices({
 }) {
   return (
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space.sm }}>
-      {choices.map((c) => {
+      {choices.map((c, i) => {
         const on = value.includes(c.id);
         return (
-          <Touch
-            key={c.id}
-            haptic="select"
-            accessibilityRole={multiple ? "checkbox" : "radio"}
-            accessibilityState={{ checked: on }}
-            accessibilityLabel={c.label}
-            onPress={() => onChange(multiple ? (on ? value.filter((v) => v !== c.id) : [...value, c.id]) : [c.id])}
-            style={[
-              styles.choice,
-              columns === 2 ? styles.choiceTile : { width: "100%" },
-              on && styles.choiceOn,
-            ]}
-          >
-            {/* Two columns leave ~150px a tile: side by side, icon and radio
-                squeeze the label to one word a line. Stacked, the label gets
-                the full width. */}
-            {columns === 2 ? (
-              <View style={styles.tileHead}>
-                {c.icon ? <Icon name={c.icon} size={20} color={on ? C.gold : C.textDim} active={on} /> : <View />}
-                <View style={[styles.radio, on && styles.radioOn]}>{on && <Icon name="check" size={12} color={C.goldInk} />}</View>
-              </View>
-            ) : (
-              c.icon && <Icon name={c.icon} size={20} color={on ? C.gold : C.textDim} active={on} />
-            )}
-            <View style={columns === 2 ? undefined : { flex: 1 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                <Text style={[text.bodySemi, { color: C.text }]}>{c.label}</Text>
-                {c.chip && (
-                  <View style={styles.miniChip}>
-                    <Text style={[text.tiny, { fontSize: 10, color: C.textDim }]}>{c.chip}</Text>
-                  </View>
+          <Animated.View key={c.id} entering={FadeInDown.delay(i * 35).duration(300)} style={columns === 2 ? { width: "48.8%" } : { width: "100%" }}>
+            <Press
+              haptic="select"
+              radius={R.lg}
+              accessibilityRole={multiple ? "checkbox" : "radio"}
+              accessibilityState={{ checked: on }}
+              accessibilityLabel={c.label}
+              onPress={() => onChange(multiple ? (on ? value.filter((v) => v !== c.id) : [...value, c.id]) : [c.id])}
+              style={[styles.choice, columns === 2 && styles.choiceTile, on && styles.choiceOn]}
+            >
+              {columns === 2 ? (
+                <View style={styles.tileHead}>
+                  {c.icon ? <Icon name={c.icon} size={20} active={on} /> : <View />}
+                  <Mark on={on} multiple={multiple} />
+                </View>
+              ) : (
+                c.icon && <Icon name={c.icon} size={20} active={on} />
+              )}
+              <View style={columns === 2 ? undefined : { flex: 1 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                  <T v="bodyMedium">{c.label}</T>
+                  {c.chip && (
+                    <View style={styles.miniChip}>
+                      <T v="micro" tone="dim">
+                        {c.chip}
+                      </T>
+                    </View>
+                  )}
+                </View>
+                {c.hint && (
+                  <T v="caption" style={{ marginTop: 2 }}>
+                    {c.hint}
+                  </T>
                 )}
               </View>
-              {c.hint && <Text style={[text.small, { color: C.textFaint, marginTop: 2 }]}>{c.hint}</Text>}
-            </View>
-            {columns !== 2 && (
-              <View style={[styles.radio, on && styles.radioOn]}>{on && <Icon name="check" size={12} color={C.goldInk} />}</View>
-            )}
-          </Touch>
+              {columns !== 2 && <Mark on={on} multiple={multiple} />}
+            </Press>
+          </Animated.View>
         );
       })}
     </View>
   );
 }
 
-export function Field({
-  label,
-  hint,
-  error,
-  prefix,
-  locked,
-  ...input
-}: TextInputProps & { label: string; hint?: string; error?: string | null; prefix?: string; locked?: string }) {
+function Mark({ on, multiple }: { on: boolean; multiple?: boolean }) {
   return (
-    <View>
-      <Text style={[text.smallSemi, { color: C.text, marginBottom: 7 }]}>{label}</Text>
-      <View style={[styles.field, error && { borderColor: C.red }]}>
-        {prefix && <Text style={[text.body, { color: C.textDim, fontFamily: font.mono }]}>{prefix}</Text>}
-        <TextInput placeholderTextColor={C.textFaint} accessibilityLabel={label} style={styles.input} {...input} />
-      </View>
-      {error ? (
-        <Text style={[text.small, { color: C.red, marginTop: 6 }]}>{error}</Text>
-      ) : hint ? (
-        <Text style={[text.small, { color: C.textFaint, marginTop: 6 }]}>{hint}</Text>
-      ) : null}
-      {locked && (
-        <View style={{ flexDirection: "row", gap: 6, marginTop: 6 }}>
-          <Icon name="lock" size={12} color={C.textFaint} />
-          <Text style={[text.tiny, { color: C.textFaint, flex: 1, lineHeight: 15 }]}>{locked}</Text>
-        </View>
+    <View style={[styles.radio, multiple && { borderRadius: 7 }, on && styles.radioOn]}>
+      {on && (
+        <Animated.View entering={pop()}>
+          <Icon name="check" size={12} color={C.ink} strokeWidth={3} />
+        </Animated.View>
       )}
     </View>
   );
 }
 
-export function Callout({ tone = "info", title, children }: { tone?: "info" | "warn" | "good"; title?: string; children: React.ReactNode }) {
-  const c = tone === "warn" ? C.red : tone === "good" ? C.green : C.violetHot;
-  const bg = tone === "warn" ? C.redWash : tone === "good" ? C.greenWash : "rgba(139,108,255,0.12)";
+/** The field, plus `locked`: a note about exactly how little is kept. */
+export function Field({ locked, ...p }: TextInputProps & { label: string; hint?: string; error?: string | null; prefix?: string; locked?: string }) {
+  return <BaseField {...p} note={locked} />;
+}
+
+export function Callout({ title, children, tone = "info" }: { title: string; children: React.ReactNode; tone?: "info" | "warn" | "good" }) {
+  const t = tone === "warn" ? { c: C.amber, bg: C.amberWash, i: "alert" as const } : tone === "good" ? { c: C.green, bg: C.greenWash, i: "checkCircle" as const } : { c: C.gold, bg: C.goldWash, i: "info" as const };
   return (
-    <Animated.View entering={FadeIn.duration(220)} style={[styles.callout, { backgroundColor: bg }]}>
-      <Icon name={tone === "warn" ? "bell" : tone === "good" ? "check" : "spark"} size={17} color={c} />
+    <Animated.View entering={FadeIn.duration(220)} style={[styles.callout, { backgroundColor: t.bg }]}>
+      <Icon name={t.i} size={17} color={t.c} />
       <View style={{ flex: 1 }}>
-        {title && <Text style={[text.smallSemi, { color: C.text, marginBottom: 2 }]}>{title}</Text>}
-        <Text style={[text.small, { color: C.textDim, lineHeight: 18 }]}>{children}</Text>
+        <T v="calloutMedium">{title}</T>
+        <T v="callout" style={{ marginTop: 3 }}>
+          {children}
+        </T>
       </View>
     </Animated.View>
   );
@@ -150,36 +140,77 @@ export function Callout({ tone = "info", title, children }: { tone?: "info" | "w
 
 export function StepHead({ kicker, title, blurb }: { kicker: string; title: string; blurb?: string }) {
   return (
-    /* No entering animation: on web a slide-in on the heading froze part way,
-       leaving the step title grey. The stepper bar already marks the change. */
     <View>
-      <Text style={[text.label, { color: C.gold }]}>{kicker}</Text>
-      <Text style={[text.title, { color: C.text, marginTop: 6 }]}>{title}</Text>
-      {blurb && <Text style={[text.body, { color: C.textDim, marginTop: 6 }]}>{blurb}</Text>}
+      <T v="label" tone="gold">
+        {kicker}
+      </T>
+      <T v="title2" style={{ marginTop: 6 }}>
+        {title}
+      </T>
+      {blurb && (
+        <T v="body" style={{ marginTop: 6 }}>
+          {blurb}
+        </T>
+      )}
     </View>
   );
 }
 
-export function StepNav({
-  onBack,
-  onNext,
-  nextLabel = "Continue",
-  disabled,
-  note,
-}: {
-  onBack?: () => void;
-  onNext?: () => void;
-  nextLabel?: string;
-  disabled?: boolean;
-  note?: string;
-}) {
+export function StepNav({ onBack, onNext, nextLabel = "Continue", disabled, note }: { onBack?: () => void; onNext?: () => void; nextLabel?: string; disabled?: boolean; note?: string }) {
   return (
     <View style={{ gap: space.sm, marginTop: space.md }}>
       <View style={{ flexDirection: "row", gap: space.sm }}>
-        {onBack && <Button label="Back" variant="glass" onPress={onBack} style={{ width: 96 }} />}
-        <Button label={nextLabel} onPress={onNext} disabled={disabled} style={{ flex: 1 }} />
+        {onBack && <Button label="Back" icon="back" variant="secondary" full={false} onPress={onBack} style={{ minWidth: 110 }} />}
+        <View style={{ flex: 1 }}>
+          <Button label={nextLabel} onPress={onNext} disabled={disabled} />
+        </View>
       </View>
-      {note && <Text style={[text.tiny, { color: C.textFaint, textAlign: "center" }]}>{note}</Text>}
+      {note && <T v="caption" center>{note}</T>}
+    </View>
+  );
+}
+
+/** A "take this with you" list. */
+export function Take({ title, items }: { title: string; items: string[] }) {
+  if (!items.length) return null;
+  return (
+    <View style={styles.take}>
+      <T v="headline">{title}</T>
+      <View style={{ gap: 7, marginTop: space.sm }}>
+        {items.map((d) => (
+          <View key={d} style={{ flexDirection: "row", gap: 10 }}>
+            <Icon name="check" size={14} color={C.gold} strokeWidth={2.2} />
+            <T v="callout" style={{ flex: 1 }}>
+              {d}
+            </T>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/** Sent: a filing now exists, and this says where to follow it. */
+export function Sent({ title, body, orderId }: { title: string; body: string; orderId: string }) {
+  const router = useRouter();
+  useEffect(() => buzz("success"), []);
+  return (
+    <View style={{ alignItems: "center", paddingTop: space.section }}>
+      <Animated.View entering={pop(0, 12)} style={styles.done}>
+        <Icon name="check" size={34} color={C.ink} strokeWidth={2.6} />
+      </Animated.View>
+      <Animated.View entering={FadeInDown.delay(250)} style={{ alignItems: "center", marginTop: space.xl }}>
+        <T v="title1" center>
+          {title}
+        </T>
+        <T v="body" center style={{ marginTop: space.sm, maxWidth: 400 }}>
+          {body}
+        </T>
+      </Animated.View>
+      <Animated.View entering={FadeInDown.delay(400)} style={{ width: "100%", maxWidth: 420, marginTop: space.section, gap: space.sm }}>
+        <Button label="Track this filing" onPress={() => router.replace(`/filing/${orderId}`)} />
+        <Button label="Back to Home" variant="ghost" onPress={() => router.replace("/")} />
+      </Animated.View>
     </View>
   );
 }
@@ -190,43 +221,16 @@ export const mobileError = (v: string) => (!v ? null : /^[6-9][0-9]{9}$/.test(v)
 export const gstinError = (v: string) => (!v ? null : /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/.test(v.toUpperCase()) ? null : "Not a valid GSTIN — 15 characters, and it contains your PAN.");
 
 const styles = StyleSheet.create({
-  track: { height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.08)", overflow: "hidden" },
-  fill: { height: "100%", backgroundColor: C.gold, borderRadius: 2 },
-  choice: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    padding: space.lg,
-    borderRadius: radius.lg,
-    backgroundColor: C.glass,
-    borderWidth: 1,
-    borderColor: C.hairline,
-  },
-  choiceTile: { width: "48.8%", flexDirection: "column", alignItems: "stretch", gap: space.sm },
+  track: { height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.08)", overflow: "hidden" },
+  fill: { flex: 1, backgroundColor: C.gold, borderRadius: 2, transformOrigin: "left" },
+  choice: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: 1, borderColor: C.line },
+  choiceTile: { flexDirection: "column", alignItems: "stretch", gap: space.sm, minHeight: 120 },
   tileHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  choiceOn: { borderColor: C.gold, backgroundColor: "rgba(242,198,109,0.08)" },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: C.hairlineStrong,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  choiceOn: { borderColor: C.gold, backgroundColor: "#15120C" },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: C.lineStrong, alignItems: "center", justifyContent: "center" },
   radioOn: { backgroundColor: C.gold, borderColor: C.gold },
-  miniChip: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 999, backgroundColor: C.glassHigh },
-  field: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    height: 54,
-    borderRadius: radius.md,
-    paddingHorizontal: space.lg,
-    backgroundColor: C.glass,
-    borderWidth: 1,
-    borderColor: C.hairline,
-  },
-  input: { flex: 1, color: C.text, fontFamily: font.body, fontSize: 15.5, padding: 0, height: 50 },
-  callout: { flexDirection: "row", gap: space.md, padding: space.lg, borderRadius: radius.lg },
+  miniChip: { paddingHorizontal: 7, height: 18, borderRadius: 9, backgroundColor: C.surfaceTop, justifyContent: "center" },
+  callout: { flexDirection: "row", gap: space.md, padding: space.lg, borderRadius: R.lg },
+  take: { padding: space.lg, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
+  done: { width: 84, height: 84, borderRadius: 42, backgroundColor: C.gold, alignItems: "center", justifyContent: "center", shadowColor: C.gold, shadowOpacity: 0.4, shadowRadius: 24, shadowOffset: { width: 0, height: 8 } },
 });

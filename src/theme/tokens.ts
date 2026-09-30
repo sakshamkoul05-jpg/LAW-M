@@ -1,139 +1,137 @@
 /**
- * Obsidian & Aurora — the LAWFIC app's design system.
+ * LAWFIC design tokens — "Obsidian & Champagne".
  *
- * The brief was "Revolut, Apple Wallet, Phantom, CRED, HDFC". What those share
- * is not a colour; it is three habits, and every screen here keeps them:
+ * The product is a legal wallet, and the palette says so by what it leaves
+ * out. It is almost entirely black and warm white. Gold appears only where it
+ * means something: the primary action on a screen, a selected tab, a verified
+ * document, progress, the wallet pass itself. A screen that is mostly gold has
+ * no way left to say "this one matters".
  *
- *   1. LIGHT BEHIND THINGS, NOT ON THEM. The background is never a flat fill —
- *      a slow aurora of violet, indigo and gold drifts behind every hero. The
- *      surfaces on top stay quiet so the light has somewhere to show.
- *   2. GLASS, NOT BOXES. Surfaces are translucent over that light, with a
- *      hairline and a bright top edge. A flat grey card on a flat black page is
- *      what made the last version read as basic.
- *   3. ONE OBJECT GETS TO BE BEAUTIFUL. On the wallet it is the card. On home
- *      it is the balance. Everything around it steps back.
- *
- * Gold stays LAWFIC's — it is the colour of money and action. Violet is the
- * second voice: the assistant, insights, anything the app works out for you.
+ * Every colour a component uses comes from here. A hex literal anywhere else
+ * is a bug waiting for the next palette change.
  */
 
 export const color = {
-  /* Ground — faintly violet, so the aurora blends instead of sitting on it. */
-  void: "#060609",
-  ground: "#0A0A10",
-  sunken: "#040406",
+  /* Ground, from deepest to highest. Each step is a surface a thing can sit
+     on; depth comes from these steps and from shadow, not from borders. */
+  bg: "#050505",
+  bgDeep: "#080808",
+  surface: "#101010",
+  surfaceHigh: "#151515",
+  surfaceTop: "#1B1B1B",
+  /** The pressed or hovered state of a surface. */
+  surfaceHover: "#202020",
 
-  /* Glass. Translucent whites over the aurora; never opaque greys. */
-  glass: "rgba(255,255,255,0.055)",
-  glassHigh: "rgba(255,255,255,0.085)",
-  glassPress: "rgba(255,255,255,0.12)",
-  hairline: "rgba(255,255,255,0.09)",
-  hairlineStrong: "rgba(255,255,255,0.16)",
-  litEdge: "rgba(255,255,255,0.14)",
+  /* Hairlines. Barely there on purpose — rows separate by spacing first. */
+  line: "rgba(255,255,255,0.06)",
+  lineStrong: "rgba(255,255,255,0.10)",
+  /** The lit top edge of a raised surface: light falls from above. */
+  edge: "rgba(255,255,255,0.08)",
 
-  /* Solid surfaces, for the few places glass would be illegible. */
-  surface: "#111118",
-  surfaceHigh: "#191922",
+  /* Text. Warm white, never pure — #FFF on #050505 vibrates. */
+  text: "#F5F3EE",
+  textDim: "#A8A6A0",
+  textMuted: "#6F6D68",
+  /** Ink on a gold fill. */
+  ink: "#17120A",
 
-  text: "#F5F4F9",
-  textDim: "#A6A4B8",
-  textFaint: "#6B6980",
+  /* The accent, used sparingly. */
+  gold: "#C6A15B",
+  goldLight: "#E0C783",
+  goldDeep: "#8F6E32",
+  goldWash: "rgba(198,161,91,0.10)",
+  goldLine: "rgba(198,161,91,0.28)",
+  goldGlow: "rgba(198,161,91,0.12)",
 
-  /* Money and action. */
-  gold: "#F2C66D",
-  goldHot: "#FFD98A",
-  goldDeep: "#B8862F",
-  goldInk: "#1A1204",
+  /* Status. Desaturated so they sit inside a black-and-gold product instead of
+     on top of it. */
+  green: "#6FCF97",
+  greenWash: "rgba(111,207,151,0.10)",
+  amber: "#E5B45A",
+  amberWash: "rgba(229,180,90,0.10)",
+  red: "#EB7A6F",
+  redWash: "rgba(235,122,111,0.10)",
+  blue: "#8AB4F8",
+  blueWash: "rgba(138,180,248,0.10)",
 
-  /* The second voice. */
-  violet: "#8B6CFF",
-  violetHot: "#B39DFF",
-  violetDeep: "#4B2FC9",
-  indigo: "#3B4BFF",
-
-  /* Status. */
-  green: "#34D399",
-  greenWash: "rgba(52,211,153,0.14)",
-  amber: "#FBBF24",
-  amberWash: "rgba(251,191,36,0.14)",
-  red: "#F87171",
-  redWash: "rgba(248,113,113,0.14)",
-  blue: "#60A5FA",
-  blueWash: "rgba(96,165,250,0.14)",
+  scrim: "rgba(0,0,0,0.62)",
 } as const;
 
-/** Gradients, as [from, ..., to]. Named for what they are used on. */
 export const gradient = {
-  gold: ["#FFE3A3", "#F2C66D", "#C9923A"] as const,
-  violet: ["#B39DFF", "#8B6CFF", "#4B2FC9"] as const,
-  aurora: ["#8B6CFF", "#3B4BFF", "#0A0A10"] as const,
-  obsidian: ["#1C1C24", "#0B0B10", "#050507"] as const,
-  champagne: ["#FBE7C0", "#E9C98B", "#B8914E"] as const,
-  midnight: ["#1B2550", "#101634", "#070A1C"] as const,
-  /* The top of every hero, fading the aurora into the ground. */
-  fadeDown: ["rgba(6,6,9,0)", "rgba(6,6,9,0.7)", "#060609"] as const,
+  /** The gold fill of a primary button: lit from the top-left. */
+  gold: ["#E0C783", "#C6A15B", "#A9843F"] as const,
+  /** The wallet pass. Obsidian with a warm core. */
+  pass: ["#1E1C19", "#0E0E0D", "#070707"] as const,
+  /** A raised surface catching light at its top. */
+  surface: ["#171717", "#101010"] as const,
+  /** Fade to the ground, for content scrolling under a bar. */
+  fadeDown: ["rgba(5,5,5,0)", "rgba(5,5,5,0.92)", "#050505"] as const,
+  fadeUp: ["#050505", "rgba(5,5,5,0.85)", "rgba(5,5,5,0)"] as const,
 };
 
+/** A 4-point grid. */
 export const space = {
+  xxs: 2,
   xs: 4,
   sm: 8,
   md: 12,
   lg: 16,
   xl: 20,
-  xxl: 28,
-  xxxl: 40,
-  section: 48,
+  xxl: 24,
+  xxxl: 32,
+  section: 40,
+  hero: 56,
 } as const;
 
+/** One radius system. Nothing in the app uses a radius outside this list. */
 export const radius = {
   sm: 12,
   md: 16,
-  lg: 22,
-  xl: 28,
-  card: 24,
+  lg: 20,
+  xl: 24,
+  xxl: 28,
   pill: 999,
 } as const;
 
 /**
- * Elevation. Two shadows, because one reads as a smudge: a tight dark one that
- * seats the object, and a wide soft one that lifts it.
+ * Shadows. Soft, black, large-radius: a raised thing on a black ground reads
+ * as raised because of what is darker around it, not because of a glow.
  */
 export const elevation = {
+  none: {},
   low: {
     shadowColor: "#000",
     shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   mid: {
     shadowColor: "#000",
     shadowOpacity: 0.5,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 14 },
-    elevation: 10,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 8,
   },
   card: {
     shadowColor: "#000",
     shadowOpacity: 0.65,
-    shadowRadius: 36,
+    shadowRadius: 34,
     shadowOffset: { width: 0, height: 22 },
-    elevation: 18,
+    elevation: 14,
   },
-  glowGold: {
-    shadowColor: "#F2C66D",
-    shadowOpacity: 0.45,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 12,
-  },
-  glowViolet: {
-    shadowColor: "#8B6CFF",
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 12,
+  /** The only glow in the product, and a faint one. */
+  gold: {
+    shadowColor: "#C6A15B",
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
   },
 } as const;
 
+/** Minimum comfortable touch target. */
 export const HIT = 44;
+
+/** Content never stretches past this on a wide screen. */
+export const MAX_CONTENT = 1180;
