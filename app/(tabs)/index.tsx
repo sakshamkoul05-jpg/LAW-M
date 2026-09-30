@@ -48,7 +48,9 @@ export default function Home() {
         </Touch>
         <Touch onPress={() => router.push("/services")} style={styles.search} accessibilityLabel="Search services">
           <Icon name="search" size={17} color={C.textDim} />
-          <Text style={[text.small, { color: C.textDim }]}>Search 39 services</Text>
+          <Text style={[text.small, { color: C.textDim, flex: 1 }]} numberOfLines={1}>
+            Search services
+          </Text>
         </Touch>
         <IconButton icon="bell" label="Notifications" badge />
       </Animated.View>
