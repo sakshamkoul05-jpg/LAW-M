@@ -1,82 +1,79 @@
 /**
- * The design system, in one file.
+ * Obsidian & Aurora — the LAWFIC app's design system.
  *
- * WHAT "CRED-LEVEL" ACTUALLY MEANS HERE, SINCE IT IS OTHERWISE A MOOD
+ * The brief was "Revolut, Apple Wallet, Phantom, CRED, HDFC". What those share
+ * is not a colour; it is three habits, and every screen here keeps them:
  *
- * It is not "dark and shiny". Four rules produce the feeling, and every screen
- * in this app obeys them:
+ *   1. LIGHT BEHIND THINGS, NOT ON THEM. The background is never a flat fill —
+ *      a slow aurora of violet, indigo and gold drifts behind every hero. The
+ *      surfaces on top stay quiet so the light has somewhere to show.
+ *   2. GLASS, NOT BOXES. Surfaces are translucent over that light, with a
+ *      hairline and a bright top edge. A flat grey card on a flat black page is
+ *      what made the last version read as basic.
+ *   3. ONE OBJECT GETS TO BE BEAUTIFUL. On the wallet it is the card. On home
+ *      it is the balance. Everything around it steps back.
  *
- *   1. ONE loud element per screen. On the wallet it is the balance. Everything
- *      else — labels, dates, hints, captions — is small, quiet and letterspaced.
- *      A screen with three things shouting has nothing to look at.
- *   2. The object gets a stage. The thing the screen is about sits alone, at
- *      full width, on a pool of light, with air around it.
- *   3. Surfaces are slabs, not boxes. Large radius, a hairline that is barely
- *      there, and a lit top edge — light falls from above, so the top edge of
- *      every raised thing catches it and the bottom does not. That single
- *      detail is most of why a flat rectangle starts reading as an object.
- *   4. Money is monospaced and tabular. A column of amounts must align on the
- *      decimal, or it reads as a list of strings rather than a ledger.
- *
- * Borrowed language, not borrowed artwork: no CRED mark, colour, illustration
- * or line of copy appears anywhere in this app. The palette is LAWFIC's own —
- * the gold is the gold from lawfic.pro, the purple is the Panda's.
+ * Gold stays LAWFIC's — it is the colour of money and action. Violet is the
+ * second voice: the assistant, insights, anything the app works out for you.
  */
 
 export const color = {
-  /* GROUND. Not #000: pure black kills the lit edges that make slabs read as
-     objects, and on OLED it turns every scroll edge into a hard cliff. */
-  void: "#08090C",
-  ground: "#0B0D12",
+  /* Ground — faintly violet, so the aurora blends instead of sitting on it. */
+  void: "#060609",
+  ground: "#0A0A10",
+  sunken: "#040406",
 
-  /* SLABS, in rising order of elevation. */
-  surface: "#101219",
-  surfaceRaised: "#161922",
-  surfaceHigh: "#1D212C",
+  /* Glass. Translucent whites over the aurora; never opaque greys. */
+  glass: "rgba(255,255,255,0.055)",
+  glassHigh: "rgba(255,255,255,0.085)",
+  glassPress: "rgba(255,255,255,0.12)",
+  hairline: "rgba(255,255,255,0.09)",
+  hairlineStrong: "rgba(255,255,255,0.16)",
+  litEdge: "rgba(255,255,255,0.14)",
 
-  /* Hairlines and the lit top edge. Both are deliberately almost invisible —
-     if you can clearly see the border, it is too strong. */
-  hairline: "#232733",
-  hairlineSoft: "#1A1D26",
-  litEdge: "rgba(255,255,255,0.075)",
+  /* Solid surfaces, for the few places glass would be illegible. */
+  surface: "#111118",
+  surfaceHigh: "#191922",
 
-  /* TEXT. Three levels and no more: a fourth always turns into guesswork. */
-  text: "#F3F2ED",
-  textDim: "#9BA1AF",
-  textFaint: "#666C7B",
+  text: "#F5F4F9",
+  textDim: "#A6A4B8",
+  textFaint: "#6B6980",
 
-  /* LAWFIC's gold, from the website. The single accent for money and action. */
-  gold: "#E6C36B",
-  goldDeep: "#A8842E",
-  goldWash: "rgba(230,195,107,0.10)",
+  /* Money and action. */
+  gold: "#F2C66D",
+  goldHot: "#FFD98A",
+  goldDeep: "#B8862F",
+  goldInk: "#1A1204",
 
-  /* The Panda's. Used for the assistant and nothing else, so its appearance on
-     a screen always means the same thing. */
-  panda: "#C74BF0",
-  pandaDeep: "#3A0D6B",
-  pandaHot: "#FF8AF0",
+  /* The second voice. */
+  violet: "#8B6CFF",
+  violetHot: "#B39DFF",
+  violetDeep: "#4B2FC9",
+  indigo: "#3B4BFF",
 
-  /* STATUS. Each carries a wash for its own chip. */
-  green: "#5DCB9C",
-  greenWash: "rgba(93,203,156,0.12)",
-  amber: "#E5A63F",
-  amberWash: "rgba(229,166,63,0.12)",
-  red: "#E5645D",
-  redWash: "rgba(229,100,93,0.12)",
-
-  /* Leather, for the wallet. Kept here rather than inside the wallet so a
-     future finish picker has one place to read from. */
-  leather: "#4A2E1C",
-  leatherLit: "#6B4529",
-  leatherDeep: "#2A1810",
-  brass: "#C9A961",
-  thread: "#D8CDB6",
+  /* Status. */
+  green: "#34D399",
+  greenWash: "rgba(52,211,153,0.14)",
+  amber: "#FBBF24",
+  amberWash: "rgba(251,191,36,0.14)",
+  red: "#F87171",
+  redWash: "rgba(248,113,113,0.14)",
+  blue: "#60A5FA",
+  blueWash: "rgba(96,165,250,0.14)",
 } as const;
 
-/**
- * An 8pt rhythm, with a 4 for the places where 8 is too loose — a chip's inner
- * padding, the gap between a label and the thing it labels.
- */
+/** Gradients, as [from, ..., to]. Named for what they are used on. */
+export const gradient = {
+  gold: ["#FFE3A3", "#F2C66D", "#C9923A"] as const,
+  violet: ["#B39DFF", "#8B6CFF", "#4B2FC9"] as const,
+  aurora: ["#8B6CFF", "#3B4BFF", "#0A0A10"] as const,
+  obsidian: ["#1C1C24", "#0B0B10", "#050507"] as const,
+  champagne: ["#FBE7C0", "#E9C98B", "#B8914E"] as const,
+  midnight: ["#1B2550", "#101634", "#070A1C"] as const,
+  /* The top of every hero, fading the aurora into the ground. */
+  fadeDown: ["rgba(6,6,9,0)", "rgba(6,6,9,0.7)", "#060609"] as const,
+};
+
 export const space = {
   xs: 4,
   sm: 8,
@@ -85,54 +82,58 @@ export const space = {
   xl: 20,
   xxl: 28,
   xxxl: 40,
-  section: 56,
+  section: 48,
 } as const;
 
 export const radius = {
-  sm: 10,
-  md: 14,
-  lg: 20,
+  sm: 12,
+  md: 16,
+  lg: 22,
   xl: 28,
+  card: 24,
   pill: 999,
 } as const;
 
 /**
- * Elevation as a pair: the shadow below AND the lit edge above. They are
- * published together because using one without the other is what makes a card
- * look like a sticker instead of a slab.
+ * Elevation. Two shadows, because one reads as a smudge: a tight dark one that
+ * seats the object, and a wide soft one that lifts it.
  */
 export const elevation = {
-  flat: {
+  low: {
     shadowColor: "#000",
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 0,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
-  raised: {
+  mid: {
     shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 14 },
+    elevation: 10,
+  },
+  card: {
+    shadowColor: "#000",
+    shadowOpacity: 0.65,
+    shadowRadius: 36,
+    shadowOffset: { width: 0, height: 22 },
+    elevation: 18,
+  },
+  glowGold: {
+    shadowColor: "#F2C66D",
     shadowOpacity: 0.45,
-    shadowRadius: 18,
+    shadowRadius: 24,
     shadowOffset: { width: 0, height: 8 },
-    elevation: 6,
+    elevation: 12,
   },
-  floating: {
-    shadowColor: "#000",
-    shadowOpacity: 0.6,
-    shadowRadius: 32,
-    shadowOffset: { width: 0, height: 16 },
-    elevation: 14,
-  },
-  /* For the wallet on its stage. A shadow this large is wrong for a card and
-     right for a physical object resting on a surface. */
-  object: {
-    shadowColor: "#000",
-    shadowOpacity: 0.7,
-    shadowRadius: 48,
-    shadowOffset: { width: 0, height: 28 },
-    elevation: 22,
+  glowViolet: {
+    shadowColor: "#8B6CFF",
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 12,
   },
 } as const;
 
-/** The one place that decides whether a touch target is big enough. */
 export const HIT = 44;

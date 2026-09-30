@@ -1,20 +1,11 @@
-import { Platform, TextStyle } from "react-native";
+import { Platform, type TextStyle } from "react-native";
 
 /**
- * Three families, each with one job.
- *
- *   Sora      — display. Geometric, slightly narrow, distinctive at large
- *               sizes. Headings, and nothing else.
- *   Manrope   — body. Warm, open, legible at 12px on a phone in daylight.
- *   Plex Mono — money, and only money. Tabular figures so a column of amounts
- *               aligns; a statement in a proportional face is a list of strings
- *               pretending to be a ledger.
- *
- * Deliberately not Inter, Roboto or SF. Every fintech app uses one of the
- * three, and an app that looks like every other app cannot be the one the
- * client shows people.
+ * Two families. Sora carries every number worth looking at — balances are set
+ * in it large and tight, the way Revolut and Apple Card set theirs, rather than
+ * in a monospace that reads like a terminal. Manrope carries everything else.
+ * Plex Mono survives only for identifiers: order numbers, PANs, card digits.
  */
-
 export const font = {
   display: "Sora_600SemiBold",
   displayBold: "Sora_700Bold",
@@ -25,36 +16,27 @@ export const font = {
   monoSemi: "IBMPlexMono_600SemiBold",
 } as const;
 
-/**
- * The micro-label: 10.5px, uppercase, widely letterspaced, dim. It sits above
- * almost every section in the app. It is what lets a heading be quiet and still
- * be found — the eye reads the tracking as "this is a label" before it reads
- * the word.
- */
-export const label: TextStyle = {
-  fontFamily: font.bodySemi,
-  fontSize: 10.5,
-  letterSpacing: 1.6,
-  textTransform: "uppercase",
-};
-
-export const text = {
-  hero: { fontFamily: font.displayBold, fontSize: 34, letterSpacing: -0.8, lineHeight: 40 },
-  title: { fontFamily: font.display, fontSize: 24, letterSpacing: -0.4, lineHeight: 30 },
-  heading: { fontFamily: font.display, fontSize: 18, letterSpacing: -0.2, lineHeight: 24 },
-  body: { fontFamily: font.body, fontSize: 14.5, lineHeight: 21 },
-  bodySemi: { fontFamily: font.bodySemi, fontSize: 14.5, lineHeight: 21 },
-  small: { fontFamily: font.body, fontSize: 12.5, lineHeight: 18 },
-  tiny: { fontFamily: font.body, fontSize: 11, lineHeight: 15 },
-  label,
-} satisfies Record<string, TextStyle>;
-
-/**
- * Tabular figures. Plex Mono is monospaced already, but iOS still needs the
- * font-variant switch for the comma and the decimal to sit on the same track;
- * without it "₹1,499" and "₹499" do not line up in a column.
- */
 export const tabular: TextStyle = Platform.select({
   ios: { fontVariant: ["tabular-nums"] },
-  default: {},
+  default: { fontVariant: ["tabular-nums"] },
 }) as TextStyle;
+
+export const text = {
+  /** The one number on the screen. */
+  money: { fontFamily: font.displayBold, fontSize: 46, letterSpacing: -1.8, lineHeight: 52 },
+  hero: { fontFamily: font.displayBold, fontSize: 32, letterSpacing: -1, lineHeight: 38 },
+  title: { fontFamily: font.displayBold, fontSize: 26, letterSpacing: -0.6, lineHeight: 32 },
+  heading: { fontFamily: font.display, fontSize: 18, letterSpacing: -0.3, lineHeight: 24 },
+  subhead: { fontFamily: font.bodyBold, fontSize: 15, letterSpacing: -0.1, lineHeight: 20 },
+  body: { fontFamily: font.body, fontSize: 14.5, lineHeight: 21 },
+  bodySemi: { fontFamily: font.bodySemi, fontSize: 14.5, lineHeight: 21 },
+  small: { fontFamily: font.body, fontSize: 12.5, lineHeight: 17 },
+  smallSemi: { fontFamily: font.bodySemi, fontSize: 12.5, lineHeight: 17 },
+  tiny: { fontFamily: font.bodySemi, fontSize: 11, lineHeight: 14 },
+  label: {
+    fontFamily: font.bodyBold,
+    fontSize: 10.5,
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+  },
+} satisfies Record<string, TextStyle>;

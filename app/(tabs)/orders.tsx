@@ -1,179 +1,128 @@
 import React, { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Icon } from "@/icons/Icon";
-import { Chip, Label, Surface, Touch } from "@/components/primitives";
+import { Chip, Glass, Segmented, T, Touch } from "@/components/ui";
 import { Money } from "@/components/Money";
-import { color as C, font, radius, space, text } from "@/theme";
-import { sampleOrders, STATUS_COPY, type Order } from "@/data/sample";
+import { Screen } from "@/components/Screen";
+import { color as C, radius, space, text } from "@/theme";
+import { STATUS, orders, timeline, type Order } from "@/data/sample";
 
 type Filter = "active" | "done" | "all";
 
 /**
- * Orders.
- *
- * THE FILTER DEFAULTS TO ACTIVE
- *
- * Nobody opens this screen to look at a filing that finished in March. The
- * default is the work in flight, and the completed ones are one tap away. A
- * list that opens on "All" makes the customer scroll past history to find the
- * thing they came for.
+ * Orders. Defaults to what is in flight — nobody opens this to look at a
+ * filing that finished in March. Anything that needs the customer floats to
+ * the top and is the only card with a red edge.
  */
 export default function Orders() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<Filter>("active");
 
   const shown = useMemo(() => {
-    if (filter === "all") return sampleOrders;
-    if (filter === "done") return sampleOrders.filter((o) => o.status === "done");
-    return sampleOrders.filter((o) => o.status !== "done");
+    const base = filter === "all" ? orders : filter === "done" ? orders.filter((o) => o.status === "done") : orders.filter((o) => o.status !== "done");
+    return [...base].sort((a, b) => Number(b.status === "needs-you") - Number(a.status === "needs-you"));
   }, [filter]);
 
+  const waiting = orders.filter((o) => o.status === "needs-you").length;
+
   return (
-    <View style={{ flex: 1, backgroundColor: C.void }}>
-      <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + space.sm, paddingBottom: 140 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.head}>
-          <Label>Your filings</Label>
-          <Text style={[text.title, { color: C.text, marginTop: 3 }]}>Orders</Text>
+    <Screen aurora="quiet" auroraHeight={360}>
+      <View style={styles.pad}>
+        <T.Label>Your filings</T.Label>
+        <T.Title style={{ marginTop: 2 }}>Orders</T.Title>
+        {waiting > 0 && (
+          <View style={styles.alert}>
+            <Icon name="bell" size={16} color={C.red} />
+            <T.Small tone={C.text} style={{ flex: 1 }}>
+              {waiting} {waiting === 1 ? "filing is" : "filings are"} waiting on you
+            </T.Small>
+          </View>
+        )}
+        <View style={{ marginTop: space.lg }}>
+          <Segmented
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { id: "active", label: "Active" },
+              { id: "done", label: "Done" },
+              { id: "all", label: "All" },
+            ]}
+          />
         </View>
+      </View>
 
-        <View style={styles.filters}>
-          {(["active", "done", "all"] as Filter[]).map((f) => {
-            const on = filter === f;
-            return (
-              <Touch
-                key={f}
-                onPress={() => setFilter(f)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: on }}
-                accessibilityLabel={`Show ${f} orders`}
-                style={[styles.filter, on && styles.filterOn]}
-              >
-                <Text
-                  style={[
-                    text.small,
-                    {
-                      color: on ? "#1A1405" : C.textDim,
-                      fontFamily: font.bodySemi,
-                      textTransform: "capitalize",
-                    },
-                  ]}
-                >
-                  {f}
-                </Text>
-              </Touch>
-            );
-          })}
-        </View>
-
-        <View style={{ paddingHorizontal: space.lg, marginTop: space.xl, gap: space.md }}>
-          {shown.map((o, i) => (
-            <Animated.View key={o.id} entering={FadeInDown.delay(i * 55).duration(340)}>
-              <OrderCard order={o} onPress={() => router.push(`/order/${o.id}`)} />
-            </Animated.View>
-          ))}
-
-          {shown.length === 0 && (
-            <Surface style={{ alignItems: "center", paddingVertical: space.xxxl }}>
-              <Icon name="orders" size={28} color={C.textFaint} />
-              <Text style={[text.body, { color: C.textDim, marginTop: space.md }]}>
-                Nothing here yet.
-              </Text>
-            </Surface>
-          )}
-        </View>
-
-        <Text style={styles.footnote}>
-          Sample orders. Numbers and dates are placeholders.
-        </Text>
-      </ScrollView>
-    </View>
+      <View style={[styles.pad, { marginTop: space.lg, gap: space.md }]}>
+        {shown.map((o, i) => (
+          <Animated.View key={o.id} entering={FadeInDown.delay(i * 60).duration(360)}>
+            <OrderCard order={o} onPress={() => router.push(`/order/${o.id}`)} />
+          </Animated.View>
+        ))}
+        {shown.length === 0 && (
+          <Glass style={{ alignItems: "center", paddingVertical: space.xxxl, borderRadius: radius.xl }}>
+            <Icon name="orders" size={30} color={C.textFaint} />
+            <T.Body style={{ marginTop: space.md }}>Nothing here yet.</T.Body>
+          </Glass>
+        )}
+        <T.Tiny style={{ textAlign: "center", marginTop: space.md }}>Sample orders. Numbers and dates are placeholders.</T.Tiny>
+      </View>
+    </Screen>
   );
 }
 
 function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
-  const status = STATUS_COPY[order.status];
-  const done = order.status === "done";
-
+  const st = STATUS[order.status];
+  const urgent = order.status === "needs-you";
   return (
-    <Touch onPress={onPress} accessibilityLabel={`${order.name}, ${status.label}`}>
-      <Surface>
+    <Touch onPress={onPress} accessibilityLabel={`${order.name}, ${st.label}`}>
+      <Glass strong={urgent} style={[{ borderRadius: radius.xl }, urgent && { borderColor: "rgba(248,113,113,0.45)" }]}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", gap: space.md }}>
           <View style={{ flex: 1 }}>
-            <Text style={[text.bodySemi, { color: done ? C.textDim : C.text }]}>{order.name}</Text>
-            <Text style={[text.tiny, { color: C.textFaint, marginTop: 3 }]}>
-              {order.id} {"·"} {order.step}
-            </Text>
+            <Chip tone={st.tone}>{st.label}</Chip>
+            <T.Sub style={{ marginTop: 10 }}>{order.name}</T.Sub>
+            <T.Small style={{ marginTop: 2 }}>{order.step}</T.Small>
           </View>
-          <Chip tone={status.tone}>{status.label}</Chip>
+          <Icon name="chevron" size={18} color={C.textFaint} />
         </View>
 
-        {!done && (
-          <View style={styles.rail}>
+        {/* The five stages as segments, lit up to where it has got to. */}
+        <View style={styles.segments}>
+          {timeline.map((_, i) => (
             <View
+              key={i}
               style={[
-                styles.railFill,
-                {
-                  width: `${order.progress * 100}%`,
-                  backgroundColor: order.status === "needs-you" ? C.red : C.gold,
-                },
+                styles.segment,
+                { backgroundColor: i < order.stepIndex ? C.green : i === order.stepIndex ? st.color : "rgba(255,255,255,0.08)" },
               ]}
             />
-          </View>
-        )}
+          ))}
+        </View>
 
         <View style={styles.foot}>
-          {order.paidPaise != null ? (
-            <Money paise={order.paidPaise} size={13} tone={C.textDim} />
-          ) : (
-            <Text style={[text.tiny, { color: C.textFaint }]}>Not paid yet</Text>
-          )}
           <Text style={[text.tiny, { color: C.textFaint }]}>
-            {order.expectedOn ? `Expected ${order.expectedOn}` : order.startedOn}
+            {order.id} · step {Math.min(order.stepIndex + 1, 5)} of 5
           </Text>
+          {order.paidPaise != null && <Money paise={order.paidPaise} size={13} tone={C.textDim} />}
         </View>
-      </Surface>
+      </Glass>
     </Touch>
   );
 }
 
 const styles = StyleSheet.create({
-  head: { paddingHorizontal: space.lg, paddingBottom: space.lg },
-  filters: { flexDirection: "row", gap: space.sm, paddingHorizontal: space.lg },
-  filter: {
-    minHeight: 38,
-    paddingHorizontal: space.lg,
-    justifyContent: "center",
-    borderRadius: radius.pill,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: C.hairline,
-    backgroundColor: C.surface,
-  },
-  filterOn: { backgroundColor: C.gold, borderColor: C.gold },
-  rail: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: C.surfaceHigh,
+  pad: { paddingHorizontal: space.lg },
+  alert: {
     marginTop: space.md,
-    overflow: "hidden",
-  },
-  railFill: { height: "100%", borderRadius: 2 },
-  foot: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginTop: space.md,
+    gap: space.sm,
+    paddingHorizontal: space.md,
+    paddingVertical: 10,
+    borderRadius: radius.md,
+    backgroundColor: C.redWash,
   },
-  footnote: {
-    ...text.tiny,
-    color: C.textFaint,
-    textAlign: "center",
-    marginTop: space.xxl,
-  },
+  segments: { flexDirection: "row", gap: 5, marginTop: space.lg },
+  segment: { flex: 1, height: 5, borderRadius: 3 },
+  foot: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: space.md },
 });

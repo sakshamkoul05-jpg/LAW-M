@@ -57,7 +57,30 @@ export type IconName =
   | "trend"
   | "close"
   | "clock"
-  | "filter";
+  | "filter"
+  /* added for the redesign */
+  | "scan"
+  | "chart"
+  | "gift"
+  | "lock"
+  | "faceid"
+  | "fingerprint"
+  | "arrowUp"
+  | "arrowDown"
+  | "calendar"
+  | "bolt"
+  | "eye"
+  | "eyeOff"
+  | "star"
+  | "camera"
+  | "image"
+  | "settings"
+  | "logout"
+  | "statement"
+  | "crown"
+  | "more"
+  | "pin"
+  | "mail";
 
 type Glyph = (p: { c: string; fill: string; active: boolean }) => React.ReactNode;
 
@@ -261,6 +284,137 @@ const GLYPHS: Record<IconName, Glyph> = {
       <Path d="M3.6 6.4h16.8M6.6 12h10.8M9.8 17.6h4.4" stroke={c} strokeWidth={S} strokeLinecap="round" />
     </G>
   ),
+  /* ── added for the redesign ─────────────────────────────────────────── */
+
+  /* Four corner brackets and a line: the scan frame everybody recognises. */
+  scan: ({ c }) => (
+    <G>
+      <Path d="M3.6 8.2V5.4a1.8 1.8 0 0 1 1.8-1.8h2.8M15.8 3.6h2.8a1.8 1.8 0 0 1 1.8 1.8v2.8M20.4 15.8v2.8a1.8 1.8 0 0 1-1.8 1.8h-2.8M8.2 20.4H5.4a1.8 1.8 0 0 1-1.8-1.8v-2.8" stroke={c} strokeWidth={S} strokeLinecap="round" />
+      <Path d="M6.8 12h10.4" stroke={c} strokeWidth={S} strokeLinecap="round" />
+    </G>
+  ),
+  chart: ({ c, fill, active }) => (
+    <G>
+      {active && <Path d="M4 20h16" stroke={fill} strokeWidth={6} />}
+      <Path d="M4 20h16M7 16v-4M11.5 16V7M16 16v-6.5" stroke={c} strokeWidth={S} strokeLinecap="round" />
+    </G>
+  ),
+  gift: ({ c, fill, active }) => (
+    <G>
+      {active && <Rect x={4} y={10} width={16} height={10} rx={2} fill={fill} />}
+      <Rect x={3.4} y={7.4} width={17.2} height={4} rx={1.4} stroke={c} strokeWidth={S} />
+      <Path d="M5 11.4v7.2a1.4 1.4 0 0 0 1.4 1.4h11.2a1.4 1.4 0 0 0 1.4-1.4v-7.2M12 7.4V20" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+      <Path d="M12 7.4S10.6 3.6 8.4 3.9c-1.6.2-1.8 2.2-.4 3 1 .5 4 .5 4 .5zm0 0s1.4-3.8 3.6-3.5c1.6.2 1.8 2.2.4 3-1 .5-4 .5-4 .5z" stroke={c} strokeWidth={1.4} strokeLinejoin="round" />
+    </G>
+  ),
+  lock: ({ c, fill, active }) => (
+    <G>
+      {active && <Rect x={5} y={10.6} width={14} height={9.8} rx={2.6} fill={fill} />}
+      <Rect x={5} y={10.6} width={14} height={9.8} rx={2.6} stroke={c} strokeWidth={S} />
+      <Path d="M8.2 10.6V7.8a3.8 3.8 0 0 1 7.6 0v2.8" stroke={c} strokeWidth={S} strokeLinecap="round" />
+      <Circle cx={12} cy={15.4} r={1.3} fill={c} />
+    </G>
+  ),
+  /* The face-scan glyph: brackets, two eyes, a nose, a smile. */
+  faceid: ({ c }) => (
+    <G>
+      <Path d="M3.6 8V5.6a2 2 0 0 1 2-2H8M16 3.6h2.4a2 2 0 0 1 2 2V8M20.4 16v2.4a2 2 0 0 1-2 2H16M8 20.4H5.6a2 2 0 0 1-2-2V16" stroke={c} strokeWidth={S} strokeLinecap="round" />
+      <Path d="M9 9v1.4M15 9v1.4M12 9v3.6l-1 .6M9.4 15.6a4 4 0 0 0 5.2 0" stroke={c} strokeWidth={S} strokeLinecap="round" strokeLinejoin="round" />
+    </G>
+  ),
+  fingerprint: ({ c }) => (
+    <G>
+      <Path d="M6.4 8.2A6.6 6.6 0 0 1 18 11.6v1.2M5.2 12.4v-.8a6.8 6.8 0 0 1 .5-2.6M12 11.6v3.2c0 2.4-.7 4.3-1.8 5.6M8.6 11.8a3.4 3.4 0 0 1 6.8-.2v2.8c0 1.8-.3 3.4-.9 4.8M17.8 15.6c-.2 1.2-.5 2.3-1 3.3M5.6 15.4c.2 1.4.2 2.4 0 3.4" stroke={c} strokeWidth={1.55} strokeLinecap="round" />
+    </G>
+  ),
+  arrowUp: ({ c }) => <Path d="M7 17 17 7M9 7h8v8" stroke={c} strokeWidth={S} strokeLinecap="round" strokeLinejoin="round" />,
+  arrowDown: ({ c }) => <Path d="M17 7 7 17M15 17H7V9" stroke={c} strokeWidth={S} strokeLinecap="round" strokeLinejoin="round" />,
+  calendar: ({ c }) => (
+    <G>
+      <Rect x={3.6} y={5} width={16.8} height={15.4} rx={2.6} stroke={c} strokeWidth={S} />
+      <Path d="M3.6 9.8h16.8M8 3.4v3.2M16 3.4v3.2" stroke={c} strokeWidth={S} strokeLinecap="round" />
+    </G>
+  ),
+  bolt: ({ c, fill, active }) => (
+    <G>
+      {active && <Path d="M13.4 2.8 5 13.6h6.2l-1 7.6 8.4-10.8h-6.2z" fill={fill} />}
+      <Path d="M13.4 2.8 5 13.6h6.2l-1 7.6 8.4-10.8h-6.2z" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+    </G>
+  ),
+  eye: ({ c }) => (
+    <G>
+      <Path d="M2.8 12S6 5.6 12 5.6 21.2 12 21.2 12 18 18.4 12 18.4 2.8 12 2.8 12z" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+      <Circle cx={12} cy={12} r={2.8} stroke={c} strokeWidth={S} />
+    </G>
+  ),
+  eyeOff: ({ c }) => (
+    <G>
+      <Path d="M9.8 5.9A8.6 8.6 0 0 1 12 5.6c6 0 9.2 6.4 9.2 6.4a15.6 15.6 0 0 1-2.4 3.2M6.2 7.6A15.2 15.2 0 0 0 2.8 12S6 18.4 12 18.4a8.8 8.8 0 0 0 4.4-1.2" stroke={c} strokeWidth={S} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M3.8 3.8l16.4 16.4" stroke={c} strokeWidth={S} strokeLinecap="round" />
+    </G>
+  ),
+  star: ({ c, fill, active }) => (
+    <G>
+      {active && <Path d="M12 3.4l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.8l-5.3 2.9 1.1-5.9-4.4-4.1 6-.8z" fill={fill} />}
+      <Path d="M12 3.4l2.6 5.5 6 .8-4.4 4.1 1.1 5.9L12 16.8l-5.3 2.9 1.1-5.9-4.4-4.1 6-.8z" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+    </G>
+  ),
+  camera: ({ c }) => (
+    <G>
+      <Path d="M3.4 8.6a1.8 1.8 0 0 1 1.8-1.8h2.4l1.6-2.4h5.6l1.6 2.4h2.4a1.8 1.8 0 0 1 1.8 1.8v9.2a1.8 1.8 0 0 1-1.8 1.8H5.2a1.8 1.8 0 0 1-1.8-1.8z" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+      <Circle cx={12} cy={13} r={3.4} stroke={c} strokeWidth={S} />
+    </G>
+  ),
+  image: ({ c }) => (
+    <G>
+      <Rect x={3.4} y={4.4} width={17.2} height={15.2} rx={2.6} stroke={c} strokeWidth={S} />
+      <Circle cx={8.6} cy={9.4} r={1.6} stroke={c} strokeWidth={S} />
+      <Path d="m4 17.6 5-4.8 3.6 3.2 2.8-2.4 4.8 4" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+    </G>
+  ),
+  settings: ({ c }) => (
+    <G>
+      <Circle cx={12} cy={12} r={3} stroke={c} strokeWidth={S} />
+      <Path d="M12 2.8v2.6M12 18.6v2.6M4 7.4l2.2 1.3M17.8 15.3l2.2 1.3M4 16.6l2.2-1.3M17.8 8.7 20 7.4" stroke={c} strokeWidth={S} strokeLinecap="round" />
+    </G>
+  ),
+  logout: ({ c }) => (
+    <G>
+      <Path d="M14.4 4.4H6.6a1.8 1.8 0 0 0-1.8 1.8v11.6a1.8 1.8 0 0 0 1.8 1.8h7.8" stroke={c} strokeWidth={S} strokeLinecap="round" />
+      <Path d="M10.4 12h9.8M16.8 8.4 20.4 12l-3.6 3.6" stroke={c} strokeWidth={S} strokeLinecap="round" strokeLinejoin="round" />
+    </G>
+  ),
+  statement: ({ c }) => (
+    <G>
+      <Path d="M6 3.4h8.6l3.4 3.4v13.8H6z" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+      <Path d="M9 11h6M9 14.4h6M9 17.8h3.4" stroke={c} strokeWidth={S} strokeLinecap="round" />
+    </G>
+  ),
+  crown: ({ c, fill, active }) => (
+    <G>
+      {active && <Path d="M3.6 8.2 8 11.6 12 5l4 6.6 4.4-3.4-1.8 10.4H5.4z" fill={fill} />}
+      <Path d="M3.6 8.2 8 11.6 12 5l4 6.6 4.4-3.4-1.8 10.4H5.4z" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+    </G>
+  ),
+  more: ({ c }) => (
+    <G>
+      <Circle cx={5.6} cy={12} r={1.6} fill={c} />
+      <Circle cx={12} cy={12} r={1.6} fill={c} />
+      <Circle cx={18.4} cy={12} r={1.6} fill={c} />
+    </G>
+  ),
+  pin: ({ c }) => (
+    <G>
+      <Path d="M12 21s7-6.2 7-11.4a7 7 0 1 0-14 0C5 14.8 12 21 12 21z" stroke={c} strokeWidth={S} strokeLinejoin="round" />
+      <Circle cx={12} cy={9.8} r={2.6} stroke={c} strokeWidth={S} />
+    </G>
+  ),
+  mail: ({ c }) => (
+    <G>
+      <Rect x={3.4} y={5.4} width={17.2} height={13.2} rx={2.4} stroke={c} strokeWidth={S} />
+      <Path d="m4 7 8 6 8-6" stroke={c} strokeWidth={S} strokeLinecap="round" strokeLinejoin="round" />
+    </G>
+  ),
 };
 
 export function Icon({
@@ -280,7 +434,7 @@ export function Icon({
 }) {
   const glyph = GLYPHS[name];
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{ position: "relative" }}>
       {glyph({ c: color, fill: fill ?? withAlpha(color, 0.18), active })}
     </Svg>
   );

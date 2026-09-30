@@ -1,43 +1,16 @@
 import React, { useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  type StyleProp,
-  type TextInputProps,
-  type TextStyle,
-} from "react-native";
-import Animated, {
-  useAnimatedProps,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import { Text, TextInput, View, type StyleProp, type TextInputProps, type TextStyle } from "react-native";
+import Animated, { useAnimatedProps, useSharedValue, withTiming } from "react-native-reanimated";
 import { color as C, font, motion, tabular } from "@/theme";
 
 const AnimatedInput = Animated.createAnimatedComponent(TextInput);
 
-/**
- * Money on screen.
- *
- * INDIAN GROUPING, NOT THOUSANDS
- *
- * ₹24,35,000 — last three digits, then pairs. Formatting a rupee amount in
- * western thousands (₹2,435,000) is the detail that tells every Indian customer
- * the app was built for somewhere else, and it is one function away from being
- * right.
- *
- * Written out rather than handed to Intl.NumberFormat because the counting
- * version below has to format on the UI thread inside a worklet, where Intl is
- * not available. One implementation, used by both, so a static amount and an
- * animating one can never disagree about where the commas go.
- */
+/** Last three digits, then pairs: ₹24,35,000, never ₹2,435,000. Worklet-safe. */
 export function groupIndian(n: number): string {
   "worklet";
   const neg = n < 0;
   const s = Math.abs(Math.round(n)).toString();
   if (s.length <= 3) return (neg ? "-" : "") + s;
-
   const last3 = s.slice(-3);
   let rest = s.slice(0, -3);
   let out = "";
@@ -48,127 +21,110 @@ export function groupIndian(n: number): string {
   return (neg ? "-" : "") + rest + out + "," + last3;
 }
 
-/** Paise to a display string. The app stores paise; it never shows them. */
-export function formatPaise(paise: number): string {
-  return groupIndian(paise / 100);
+/** Whole rupees when the paise are zero, otherwise to the paisa. Floored, never
+    rounded: ₹24,350.50 must not read as ₹24,351 anywhere in a wallet. */
+export function rupees(paise: number): string {
+  const abs = Math.round(Math.abs(paise));
+  const r = groupIndian(Math.floor(abs / 100));
+  const p = abs % 100;
+  return p ? `₹${r}.${String(p).padStart(2, "0")}` : `₹${r}`;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════ */
-
+/** An amount in a row. Credits green and signed, debits plain. */
 export function Money({
   paise,
-  size = 16,
+  size = 15,
   tone = C.text,
-  style,
   signed,
+  style,
 }: {
   paise: number;
   size?: number;
   tone?: string;
-  style?: StyleProp<TextStyle>;
-  /** Shows + or − and colours credits green. For a statement column. */
   signed?: boolean;
+  style?: StyleProp<TextStyle>;
 }) {
   const credit = paise >= 0;
-  const colour = signed ? (credit ? C.green : tone) : tone;
+  const colour = signed && credit ? C.green : tone;
   const sign = signed ? (credit ? "+" : "−") : "";
-
   return (
-    <Text
-      style={[
-        { fontFamily: font.monoSemi, fontSize: size, color: colour, letterSpacing: -0.3 },
-        tabular,
-        style,
-      ]}
-    >
+    <Text style={[{ fontFamily: font.display, fontSize: size, color: colour, letterSpacing: -0.3 }, tabular, style]}>
       {sign}
-      {"₹"}
-      {groupIndian(Math.abs(paise) / 100)}
+      {rupees(paise)}
     </Text>
   );
 }
 
 /**
- * The balance, counting up.
+ * The balance, counting up — large, tight, in the display face.
  *
- * WHY A TEXTINPUT AND NOT A TEXT
- *
- * Reanimated can drive a TextInput's `text` prop from the UI thread. A <Text>
- * cannot be written to that way — its content would have to come back through
- * React state on every frame, which means a re-render at 60fps and a number
- * that visibly stutters the moment anything else on the screen is busy. The
- * input is not editable and not focusable; it is a label that the animation
- * thread is allowed to write into.
- *
- * The easing decelerates and never overshoots. A balance that springs past its
- * value and settles back has, for a few frames, told the customer they have
- * more money than they do.
+ * Driven through an animated TextInput so the count runs on the UI thread and
+ * does not re-render React sixty times a second. The paise are set smaller and
+ * dimmer than the rupees, the way Revolut and Apple Card do it: the whole
+ * number is what you read, the fraction is what you check.
  */
-export function CountingBalance({
+export function Balance({
   paise,
-  size = 52,
-  tone = C.text,
+  size = 50,
+  hidden,
 }: {
   paise: number;
   size?: number;
-  tone?: string;
+  hidden?: boolean;
 }) {
-  const value = useSharedValue(0);
+  const v = useSharedValue(0);
 
   useEffect(() => {
-    value.value = withTiming(paise / 100, motion.count);
-  }, [paise, value]);
+    v.value = withTiming(paise / 100, motion.count);
+  }, [paise, v]);
 
-  /* `text` is not in TextInput's public prop types — Reanimated writes it
-     straight onto the native view. The cast is the documented way to do this
-     and the reason the component below is a TextInput at all. */
-  const animatedProps = useAnimatedProps(() => {
-    const shown = "₹" + groupIndian(value.value);
-    return { text: shown, defaultValue: shown } as unknown as TextInputProps;
+  const props = useAnimatedProps(() => {
+    const s = groupIndian(Math.floor(v.value));
+    return { text: s, defaultValue: s } as unknown as TextInputProps;
   });
 
-  /* `alignSelf: stretch` plus a centred input, rather than a row that hugs
-     its content. On the web an <input> carries a default size of about twenty
-     characters and a TextInput with no width inherits it, so the balance was
-     rendering into a box narrower than itself and losing its first digits. A
-     row that shrink-wraps looks identical on iOS and clips on web. */
+  const paisePart = String(Math.round(paise) % 100).padStart(2, "0");
+  const shown = groupIndian(Math.floor(paise / 100));
+  const commas = (shown.match(/,/g) ?? []).length;
+  const inputW = Math.ceil((shown.length - commas) * size * 0.64 + commas * size * 0.3 + 4);
+
+  if (hidden) {
+    return (
+      <Text style={{ fontFamily: font.displayBold, fontSize: size, color: C.text, letterSpacing: -1.5 }}>
+        ₹ ••••••
+      </Text>
+    );
+  }
+
   return (
-    <View style={{ alignSelf: "stretch", alignItems: "center" }}>
+    <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+      <Text style={{ fontFamily: font.display, fontSize: size * 0.52, color: C.textDim, marginTop: size * 0.12, marginRight: 4 }}>
+        ₹
+      </Text>
       <AnimatedInput
         editable={false}
-        /* Off the tab order and out of the accessibility tree — the real value
-           is announced by the label below, once, instead of being re-read on
-           every frame of the count. */
         focusable={false}
         accessibilityElementsHidden
         importantForAccessibility="no-hide-descendants"
         underlineColorAndroid="transparent"
-        animatedProps={animatedProps}
+        animatedProps={props}
         style={[
-          styles.counter,
-          tabular,
           {
+            fontFamily: font.displayBold,
             fontSize: size,
-            color: tone,
-            lineHeight: size * 1.12,
-            width: "100%",
-            textAlign: "center",
+            color: C.text,
+            letterSpacing: -size * 0.04,
+            padding: 0,
+            margin: 0,
+            includeFontPadding: false,
+            width: inputW,
           },
+          tabular,
         ]}
       />
+      <Text style={{ fontFamily: font.display, fontSize: size * 0.4, color: C.textFaint, marginTop: size * 0.14, marginLeft: 2 }}>
+        .{paisePart}
+      </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  counter: {
-    fontFamily: font.monoSemi,
-    letterSpacing: -1.4,
-    padding: 0,
-    margin: 0,
-    /* Without an explicit height the input reserves room for a caret and the
-       number sits a few pixels high inside its own box. */
-    includeFontPadding: false,
-    textAlignVertical: "center",
-  },
-});

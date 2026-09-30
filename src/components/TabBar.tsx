@@ -1,175 +1,172 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useRouter } from "expo-router";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
-import { color as C, font, motion, radius, space } from "@/theme";
-import { Touch } from "./primitives";
+import { color as C, elevation, gradient, motion, radius, space, text } from "@/theme";
 import { useAppWidth } from "./AppWidth";
+import { Sheet } from "./Sheet";
+import { IconTile, Touch } from "./ui";
 
 /**
- * The tab bar.
+ * The tab bar: four tabs and a raised centre button.
  *
- * WHY IT IS HAND-BUILT
+ * The centre button is the HDFC / Paytm idea — the thing you most often came
+ * to do, one thumb-reach away on every screen. Here it is not "Pay" (there is
+ * no paying other people from this wallet, deliberately) but "Do something":
+ * add money, start a filing, ask the Panda. It opens a sheet rather than
+ * navigating, so whatever you were looking at stays behind it.
  *
- * The stock bar is fine and looks like the stock bar. Three things here are
- * worth the file:
- *
- *   1. A LIT PILL that slides between tabs on a spring. It is the only thing
- *      that moves, so the eye tracks it and the icons stay still — swapping
- *      which icon is bright makes the bar flicker; sliding one highlight
- *      underneath does not.
- *   2. THE ICON DOES NOT CHANGE SHAPE when selected. It gains a soft fill in
- *      the same hue. Silhouette-swapping (outline to solid) is the most common
- *      tab-bar mistake: in peripheral vision the shape changing reads as the
- *      icon being replaced, and people lose their place.
- *   3. A SELECTION haptic, and only on a real change. Tapping the tab you are
- *      already on buzzes for nothing, which is how a phone teaches somebody to
- *      ignore its haptics.
- *
- * The bar floats over the content on blur rather than sitting on an opaque
- * strip, so a list scrolling under it stays visible. That is what makes a
- * screen feel taller than the phone.
+ * Profile is not a tab. It is your avatar, top-left on Home — the Revolut
+ * convention, and it gives the bar back a slot for something used daily.
  */
-/**
- * Route name to icon. Explicit rather than derived: the home route is called
- * "index" because that is what the router requires of a folder's default
- * screen, and deriving an icon from a filename convention would leave exactly
- * one tab silently blank.
- */
-const ROUTE_ICON: Record<string, IconName> = {
+
+const ICON: Record<string, IconName> = {
   index: "home",
   services: "services",
   orders: "orders",
   wallet: "wallet",
-  account: "account",
 };
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  /* The app's width, not the window's: inside the web preview's phone frame
-     they differ, and sizing five slots off the window leaves four of them off
-     the side of the phone. */
   const width = useAppWidth();
+  const router = useRouter();
+  const [actions, setActions] = useState(false);
 
   const SIDE = space.lg;
-  const barWidth = width - SIDE * 2;
-  const slot = barWidth / state.routes.length;
-  const PILL = slot - 10;
+  const barW = width - SIDE * 2;
+  /* Four tab slots plus a centre gap the width of one slot. */
+  const slot = barW / 5;
+  const slotX = (i: number) => (i < 2 ? i * slot : (i + 1) * slot);
 
-  const x = useSharedValue(state.index * slot + (slot - PILL) / 2);
-
+  const x = useSharedValue(slotX(state.index));
   useEffect(() => {
-    x.value = withSpring(state.index * slot + (slot - PILL) / 2, motion.arrive);
-  }, [state.index, slot, PILL, x]);
+    x.value = withSpring(slotX(state.index), motion.arrive);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.index, slot]);
 
-  const pill = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+  const dot = useAnimatedStyle(() => ({ transform: [{ translateX: x.value + slot / 2 - 3 }] }));
+
+  const go = (to: string) => {
+    setActions(false);
+    setTimeout(() => router.push(to as never), 220);
+  };
+
+  const tabs = state.routes.map((route, i) => {
+    const focused = state.index === i;
+    const label = (descriptors[route.key]?.options.title ?? route.name) as string;
+    return (
+      <Touch
+        key={route.key}
+        haptic="none"
+        accessibilityRole="tab"
+        accessibilityState={{ selected: focused }}
+        accessibilityLabel={label}
+        onPress={() => {
+          const e = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+          if (focused || e.defaultPrevented) return;
+          Haptics.selectionAsync().catch(() => {});
+          navigation.navigate(route.name);
+        }}
+        style={{ width: slot, alignItems: "center", paddingTop: 12, paddingBottom: 10 }}
+      >
+        <TabGlyph name={ICON[route.name] ?? "home"} focused={focused} />
+        <Text style={[text.tiny, { fontSize: 10, marginTop: 5, color: focused ? C.text : C.textFaint }]}>{label}</Text>
+      </Touch>
+    );
+  });
 
   return (
-    <View
-      style={{
-        position: "absolute",
-        left: SIDE,
-        right: SIDE,
-        bottom: Math.max(insets.bottom, space.md),
-      }}
-    >
-      <View style={styles.shell}>
-        <BlurView
-          intensity={Platform.OS === "ios" ? 42 : 24}
-          tint="dark"
-          style={StyleSheet.absoluteFill}
-        />
-        {/* Blur alone is too transparent over a bright photo, and the icons go
-            unreadable exactly when a flyer scrolls under the bar. */}
-        <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(12,14,20,0.72)" }]} />
-        <LinearGradient
-          colors={[C.litEdge, "transparent"]}
-          style={StyleSheet.absoluteFill}
-          pointerEvents="none"
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 0.5 }}
-        />
-
-        <Animated.View style={[styles.pill, { width: PILL }, pill]} pointerEvents="none">
+    <>
+      <View style={{ position: "absolute", left: SIDE, right: SIDE, bottom: Math.max(insets.bottom, space.md) }}>
+        <View style={[styles.shell, elevation.mid]}>
+          <BlurView intensity={Platform.OS === "ios" ? 50 : 30} tint="dark" style={StyleSheet.absoluteFill} />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(12,12,18,0.78)" }]} />
           <LinearGradient
-            colors={["rgba(230,195,107,0.16)", "rgba(230,195,107,0.04)"]}
-            style={[StyleSheet.absoluteFill, { borderRadius: radius.md }]}
+            colors={[C.litEdge, "rgba(255,255,255,0)"]}
+            style={{ position: "absolute", left: 0, right: 0, top: 0, height: 1.2 }}
           />
-        </Animated.View>
+          <Animated.View style={[styles.dot, dot]} />
+          <View style={{ flexDirection: "row" }}>
+            {tabs.slice(0, 2)}
+            <View style={{ width: slot }} />
+            {tabs.slice(2)}
+          </View>
+        </View>
 
-        <View style={{ flexDirection: "row" }}>
-          {state.routes.map((route, i) => {
-            const { options } = descriptors[route.key];
-            const focused = state.index === i;
-            const label = (options.title ?? route.name) as string;
-            const icon = ROUTE_ICON[route.name] ?? "home";
-
-            return (
-              <Touch
-                key={route.key}
-                haptic="none"
-                accessibilityRole="tab"
-                accessibilityState={{ selected: focused }}
-                accessibilityLabel={label}
-                onPress={() => {
-                  const event = navigation.emit({
-                    type: "tabPress",
-                    target: route.key,
-                    canPreventDefault: true,
-                  });
-                  if (focused || event.defaultPrevented) return;
-                  Haptics.selectionAsync().catch(() => {});
-                  navigation.navigate(route.name);
-                }}
-                style={{ width: slot, alignItems: "center", paddingVertical: 11 }}
-              >
-                <TabIcon name={icon} focused={focused} />
-                <Text
-                  style={{
-                    fontFamily: focused ? font.bodySemi : font.body,
-                    fontSize: 9.5,
-                    letterSpacing: 0.3,
-                    marginTop: 4,
-                    color: focused ? C.gold : C.textFaint,
-                  }}
-                >
-                  {label}
-                </Text>
-              </Touch>
-            );
-          })}
+        {/* The raised centre. It sits above the bar, not in it. */}
+        <View style={[styles.fabWrap, { left: slot * 2 + slot / 2 - 31 }]} pointerEvents="box-none">
+          <Touch
+            onPress={() => setActions(true)}
+            haptic="medium"
+            scaleTo={0.9}
+            accessibilityLabel="Quick actions"
+            style={[styles.fab, elevation.glowGold]}
+          >
+            <LinearGradient colors={gradient.gold} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+            <LinearGradient
+              colors={["rgba(255,255,255,0.45)", "rgba(255,255,255,0)"]}
+              style={{ position: "absolute", left: 0, right: 0, top: 0, height: 30 }}
+            />
+            <Icon name="plus" size={26} color={C.goldInk} />
+          </Touch>
         </View>
       </View>
-    </View>
+
+      <Sheet open={actions} onClose={() => setActions(false)} title="What would you like to do?">
+        <View style={{ gap: space.sm }}>
+          <Action icon="plus" tone="gold" title="Add money" sub="UPI, card or net banking" onPress={() => go("/pay")} />
+          <Action icon="legal" tone="violet" title="Start a filing" sub="39 services, from Udyam to trademarks" onPress={() => go("/services")} />
+          <Action icon="spark" tone="violet" title="Ask the Panda" sub="Which service do I need?" onPress={() => go("/panda")} />
+          <Action icon="statement" tone="blue" title="Download statement" sub="Every credit and debit" onPress={() => go("/wallet")} />
+          <Action icon="star" tone="amber" title="Reviews" sub="What customers said" onPress={() => go("/reviews")} />
+        </View>
+      </Sheet>
+    </>
   );
 }
 
-/** A small lift on selection. Enough to notice, not enough to bounce. */
-function TabIcon({ name, focused }: { name: IconName; focused: boolean }) {
-  const lift = useSharedValue(0);
-
+function TabGlyph({ name, focused }: { name: IconName; focused: boolean }) {
+  const s = useSharedValue(focused ? 1 : 0);
   useEffect(() => {
-    lift.value = withTiming(focused ? 1 : 0, motion.fade);
-  }, [focused, lift]);
-
-  const style = useAnimatedStyle(() => ({
-    transform: [{ translateY: -lift.value * 1.5 }, { scale: 1 + lift.value * 0.06 }],
-  }));
-
+    s.value = withTiming(focused ? 1 : 0, motion.fade);
+  }, [focused, s]);
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: 1 + s.value * 0.08 }, { translateY: -s.value * 1.5 }] }));
   return (
     <Animated.View style={style}>
       <Icon name={name} size={23} color={focused ? C.gold : C.textFaint} active={focused} />
     </Animated.View>
+  );
+}
+
+function Action({
+  icon,
+  tone,
+  title,
+  sub,
+  onPress,
+}: {
+  icon: IconName;
+  tone: "gold" | "violet" | "blue" | "amber";
+  title: string;
+  sub: string;
+  onPress: () => void;
+}) {
+  return (
+    <Touch onPress={onPress} accessibilityLabel={title} style={styles.action}>
+      <IconTile icon={icon} tone={tone} size={44} />
+      <View style={{ flex: 1 }}>
+        <Text style={[text.subhead, { color: C.text }]}>{title}</Text>
+        <Text style={[text.small, { color: C.textFaint, marginTop: 1 }]}>{sub}</Text>
+      </View>
+      <Icon name="chevron" size={16} color={C.textFaint} />
+    </Touch>
   );
 }
 
@@ -178,20 +175,36 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     overflow: "hidden",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: C.hairline,
-    shadowColor: "#000",
-    shadowOpacity: 0.55,
-    shadowRadius: 28,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 16,
+    borderColor: C.hairlineStrong,
   },
-  pill: {
+  dot: {
     position: "absolute",
-    top: 6,
-    bottom: 6,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(230,195,107,0.22)",
+    top: 5,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: C.gold,
+  },
+  fabWrap: { position: "absolute", top: -22 },
+  fab: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
     overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: C.void,
+  },
+  action: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+    padding: space.md,
+    borderRadius: radius.md,
+    backgroundColor: C.glass,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: C.hairline,
   },
 });
+

@@ -19,6 +19,7 @@ import {
 import { color as C } from "@/theme";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { AppWidthProvider } from "@/components/AppWidth";
+import { LockProvider } from "@/lib/lock";
 
 /* Hold the native splash until the fonts are in. Without this the whole app
    renders one frame in the system face and then reflows, which is the single
@@ -63,6 +64,7 @@ export default function RootLayout() {
               column of list rows reads as broken rather than as a decision. */}
           <PhoneFrame>
           <AppWidthProvider>
+          <LockProvider>
           <Stack
             screenOptions={{
               headerShown: false,
@@ -77,7 +79,9 @@ export default function RootLayout() {
             />
             <Stack.Screen name="panda" options={{ animation: "slide_from_bottom" }} />
             <Stack.Screen name="pay" options={{ animation: "slide_from_bottom" }} />
+            <Stack.Screen name="account" options={{ animation: "slide_from_left" }} />
           </Stack>
+          </LockProvider>
           </AppWidthProvider>
           </PhoneFrame>
         </View>

@@ -19,7 +19,7 @@ import Animated, {
 import { Icon } from "@/icons/Icon";
 import { color as C, elevation, font, radius, space, text } from "@/theme";
 import { flyers, type Flyer } from "@/data/flyers";
-import { Touch } from "./primitives";
+import { Touch } from "./ui";
 import { useAppWidth } from "./AppWidth";
 
 /**
@@ -124,7 +124,7 @@ function FlyerCard({
   scrollX: SharedValue<number>;
   onPress: () => void;
 }) {
-  const HEIGHT = Math.round(width * 0.62);
+  const HEIGHT = Math.round(width * 0.72);
   const [failed, setFailed] = useState(false);
 
   const range = [(index - 1) * stride, index * stride, (index + 1) * stride];
@@ -153,7 +153,7 @@ function FlyerCard({
   return (
     <Animated.View style={card}>
       <Touch onPress={onPress} accessibilityLabel={`${flyer.title}. ${flyer.cta}`}>
-        <View style={[{ width, height: HEIGHT, borderRadius: radius.xl, overflow: "hidden" }, elevation.floating]}>
+        <View style={[{ width, height: HEIGHT, borderRadius: 28, overflow: "hidden" }, elevation.card]}>
           {/* The tint sits underneath, so a photo that is slow or absent leaves
               a designed card rather than a grey hole. */}
           <LinearGradient colors={flyer.tint} style={StyleSheet.absoluteFill} />
@@ -191,11 +191,11 @@ function FlyerCard({
               {flyer.title}
             </Text>
 
+            {/* A glass pill, not a text link — it has to read as the thing to
+                press on a photograph that could be any brightness. */}
             <View style={styles.cta}>
-              <Text style={[text.small, { color: C.text, fontFamily: font.bodySemi }]}>
-                {flyer.cta}
-              </Text>
-              <Icon name="chevron" size={14} color={C.gold} />
+              <Text style={[text.smallSemi, { color: C.goldInk }]}>{flyer.cta}</Text>
+              <Icon name="arrowUp" size={14} color={C.goldInk} />
             </View>
           </View>
         </View>
@@ -214,12 +214,22 @@ const styles = StyleSheet.create({
   kicker: { flexDirection: "row", alignItems: "center", gap: 6 },
   title: {
     fontFamily: font.display,
-    fontSize: 21,
-    lineHeight: 26,
+    fontSize: 24,
+    lineHeight: 29,
     letterSpacing: -0.4,
     color: C.text,
   },
-  cta: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 },
+  cta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 8,
+    alignSelf: "flex-start",
+    backgroundColor: C.gold,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 999,
+  },
   dots: {
     flexDirection: "row",
     justifyContent: "center",

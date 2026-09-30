@@ -1,199 +1,200 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Switch, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
+import Animated, { FadeIn, FadeInDown, FadeInUp } from "react-native-reanimated";
 import { Icon } from "@/icons/Icon";
-import { Button, Label, Rule, Surface, Touch } from "@/components/primitives";
-import { CountingBalance, Money } from "@/components/Money";
-import { Wallet } from "@/wallet/Wallet";
-import { color as C, font, radius, space, text } from "@/theme";
-import { SAMPLE_BALANCE_PAISE, sampleEntries } from "@/data/sample";
+import { Button, Chip, CircleAction, Glass, IconButton, IconTile, SectionHeader, T } from "@/components/ui";
+import { Screen, TxnList } from "@/components/Screen";
+import { useAppWidth } from "@/components/AppWidth";
+import { CardStack } from "@/wallet/CardStack";
+import { passesFor } from "@/wallet/WalletCard";
+import { useLock } from "@/lib/lock";
+import { color as C, elevation, gradient, radius, space, text } from "@/theme";
+import { SAMPLE_BALANCE_PAISE, profile, transactions } from "@/data/sample";
 
 /**
  * The wallet.
  *
- * ONE LOUD THING, AND IT IS THE OBJECT
+ * Three passes in an Apple Wallet stack. Tap one to lift it out; what is under
+ * the stack changes to match — the ledger for the wallet, the benefits for the
+ * membership, the referral code for credits. Tap it again to put it back.
  *
- * The wallet sits alone, at full width, on a pool of light, with nothing beside
- * it. The balance below it is the only other thing allowed to be large. Every
- * label, date and caption on this screen is small, dim and letterspaced, and
- * that restraint is what makes the object look expensive — a screen where four
- * things compete has no hero, and a wallet app with no hero is a list.
- *
- * The stage is a radial pool rather than a flat panel. Real objects sit in
- * light that falls off; a card on an evenly-lit rectangle reads as a sticker.
+ * Face ID sits on top of all of it. When the lock is on and the wallet is
+ * locked, the passes still show — their colour tells you what is there — but
+ * every figure on them and below them is replaced with dots until you unlock.
  */
 export default function WalletScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const [open, setOpen] = useState(false);
+  const width = useAppWidth();
+  const lock = useLock();
+  const [selected, setSelected] = useState<string | null>("wallet");
+
+  const hidden = lock.enabled && !lock.unlocked;
+  const passes = passesFor({ balancePaise: SAMPLE_BALANCE_PAISE, holder: profile.name, member: profile.member });
+  const cardW = width - space.lg * 2;
 
   return (
-    <View style={{ flex: 1, backgroundColor: C.void }}>
-      <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + space.sm, paddingBottom: 140 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.head}>
-          <Label>Your money</Label>
-          <Text style={[text.title, { color: C.text, marginTop: 3 }]}>Wallet</Text>
+    <Screen aurora="wallet" auroraHeight={620}>
+      <View style={styles.head}>
+        <View style={{ flex: 1 }}>
+          <T.Label>Your passes</T.Label>
+          <T.Title style={{ marginTop: 2 }}>Wallet</T.Title>
         </View>
-
-        {/* ── THE STAGE ── */}
-        <Animated.View entering={FadeIn.duration(520)} style={styles.stage}>
-          <LinearGradient
-            colors={["rgba(230,195,107,0.10)", "rgba(230,195,107,0.02)", "transparent"]}
-            style={StyleSheet.absoluteFill}
-            start={{ x: 0.5, y: 0.1 }}
-            end={{ x: 0.5, y: 1 }}
+        {lock.enabled && (
+          <IconButton
+            icon={hidden ? "lock" : "faceid"}
+            label={hidden ? "Unlock" : "Lock now"}
+            onPress={() => (hidden ? lock.unlock() : lock.relock())}
           />
-          <Wallet
-            balancePaise={SAMPLE_BALANCE_PAISE}
-            open={open}
-            onToggle={setOpen}
-            engraving=""
-          />
-          <Text style={styles.hint}>
-            {open ? "Tap to close" : "Tap to open"} {"·"} drag to turn
-          </Text>
-        </Animated.View>
+        )}
+        <IconButton icon="plus" label="Add money" onPress={() => router.push("/pay")} />
+      </View>
 
-        {/* ── THE BALANCE ── */}
-        <Animated.View entering={FadeInDown.delay(140).duration(420)} style={styles.balance}>
-          <Label>Available balance</Label>
-          <View style={{ marginTop: space.sm }}>
-            <CountingBalance paise={SAMPLE_BALANCE_PAISE} size={50} />
-          </View>
-          <Text
-            style={[text.tiny, { color: C.textFaint, marginTop: 4 }]}
-            accessibilityLabel={`Sample balance, ${SAMPLE_BALANCE_PAISE / 100} rupees`}
-          >
-            Sample balance {"·"} not your account
-          </Text>
-        </Animated.View>
+      <View style={{ paddingHorizontal: space.lg, marginTop: space.xl }}>
+        <CardStack passes={passes} width={cardW} selected={selected} onSelect={setSelected} hideAmount={hidden} />
+        <T.Tiny style={{ textAlign: "center", marginTop: space.md }}>
+          {selected ? "Tap the pass to put it back · drag it to catch the light" : "Tap a pass to open it"}
+        </T.Tiny>
+      </View>
 
-        {/* ── ACTIONS ── */}
-        <Animated.View entering={FadeInDown.delay(220).duration(420)} style={styles.actions}>
-          <Button label="Add money" onPress={() => router.push("/pay")} style={{ flex: 1 }} />
-          <Button label="Statement" variant="ghost" onPress={() => {}} style={{ flex: 1 }} />
-        </Animated.View>
-
-        {/* ── THE CLOSED LOOP, SAID PLAINLY ── */}
-        <Animated.View entering={FadeInDown.delay(280).duration(420)} style={styles.note}>
-          <Icon name="shield" size={16} color={C.textFaint} />
-          <Text style={[text.tiny, { color: C.textFaint, flex: 1, lineHeight: 17 }]}>
-            A closed wallet. Money here pays for LAWFIC services. It cannot be
-            sent to another person or withdrawn as cash.
-          </Text>
-        </Animated.View>
-
-        {/* ── STATEMENT ── */}
-        <Animated.View entering={FadeInDown.delay(340).duration(420)} style={styles.section}>
-          <View style={styles.sectionHead}>
-            <Label>Recent</Label>
-            <Text style={[text.tiny, { color: C.textFaint }]}>Example statement</Text>
-          </View>
-
-          <Surface padded={false}>
-            {sampleEntries.map((e, i) => (
-              <View key={e.id}>
-                <View style={styles.row}>
-                  <View style={[styles.dot, { backgroundColor: e.paise >= 0 ? C.greenWash : C.surfaceHigh }]}>
-                    <Icon
-                      name={e.paise >= 0 ? "plus" : "chevron"}
-                      size={13}
-                      color={e.paise >= 0 ? C.green : C.textFaint}
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[text.small, { color: C.text, fontFamily: font.bodySemi }]} numberOfLines={1}>
-                      {e.reason}
-                    </Text>
-                    <Text style={[text.tiny, { color: C.textFaint, marginTop: 2 }]}>{e.date}</Text>
-                  </View>
-                  <Money paise={e.paise} size={14} signed />
-                </View>
-                {i < sampleEntries.length - 1 && <Rule style={{ marginLeft: 58 }} />}
+      {/* ── locked ── */}
+      {hidden && (
+        <Animated.View entering={FadeIn.duration(300)} style={styles.pad}>
+          <Glass strong style={{ borderRadius: radius.xl, marginTop: space.xl }}>
+            <View style={{ alignItems: "center", paddingVertical: space.lg }}>
+              <View style={[styles.lockOrb, elevation.glowViolet]}>
+                <LinearGradient colors={gradient.violet} style={StyleSheet.absoluteFill} />
+                <Icon name={lock.kind === "fingerprint" ? "fingerprint" : "faceid"} size={34} color="#fff" />
               </View>
-            ))}
-          </Surface>
+              <T.Heading style={{ marginTop: space.lg }}>Your wallet is locked</T.Heading>
+              <T.Small style={{ marginTop: 4, textAlign: "center" }}>
+                Unlock with {lock.label} to see your balance and what it paid for.
+              </T.Small>
+              <Button label={`Unlock with ${lock.label}`} icon="faceid" variant="violet" onPress={lock.unlock} style={{ marginTop: space.xl, alignSelf: "stretch" }} />
+            </View>
+          </Glass>
         </Animated.View>
+      )}
 
-        <Touch
-          onPress={() => {}}
-          accessibilityLabel="Customise your wallet"
-          style={styles.customise}
-        >
-          <Icon name="spark" size={15} color={C.gold} />
-          <Text style={[text.small, { color: C.gold, fontFamily: font.bodySemi }]}>
-            Customise the leather
-          </Text>
-        </Touch>
-      </ScrollView>
-    </View>
+      {/* ── what the selected pass opens into ── */}
+      {!hidden && selected === "wallet" && (
+        <Animated.View entering={FadeInUp.duration(360)} key="w">
+          <View style={styles.actions}>
+            <CircleAction icon="plus" label="Add money" tone="gold" onPress={() => router.push("/pay")} />
+            <CircleAction icon="legal" label="Pay a filing" onPress={() => router.push("/services")} />
+            <CircleAction icon="statement" label="Statement" />
+            <CircleAction icon="chart" label="Insights" onPress={() => router.push("/insights")} />
+          </View>
+
+          <View style={[styles.pad, { marginTop: space.xl }]}>
+            <Glass style={{ borderRadius: radius.lg }}>
+              <View style={{ flexDirection: "row", gap: space.md, alignItems: "flex-start" }}>
+                <Icon name="shield" size={18} color={C.gold} />
+                <T.Small style={{ flex: 1, lineHeight: 18 }}>
+                  A closed wallet. It pays for LAWFIC services and takes refunds back — it cannot send money to
+                  another person or be withdrawn as cash.
+                </T.Small>
+              </View>
+            </Glass>
+          </View>
+
+          <View style={[styles.pad, { marginTop: space.xxl }]}>
+            <SectionHeader title="Activity" action="Insights" onAction={() => router.push("/insights")} />
+            <TxnList items={transactions} />
+          </View>
+        </Animated.View>
+      )}
+
+      {!hidden && selected === "membership" && (
+        <Animated.View entering={FadeInUp.duration(360)} key="m" style={[styles.pad, { marginTop: space.xl, gap: space.md }]}>
+          <T.Heading>What membership covers</T.Heading>
+          {[
+            { icon: "bolt" as const, t: "10% off every filing", s: "One membership, every service on the site, all year." },
+            { icon: "clock" as const, t: "Priority in the queue", s: "Your filings are picked up first." },
+            { icon: "phone" as const, t: "A named person to call", s: "The same team member each time." },
+          ].map((b) => (
+            <Glass key={b.t} style={{ borderRadius: radius.lg }}>
+              <View style={{ flexDirection: "row", gap: space.md, alignItems: "center" }}>
+                <IconTile icon={b.icon} tone="violet" />
+                <View style={{ flex: 1 }}>
+                  <T.Sub>{b.t}</T.Sub>
+                  <T.Small style={{ marginTop: 2 }}>{b.s}</T.Small>
+                </View>
+              </View>
+            </Glass>
+          ))}
+          <Button label="Become a member" variant="violet" icon="crown" style={{ marginTop: space.sm }} />
+          <T.Tiny style={{ textAlign: "center" }}>Price and terms as published on lawfic.pro/pricing.</T.Tiny>
+        </Animated.View>
+      )}
+
+      {!hidden && selected === "credits" && (
+        <Animated.View entering={FadeInUp.duration(360)} key="c" style={[styles.pad, { marginTop: space.xl, gap: space.md }]}>
+          <T.Heading>Refer a friend</T.Heading>
+          <T.Body>
+            Share your code. When somebody you refer completes their first filing, credits land here — and they can
+            only be spent on LAWFIC services, like the rest of the wallet.
+          </T.Body>
+          <Glass strong style={{ borderRadius: radius.lg }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={{ flex: 1 }}>
+                <T.Label>Your code</T.Label>
+                <Text style={[text.title, { color: C.gold, letterSpacing: 3, marginTop: 4 }]}>[CODE]</Text>
+              </View>
+              <Button label="Share" size="md" variant="gold" style={{ paddingHorizontal: 4 }} />
+            </View>
+          </Glass>
+          <Chip tone="amber" icon="clock">Referral terms not yet published — sample only</Chip>
+        </Animated.View>
+      )}
+
+      {/* ── security ── */}
+      <Animated.View entering={FadeInDown.delay(120).duration(400)} style={[styles.pad, { marginTop: space.section }]}>
+        <T.Label style={{ marginBottom: space.md }}>Security</T.Label>
+        <Glass style={{ borderRadius: radius.lg }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: space.md }}>
+            <IconTile icon={lock.kind === "fingerprint" ? "fingerprint" : "faceid"} tone="violet" />
+            <View style={{ flex: 1 }}>
+              <T.Sub>Lock with {lock.available ? lock.label : "Face ID"}</T.Sub>
+              <T.Small style={{ marginTop: 2 }}>
+                {lock.available
+                  ? "Hide every figure until it is you. Relocks when you leave the app."
+                  : "Available in the installed app on a phone with Face ID or a fingerprint reader."}
+              </T.Small>
+            </View>
+            <Switch
+              value={lock.enabled}
+              disabled={!lock.available}
+              onValueChange={(on) => {
+                if (on) void lock.enable();
+                else lock.disable();
+              }}
+              trackColor={{ false: C.glassPress, true: C.violet }}
+              thumbColor="#fff"
+              accessibilityLabel={`Lock the wallet with ${lock.label}`}
+            />
+          </View>
+        </Glass>
+        <T.Tiny style={{ marginTop: space.sm, lineHeight: 15 }}>
+          Your face and fingerprint never leave your phone. The app gets a yes or a no from it, nothing else.
+        </T.Tiny>
+      </Animated.View>
+
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  head: { paddingHorizontal: space.lg, paddingBottom: space.lg },
-  stage: {
-    paddingVertical: space.xxl,
-    alignItems: "center",
+  pad: { paddingHorizontal: space.lg },
+  head: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg },
+  actions: { flexDirection: "row", paddingHorizontal: space.md, marginTop: space.xl },
+  lockOrb: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     overflow: "hidden",
-  },
-  hint: {
-    ...text.tiny,
-    color: C.textFaint,
-    marginTop: space.xl,
-    letterSpacing: 0.4,
-  },
-  balance: { alignItems: "center", marginTop: space.md },
-  actions: {
-    flexDirection: "row",
-    gap: space.md,
-    paddingHorizontal: space.lg,
-    marginTop: space.xxl,
-  },
-  note: {
-    flexDirection: "row",
-    gap: space.sm + 2,
-    alignItems: "flex-start",
-    paddingHorizontal: space.lg,
-    marginTop: space.xl,
-  },
-  section: { paddingHorizontal: space.lg, marginTop: space.xxl },
-  sectionHead: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: space.md,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.md + 2,
-  },
-  dot: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
-  },
-  customise: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7,
-    minHeight: 48,
-    marginTop: space.xl,
-    marginHorizontal: space.lg,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: C.hairline,
   },
 });
