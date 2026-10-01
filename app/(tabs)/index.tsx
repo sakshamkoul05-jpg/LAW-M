@@ -9,12 +9,13 @@ import { FlyerCarousel } from "@/components/FlyerCarousel";
 import { isActive, useStore } from "@/lib/store";
 import { ago, firstName, greeting, rupees } from "@/lib/format";
 import { STATUS_META, orderTotalPaise, timelineIndex, TIMELINE } from "@/lawfic/orders";
-import { feePaise, iconFor, liveServices, serviceName } from "@/data/catalogue";
+import { allServices, iconFor, serviceName } from "@/data/catalogue";
 import { nextStep } from "@/features/filings";
 import { TransactionItem, TransactionSheet } from "@/features/money";
 import { Pass } from "@/wallet/Pass";
 import { usePassData } from "@/wallet/usePassData";
-import { Avatar, Divider, IconButton, IconTile, Logo, Panda, Press, Reveal, Screen, Skeleton, SkeletonCard, StepBar, T } from "@/ui";
+import { Avatar, Divider, IconButton, IconTile, Logo, Panda, Press, Reveal, Screen, Sheet, Skeleton, SkeletonCard, StepBar, T } from "@/ui";
+import { ComingSoon, ExploreCategories, ForYou, LatestLaunch, OfferTickets, PromiseStrip, QuickBar, SearchBand, SectionHead, TopTrending, WhyLawfic, useGo } from "@/features/home";
 import { color as C, font, radius as R, space } from "@/theme";
 import type { WalletEntry } from "@/lawfic/wallet-entries";
 
@@ -23,10 +24,12 @@ const ASKS = ["Do I need GST to sell online?", "What does Udyam cost?", "My PAN 
 /**
  * Home.
  *
- * Classy is mostly restraint. One object leads — the wallet — and everything
- * under it is arranged by how likely it is to be why you opened the app:
- * money, then Panda, then the one thing waiting on you (only if there is one),
- * then what LAWFIC is doing for you, then what you might start next.
+ * Classy is mostly restraint. The top is lawfic.pro's own homepage, made for
+ * a phone — the running promises, the search, the quick actions — then the
+ * wallet leads, then Panda, the one thing waiting on you (only if there is
+ * one) and what LAWFIC is doing for you. Under that, the website's homepage in
+ * its order: flyers, offers, the welcome with its five tabs, why LAWFIC, the
+ * top 21, categories, latest launches and what is coming soon.
  *
  * Sections are titled in plain sentence case, not shouted in caps; there is
  * one gold action on the screen; and there is more space between sections than
@@ -64,6 +67,8 @@ export default function Home() {
   );
   const pass = usePassData();
   const [entry, setEntry] = useState<WalletEntry | null>(null);
+  const [offers, setOffers] = useState(false);
+  const go = useGo();
 
   const side = width < 360 ? space.lg : space.xl;
   const inner = Math.min(width, 560) - side * 2;
@@ -119,6 +124,17 @@ export default function Home() {
 
   return (
     <Screen tabbed header={header} scrollY={y} onRefresh={onRefresh} refreshing={refreshing} overlay={pandaPeek}>
+      {/* lawfic.pro's top of page: promises, search, quick actions */}
+      <Reveal fade>
+        <PromiseStrip />
+      </Reveal>
+      <Reveal fade style={{ marginTop: space.md }}>
+        <SearchBand />
+      </Reveal>
+      <Reveal fade style={{ marginTop: space.lg, marginBottom: gap }}>
+        <QuickBar side={side} onOffers={() => setOffers(true)} />
+      </Reveal>
+
       {/* The wallet */}
       <Reveal i={0} style={{ alignItems: "center" }}>
         <Pass kind="wallet" width={inner} data={pass} onPress={() => router.push("/wallet")} />
@@ -242,43 +258,69 @@ export default function Home() {
         <Reveal i={5} style={{ marginTop: gap }}>
           <Head title="From LAWFIC" />
           <View style={{ marginHorizontal: -side }}>
-            <FlyerCarousel width={Math.min(width, 560)} inset={side} onOpen={(f) => router.push(`/service/${f.slug}`)} />
+            <FlyerCarousel
+              width={Math.min(width, 560)}
+              inset={side}
+              onOpen={(f) => (f.href ? (f.href.startsWith("http") ? go({ web: f.href }) : go({ app: f.href })) : router.push(`/service/${f.slug}`))}
+            />
           </View>
         </Reveal>
       )}
 
-      {/* Start something */}
-      {sections.services && (
+      {/* Offers */}
+      {sections.promotions && (
         <Reveal i={6} style={{ marginTop: gap }}>
-          <Head title="Start today" action="All 39" onAction={() => router.push("/services")} />
-          <View style={styles.group}>
-            {liveServices.map((s, i) => (
-              <View key={s.slug}>
-                {i > 0 && <Divider inset={66} />}
-                <Press onPress={() => router.push(`/service/${s.slug}`)} radius={0} scaleTo={0.99} accessibilityLabel={s.name} style={styles.svc}>
-                  <IconTile icon={iconFor(s.slug)} size={38} />
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <T v="bodyMedium" numberOfLines={1}>
-                      {s.name}
-                    </T>
-                    <T v="caption" numberOfLines={1}>
-                      {s.turnaround}
-                    </T>
-                  </View>
-                  <T v="calloutMedium" num>
-                    {feePaise(s.slug) ? rupees(feePaise(s.slug)!) : "Quoted"}
-                  </T>
-                  <Icon name="chevron" size={15} color={C.textMuted} />
-                </Press>
-              </View>
-            ))}
-          </View>
+          <SectionHead title="Best offers" />
+          <OfferTickets side={side} width={inner} />
+        </Reveal>
+      )}
+
+      {/* The welcome, five tabs, and the wallet tiers */}
+      {sections.forYou && (
+        <Reveal i={7} style={{ marginTop: gap }}>
+          <ForYou side={side} width={inner} name={name} />
+        </Reveal>
+      )}
+
+      {/* Why LAWFIC */}
+      <Reveal i={8} style={{ marginTop: gap }}>
+        <SectionHead title="Why choose LAWFIC" />
+        <WhyLawfic side={side} width={inner} />
+      </Reveal>
+
+      {/* Top twenty-one */}
+      <Reveal i={9} style={{ marginTop: gap }}>
+        <SectionHead title="Top 21 trending" />
+        <TopTrending />
+      </Reveal>
+
+      {/* Explore by category */}
+      {sections.services && (
+        <Reveal i={10} style={{ marginTop: gap }}>
+          <SectionHead title="Explore by category" action={`All ${allServices.length}`} onAction={() => router.push("/services")} />
+          <ExploreCategories />
+        </Reveal>
+      )}
+
+      {/* Latest launch */}
+      {sections.services && (
+        <Reveal i={11} style={{ marginTop: gap }}>
+          <SectionHead title="Latest launch" action="Start today" onAction={() => router.push("/services")} />
+          <LatestLaunch side={side} width={inner} />
+        </Reveal>
+      )}
+
+      {/* Coming soon */}
+      {sections.services && (
+        <Reveal i={12} style={{ marginTop: gap }}>
+          <SectionHead title="Coming soon" />
+          <ComingSoon />
         </Reveal>
       )}
 
       {/* Recent activity */}
       {sections.activity && state.entries.length > 0 && (
-        <Reveal i={7} style={{ marginTop: gap }}>
+        <Reveal i={13} style={{ marginTop: gap }}>
           <Head title="Recent activity" action="Wallet" onAction={() => router.push("/wallet")} />
           <View style={styles.group}>
             {state.entries.slice(0, 3).map((e, i) => (
@@ -297,6 +339,9 @@ export default function Home() {
       </View>
 
       <TransactionSheet entry={entry} onClose={() => setEntry(null)} />
+      <Sheet open={offers} onClose={() => setOffers(false)} title="Best offers" subtitle="Current offers from LAWFIC.">
+        <OfferTickets side={0} width={inner} stack onPick={() => setOffers(false)} />
+      </Sheet>
     </Screen>
   );
 }

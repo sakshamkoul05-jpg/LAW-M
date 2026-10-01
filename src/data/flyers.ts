@@ -26,6 +26,8 @@ export type Flyer = {
   icon: IconName;
   /** Two colours pulled from the photograph, for the gradient scrim. */
   tint: [string, string];
+  /** A screen to open instead of the service page (membership, jobs). */
+  href?: string;
 };
 
 const CDN = "https://lawfic.pro";
@@ -107,5 +109,51 @@ export const flyers: Flyer[] = [
     alt: "Two founders at a table with incorporation paperwork",
     icon: "business",
     tint: ["#262B35", "#0B0D12"],
+  },
+  {
+    id: "membership",
+    kicker: "Membership",
+    title: "Ten percent off every filing",
+    cta: "See what it costs",
+    slug: null,
+    href: "/membership",
+    photo: `${CDN}/banners/membership.webp`,
+    alt: "A shopkeeper handing a wrapped package to a customer across a counter",
+    icon: "crown",
+    tint: ["#33281A", "#0B0D12"],
+  },
+  {
+    id: "jobs",
+    kicker: "Jobs",
+    title: "Openings matched to your city and trade",
+    cta: "Browse jobs",
+    slug: null,
+    href: "https://lawfic.pro/jobs",
+    photo: `${CDN}/banners/jobs.webp`,
+    alt: "A job candidate shaking hands with an interviewer across a desk",
+    icon: "briefcase",
+    tint: ["#1E2A33", "#0B0D12"],
+  },
+  {
+    id: "agreement",
+    kicker: "Agreements",
+    title: "A rent agreement that would hold up",
+    cta: "Draft an agreement",
+    slug: "rent-agreement",
+    photo: `${CDN}/banners/agreement.webp`,
+    alt: "A signed agreement beside a stamp",
+    icon: "agreement",
+    tint: ["#1E2D33", "#0B0D12"],
+  },
+  {
+    id: "passport",
+    kicker: "Travel",
+    title: "Passport, without the second appointment",
+    cta: "Start a passport application",
+    slug: "passport-application",
+    photo: `${CDN}/banners/passport.webp`,
+    alt: "A family walking through an airport departure hall with luggage",
+    icon: "globe",
+    tint: ["#331E1B", "#0B0D12"],
   },
 ];

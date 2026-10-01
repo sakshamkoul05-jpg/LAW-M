@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { Icon } from "@/icons/Icon";
@@ -22,9 +22,12 @@ import { color as C, elevation, font, radius as R, space, text } from "@/theme";
 export default function Services() {
   const router = useRouter();
   const layout = useLayout();
-  const [q, setQ] = useState("");
+  /* Home's search band and category tiles open this screen with a query or a
+     category already chosen. */
+  const params = useLocalSearchParams<{ q?: string; cat?: string }>();
+  const [q, setQ] = useState(typeof params.q === "string" ? params.q : "");
   const [focus, setFocus] = useState(false);
-  const [cat, setCat] = useState<string | null>(null);
+  const [cat, setCat] = useState<string | null>(typeof params.cat === "string" ? params.cat : null);
   const results = useMemo(() => searchServices(q), [q]);
   const wide = layout !== "compact";
   const active = cat ? categories.find((c) => c.id === cat) : null;
