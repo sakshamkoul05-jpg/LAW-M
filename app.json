@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "LAWFIC",
-    "slug": "lawfic",
+    "slug": "saksham",
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "lawfic",
@@ -34,7 +34,10 @@
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
       ],
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -49,7 +52,8 @@
         "expo-image-picker",
         {
           "photosPermission": "LAWFIC lets you choose documents and a profile photo from your photos.",
-          "cameraPermission": "LAWFIC uses the camera to photograph documents and your profile photo."
+          "cameraPermission": "LAWFIC uses the camera to photograph documents and your profile photo.",
+          "microphonePermission": false
         }
       ],
       "expo-web-browser"
@@ -66,6 +70,12 @@
       "themeColor": "#050505",
       "favicon": "./assets/brand/icon.png"
     },
-    "icon": "./assets/brand/icon.png"
+    "icon": "./assets/brand/icon.png",
+    "extra": {
+      "eas": {
+        "projectId": "08030744-22d5-4926-816f-e606d8f18fd2"
+      }
+    },
+    "owner": "koulsk16s-team"
   }
 }
