@@ -7,6 +7,7 @@ import Svg, { Circle, Defs, RadialGradient, Stop } from "react-native-svg";
 import { isValidPhone } from "@/lawfic/profile";
 import { useAppWidth, useDevice } from "@/components/AppWidth";
 import { useAuth } from "@/lib/auth";
+import { OTP_LENGTH } from "@/lib/supabase-config";
 import { useStore } from "@/lib/store";
 import { Icon } from "@/icons/Icon";
 import { Button, CodeInput, Field, Glow, IconButton, Logo, Press, T, useToast } from "@/ui";
@@ -20,7 +21,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
  * Welcome, and your LAWFIC account.
  *
  * The same account as lawfic.pro: email and password, and a new account
- * confirms its address with a six-digit code. Sign up here and you can sign in
+ * confirms its address with the code Supabase emails (OTP_LENGTH digits). Sign up here and you can sign in
  * on the website, and the other way round — both read the same filings,
  * wallet and messages.
  *
@@ -113,7 +114,7 @@ export default function Welcome() {
   };
 
   const verify = async () => {
-    if (code.length !== 6) {
+    if (code.length !== OTP_LENGTH) {
       shakeCode();
       return false;
     }
@@ -231,7 +232,7 @@ export default function Welcome() {
 
             {step === "signup" && (
               <>
-                <Heading title="Create your account" body="One account for the app and lawfic.pro. We will email a six-digit code to confirm it is you." />
+                <Heading title="Create your account" body="One account for the app and lawfic.pro. We will email you a code to confirm it is you." />
                 <Field label="Email" icon="mail" value={email} onChangeText={(t) => { setEmail(t); setErr({}); }} error={err.email} keyboardType="email-address" autoCapitalize="none" autoComplete="email" textContentType="username" />
                 <Field label="Choose a password" icon="key" value={password} onChangeText={(t) => { setPassword(t); setErr({}); }} error={err.password} hint="At least 8 characters." secureTextEntry autoComplete="new-password" textContentType="newPassword" />
                 <PasswordMeter value={password} />
@@ -247,11 +248,11 @@ export default function Welcome() {
 
             {step === "verify" && (
               <>
-                <Heading title="Check your email" body={`Enter the six-digit code we sent to ${email.trim()}.`} />
+                <Heading title="Check your email" body={`Enter the ${OTP_LENGTH}-digit code we sent to ${email.trim()}.`} />
                 {note && <Note text={note} />}
-                <CodeInput value={code} onChange={(v) => { setCode(v); setErr({}); }} error={codeBad} />
+                <CodeInput length={OTP_LENGTH} value={code} onChange={(v) => { setCode(v); setErr({}); }} error={codeBad} />
                 {err.code && <FormError text={err.code} />}
-                <Button label="Confirm" icon="check" onPress={verify} successLabel="Confirmed" disabled={code.length !== 6} />
+                <Button label="Confirm" icon="check" onPress={verify} successLabel="Confirmed" disabled={code.length !== OTP_LENGTH} />
                 <Press
                   onPress={async () => {
                     const r = await auth.resendCode(email);

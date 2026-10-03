@@ -9,5 +9,12 @@
 export const SUPABASE_URL = "https://rxonbipcrcuqwukinbne.supabase.co";
 export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4b25iaXBjcmN1cXd1a2luYm5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4OTQ5MzUsImV4cCI6MjEwMzQ3MDkzNX0.3wTHvwW3_z9IWGoKKntgbEgUtezG3L0ZQ-7-H0swGYQ";
 
+/**
+ * Digits in the sign-up code Supabase emails. It is a project setting
+ * (Authentication → Providers → Email → "Email OTP Length"), currently 8 —
+ * change it here if it is changed there, or the code box will not fit it.
+ */
+export const OTP_LENGTH = 8;
+
 /** The website, for the routes that must run server-side (payments, uploads). */
 export const SITE_URL = "https://lawfic.pro";

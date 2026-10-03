@@ -7,7 +7,7 @@ import { T } from "./Text";
 import { buzz } from "./Press";
 
 /**
- * The six-digit code, as six boxes.
+ * The emailed code, one box per digit (six to ten — Supabase's range).
  *
  * One real TextInput sits invisibly on top, so paste, the SMS/email one-time
  * code autofill on iOS and Android, and the system keyboard all work as they
@@ -36,7 +36,7 @@ export function CodeInput({ value, onChange, error, length = 6, autoFocus = true
 
   return (
     <Pressable onPress={() => ref.current?.focus()} accessibilityLabel="Verification code" accessibilityHint={`Enter the ${length}-digit code`}>
-      <Animated.View style={[styles.row, row]}>
+      <Animated.View style={[styles.row, length > 6 && { gap: 6 }, row]}>
         {Array.from({ length }, (_, i) => {
           const ch = value[i];
           const active = focused && i === Math.min(value.length, length - 1) && value.length < length;
@@ -44,7 +44,7 @@ export function CodeInput({ value, onChange, error, length = 6, autoFocus = true
             <View key={i} style={[styles.box, active && styles.active, !!ch && styles.filled, error && styles.bad]}>
               {ch ? (
                 <Animated.View key={ch + i} entering={pop()}>
-                  <T style={styles.digit} num>
+                  <T style={[styles.digit, length > 6 && { fontSize: 21 }]} num>
                     {ch}
                   </T>
                 </Animated.View>

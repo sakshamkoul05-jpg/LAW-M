@@ -9,7 +9,7 @@ import { isAlreadyConfirmed, signUpWasDeclinedAsDuplicate } from "@/lawfic/auth-
  * Accounts — the same LAWFIC accounts as the website.
  *
  * Sign-in is the website's: email and password, and a new account confirms its
- * address with the six-digit code Supabase emails. An account made in the app
+ * address with the code Supabase emails (see OTP_LENGTH). An account made in the app
  * signs in on lawfic.pro and the other way round, and both see the same
  * filings, wallet and messages, because both read the same rows.
  *
