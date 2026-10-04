@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
-import { color as C, font, radius as R, space, text } from "@/theme";
+import { color as C, font, radius as R, space, text, themed } from "@/theme";
 import { T } from "./Text";
 
 /**
@@ -54,8 +54,11 @@ export function Field({
     if (error) shake.value = withSequence(withTiming(-5, { duration: 50 }), withTiming(5, { duration: 70 }), withTiming(-3, { duration: 60 }), withTiming(0, { duration: 50 }));
   }, [!!error]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* Plain strings for the worklet: the palette itself is a live view and does
+     not cross to the UI thread. */
+  const red = C.red, rest = C.lineStrong, lit = C.gold;
   const box = useAnimatedStyle(() => ({
-    borderColor: error ? C.red : interpolateColor(glow.value, [0, 1], [C.lineStrong, C.gold]),
+    borderColor: error ? red : interpolateColor(glow.value, [0, 1], [rest, lit]),
     shadowOpacity: glow.value * 0.25,
     transform: [{ translateX: shake.value }],
   }));
@@ -132,7 +135,7 @@ export function Field({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   box: {
     flexDirection: "row",
     alignItems: "center",
@@ -148,4 +151,4 @@ const styles = StyleSheet.create({
   label: { position: "absolute", left: 0, right: 0 },
   input: { ...text.bodyMedium, color: C.text, fontFamily: font.medium, paddingTop: 20, paddingBottom: 6, padding: 0, margin: 0 },
   msg: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 7, marginLeft: 4 },
-});
+}));

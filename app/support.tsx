@@ -6,7 +6,7 @@ import { company } from "@/lawfic/company";
 import { liveServices } from "@/data/catalogue";
 import { Icon, type IconName } from "@/icons/Icon";
 import { Badge, Press, Reveal, Screen, SectionHeader, Surface, T, useToast } from "@/ui";
-import { color as C, motion, radius as R, space } from "@/theme";
+import { color as C, motion, radius as R, space, themed } from "@/theme";
 
 /**
  * Talk to the team.
@@ -132,7 +132,7 @@ function Faq({ q, a, service, first }: { q: string; a: string; service: string; 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   channels: { flexDirection: "row", flexWrap: "wrap", gap: space.md },
   channel: { padding: space.xl, borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   channelIcon: { width: 48, height: 48, borderRadius: 16, backgroundColor: C.goldWash, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine, alignItems: "center", justifyContent: "center" },
@@ -141,4 +141,4 @@ const styles = StyleSheet.create({
   ai: { padding: space.lg, borderRadius: R.xl, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   faq: { borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
   q: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 14 },
-});
+}));

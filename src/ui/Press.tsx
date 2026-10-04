@@ -90,7 +90,7 @@ export function Press({
     >
       {children}
       {lift && (
-        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: radius, backgroundColor: "rgba(255,255,255,0.035)" }, wash]} />
+        <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: radius, backgroundColor: C.press }, wash]} />
       )}
       {focused && Platform.OS === "web" && (
         <View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: radius, borderWidth: 2, borderColor: C.gold, margin: -3 }]} />

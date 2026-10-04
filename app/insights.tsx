@@ -8,9 +8,9 @@ import { useWalletHidden } from "@/lib/lock";
 import { rupees } from "@/lib/format";
 import { serviceName } from "@/data/catalogue";
 import { Bar, EmptyState, Reveal, Screen, Segmented, Surface, T } from "@/ui";
-import { color as C, space } from "@/theme";
+import { color as C, space, themed, perTheme } from "@/theme";
 
-const SHADES = [C.gold, C.goldLight, "#8F6E32", "#6F6D68", "#A8A6A0", "#4A4640"];
+const SHADES = perTheme(() => ([C.gold, C.goldLight, "#8F6E32", "#6F6D68", "#A8A6A0", "#4A4640"]));
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /**
@@ -135,8 +135,8 @@ export default function Insights() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   row: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 14 },
   rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
   swatch: { width: 10, height: 10, borderRadius: 3 },
-});
+}));

@@ -5,7 +5,7 @@ import { EXAM_OPTIONS, JOB_OPTIONS, isValidEmail, isValidPhone } from "@/lawfic/
 import { Icon } from "@/icons/Icon";
 import { useStore } from "@/lib/store";
 import { Button, Field, Press, Reveal, Screen, SectionHeader, T, useToast } from "@/ui";
-import { color as C, radius as R, space } from "@/theme";
+import { color as C, radius as R, space, themed } from "@/theme";
 
 /**
  * Personal information — the website's profile (lib/profile.ts), with its own
@@ -105,7 +105,7 @@ function Chips({ options, value, onChange }: { options: readonly string[]; value
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   chip: { flexDirection: "row", alignItems: "center", gap: 6, height: 36, paddingHorizontal: 14, borderRadius: 18, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
-  chipOn: { borderColor: C.gold, backgroundColor: "#15120C" },
-});
+  chipOn: { borderColor: C.gold, backgroundColor: C.goldSelect },
+}));

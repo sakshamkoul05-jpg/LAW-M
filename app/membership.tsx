@@ -10,7 +10,7 @@ import { useMembership, useStore } from "@/lib/store";
 import { useLock } from "@/lib/lock";
 import { dateLong, rupees } from "@/lib/format";
 import { Badge, Button, Reveal, Screen, Segmented, Sheet, Surface, T, useToast } from "@/ui";
-import { color as C, elevation, font, radius as R, space } from "@/theme";
+import { color as C, elevation, font, radius as R, space, themed } from "@/theme";
 
 /**
  * Membership — the website's plans (lib/pricing.ts) and rules
@@ -234,11 +234,11 @@ function Line({ k, v, strong }: { k: string; v: string; strong?: boolean }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   grid: { flexDirection: "row", flexWrap: "wrap", gap: space.md },
   card: { flex: 1, minHeight: 470, padding: space.xl, borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
   featured: { borderColor: C.gold, borderWidth: 1 },
   discount: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: space.md, paddingHorizontal: 12, height: 34, borderRadius: 10, backgroundColor: C.goldWash, alignSelf: "flex-start" },
   bullet: { width: 5, height: 5, borderRadius: 3, backgroundColor: C.gold, marginTop: 8 },
   line: { flexDirection: "row", alignItems: "center", paddingHorizontal: space.lg, paddingVertical: 13, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.line },
-});
+}));

@@ -11,7 +11,7 @@ import { askPanda } from "@/lib/panda";
 import { dateLong } from "@/lib/format";
 import { ReceiptPaper, receiptText, saveReceiptPdf } from "@/features/documents";
 import { Badge, Button, Dots, EmptyState, IconButton, Screen, Sheet, Surface, T, useToast } from "@/ui";
-import { color as C, motion, radius as R, space } from "@/theme";
+import { color as C, motion, radius as R, space, themed } from "@/theme";
 
 /**
  * The document viewer.
@@ -226,9 +226,9 @@ export default function DocumentViewer() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   stage: { borderRadius: R.xxl, backgroundColor: C.bgDeep, padding: space.lg, overflow: "hidden", borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   pageShadow: { shadowColor: "#000", shadowOpacity: 0.6, shadowRadius: 30, shadowOffset: { width: 0, height: 18 }, elevation: 12 },
   photoPage: { backgroundColor: "#111", borderRadius: 6, overflow: "hidden" },
   tools: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: space.md, paddingHorizontal: 4 },
-});
+}));

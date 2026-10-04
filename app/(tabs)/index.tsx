@@ -16,7 +16,7 @@ import { Pass } from "@/wallet/Pass";
 import { usePassData } from "@/wallet/usePassData";
 import { Avatar, Divider, IconButton, IconTile, Logo, Panda, Press, Reveal, Screen, Sheet, Skeleton, SkeletonCard, StepBar, T } from "@/ui";
 import { ComingSoon, ExploreCategories, ForYou, LatestLaunch, OfferTickets, PromiseStrip, QuickBar, SearchBand, SectionHead, TopTrending, WhyLawfic, useGo } from "@/features/home";
-import { color as C, font, radius as R, space } from "@/theme";
+import { color as C, font, radius as R, space, themed } from "@/theme";
 import type { WalletEntry } from "@/lawfic/wallet-entries";
 
 const ASKS = ["Do I need GST to sell online?", "What does Udyam cost?", "My PAN name is wrong"];
@@ -362,7 +362,7 @@ function Head({ title, action, onAction }: { title: string; action?: string; onA
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   header: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.xl },
   actions: { flexDirection: "row", justifyContent: "space-between", marginTop: space.xl, paddingHorizontal: space.xs },
   action: { alignItems: "center", gap: 8, width: 76 },
@@ -380,4 +380,4 @@ const styles = StyleSheet.create({
   group: { borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
   svc: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 13 },
   signoff: { alignItems: "center", marginTop: space.hero, marginBottom: space.lg, opacity: 0.8 },
-});
+}));

@@ -2,7 +2,7 @@ import React from "react";
 import { Platform, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import { color as C, elevation, radius as R, space } from "@/theme";
+import { color as C, elevation, radius as R, space, themed, themeMode } from "@/theme";
 
 /**
  * A raised surface.
@@ -82,10 +82,10 @@ export function Glass({
 }) {
   return (
     <View style={[{ borderRadius: radius, overflow: "hidden", borderWidth: StyleSheet.hairlineWidth, borderColor: C.lineStrong }, style]}>
-      <BlurView intensity={intensity} tint="dark" style={StyleSheet.absoluteFill} />
+      <BlurView intensity={intensity} tint={themeMode() === "light" ? "light" : "dark"} style={StyleSheet.absoluteFill} />
       <View
         pointerEvents="none"
-        style={[StyleSheet.absoluteFill, { backgroundColor: Platform.OS === "android" ? "rgba(16,16,16,0.94)" : "rgba(16,16,16,0.72)" }]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: Platform.OS === "android" ? C.glassSolid : C.glass }]}
       />
       <LinearGradient colors={[C.edge, "rgba(255,255,255,0)"]} start={{ x: 0, y: 0.5 }} end={{ x: 1, y: 0.5 }} style={styles.edge} pointerEvents="none" />
       {children}
@@ -97,6 +97,6 @@ export function Divider({ inset = 0, style }: { inset?: number; style?: StylePro
   return <View style={[{ height: StyleSheet.hairlineWidth, backgroundColor: C.line, marginLeft: inset }, style]} />;
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   edge: { position: "absolute", left: 0, right: 0, top: 0, height: 1 },
-});
+}));

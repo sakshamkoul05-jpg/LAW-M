@@ -6,7 +6,7 @@ import { useStore } from "@/lib/store";
 import { useLayout } from "@/components/AppWidth";
 import { serviceName } from "@/data/catalogue";
 import { Badge, Button, Chip, Reveal, Screen, Surface, T } from "@/ui";
-import { color as C, font, space } from "@/theme";
+import { color as C, font, space, themed } from "@/theme";
 
 /**
  * Reviews — the website's rules, the app's look.
@@ -94,7 +94,7 @@ export default function Reviews() {
   );
 }
 
-const styles = StyleSheet.create({
-  bar: { flex: 1, height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.07)" },
+const styles = themed(() => ({
+  bar: { flex: 1, height: 6, borderRadius: 3, backgroundColor: C.track },
   done: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.md, borderRadius: 14, backgroundColor: C.surfaceTop },
-});
+}));

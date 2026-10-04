@@ -45,7 +45,7 @@ export function ProgressRing({
             <Stop offset="1" stopColor={tone} />
           </LinearGradient>
         </Defs>
-        <Circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.07)" strokeWidth={stroke} fill="none" />
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={C.track} strokeWidth={stroke} fill="none" />
         <AnimatedCircle
           cx={size / 2}
           cy={size / 2}
@@ -89,7 +89,7 @@ function Segment({ fill, tone, delay }: { fill: number; tone: string; delay: num
   }, [fill, delay, v]);
   const s = useAnimatedStyle(() => ({ transform: [{ scaleX: v.value }] }));
   return (
-    <View style={{ flex: 1, height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
+    <View style={{ flex: 1, height: 3, borderRadius: 2, backgroundColor: C.track, overflow: "hidden" }}>
       <Animated.View style={[{ flex: 1, backgroundColor: tone, borderRadius: 2, transformOrigin: "left" }, s]} />
     </View>
   );
@@ -103,7 +103,7 @@ export function Bar({ value, tone = C.gold, height = 4, delay = 0 }: { value: nu
   }, [value, delay, v]);
   const s = useAnimatedStyle(() => ({ transform: [{ scaleX: v.value }] }));
   return (
-    <View style={{ height, borderRadius: height / 2, backgroundColor: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
+    <View style={{ height, borderRadius: height / 2, backgroundColor: C.track, overflow: "hidden" }}>
       <Animated.View style={[{ flex: 1, backgroundColor: tone, borderRadius: height / 2, transformOrigin: "left" }, s]} />
     </View>
   );

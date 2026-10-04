@@ -6,7 +6,7 @@ import { Screen, Surface, T } from "@/ui";
 import { useStore } from "@/lib/store";
 import { useToast } from "@/ui";
 import { Callout, Choices, Field, Sent, StepHead, StepNav, Stepper, digits, gstinError, mobileError, panError } from "@/components/apply";
-import { color as C, font, gradient, motion, radius, space } from "@/theme";
+import { color as C, font, gradient, motion, radius, space, themed } from "@/theme";
 import {
   ACTIVITIES,
   ORG_TYPES,
@@ -239,10 +239,10 @@ function Band({ label, value, max, keyName }: { label: string; value: number; ma
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   verdict: { borderRadius: radius.xl, padding: space.xl, overflow: "hidden" },
   row: { flexDirection: "row", alignItems: "center", paddingHorizontal: space.lg, paddingVertical: 13 },
   rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
-  bandTrack: { flexDirection: "row", height: 10, borderRadius: 5, overflow: "hidden", backgroundColor: "rgba(255,255,255,0.06)" },
+  bandTrack: { flexDirection: "row", height: 10, borderRadius: 5, overflow: "hidden", backgroundColor: C.track },
   marker: { position: "absolute", width: 4, height: 22, marginLeft: -2, borderRadius: 2, backgroundColor: C.text },
-});
+}));

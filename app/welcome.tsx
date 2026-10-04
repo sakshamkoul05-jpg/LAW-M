@@ -11,7 +11,7 @@ import { OTP_LENGTH } from "@/lib/supabase-config";
 import { useStore } from "@/lib/store";
 import { Icon } from "@/icons/Icon";
 import { Button, CodeInput, Field, Glow, IconButton, Logo, Press, T, useToast } from "@/ui";
-import { color as C, radius as R, space } from "@/theme";
+import { color as C, radius as R, space, themed } from "@/theme";
 
 type Step = "start" | "signin" | "signup" | "verify" | "setup" | "forgot";
 
@@ -363,10 +363,10 @@ function Safety() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   wrap: { flexGrow: 1, paddingHorizontal: space.xl, width: "100%", maxWidth: 480, alignSelf: "center" },
   top: { height: 40, justifyContent: "center" },
   logoWrap: { alignItems: "center", justifyContent: "center" },
   links: { flexDirection: "row", justifyContent: "space-between", flexWrap: "wrap", gap: space.md },
   note: { flexDirection: "row", gap: 10, padding: space.md, borderRadius: R.md, backgroundColor: C.goldWash, alignItems: "flex-start" },
-});
+}));

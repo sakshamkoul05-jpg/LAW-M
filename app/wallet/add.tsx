@@ -12,7 +12,7 @@ import { useLock } from "@/lib/lock";
 import { groupIndian, rupees } from "@/lib/format";
 import { useDevice, useLayout } from "@/components/AppWidth";
 import { AnimatedMoney, Button, Dots, Field, Glow, IconButton, Press, Sheet, T, buzz } from "@/ui";
-import { color as C, font, motion, radius as R, space } from "@/theme";
+import { color as C, font, motion, radius as R, space, themed } from "@/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -339,7 +339,7 @@ function Success({ paise, balance, onDone }: { paise: number; balance: number; o
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   bar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: space.lg, height: 56 },
   body: { flex: 1, width: "100%", alignSelf: "center", paddingHorizontal: space.xl },
   amount: { flexDirection: "row", alignItems: "flex-start", marginVertical: space.md, minHeight: 72 },
@@ -349,9 +349,9 @@ const styles = StyleSheet.create({
   presetOn: { borderColor: C.gold, backgroundColor: C.goldWash },
   methods: { flexDirection: "row", gap: space.sm, marginTop: space.xl },
   method: { flex: 1, alignItems: "center", gap: 4, paddingVertical: space.md, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
-  methodOn: { borderColor: C.gold, backgroundColor: "#15120C" },
+  methodOn: { borderColor: C.gold, backgroundColor: C.goldSelect },
   cashfree: { flexDirection: "row", alignItems: "center", gap: space.md, marginTop: space.xl, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   tick: { position: "absolute", top: 6, right: 6, width: 16, height: 16, borderRadius: 8, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
   pad: { flexDirection: "row", flexWrap: "wrap", marginBottom: space.md },
   key: { width: "33.33%", height: 58, alignItems: "center", justifyContent: "center" },
-});
+}));

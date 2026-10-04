@@ -8,7 +8,7 @@ import { DOC_GROUPS, documents } from "@/data/catalogue";
 import { DocumentCard } from "@/features/documents";
 import { pickDocument } from "@/features/upload";
 import { Badge, Button, EmptyState, IconButton, IconTile, Press, Reveal, Screen, SectionHeader, Segmented, Sheet, SkeletonCard, T, useToast } from "@/ui";
-import { color as C, radius as R, space } from "@/theme";
+import { color as C, radius as R, space, themed } from "@/theme";
 
 type Filter = "all" | "receipts" | "uploads";
 
@@ -119,10 +119,10 @@ export default function Documents() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   grid: { flexDirection: "row", flexWrap: "wrap", gap: space.md },
   groupHead: { flexDirection: "row", alignItems: "center", gap: space.md, marginBottom: space.md },
   list: { borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
   docRow: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 13 },
   rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
-});
+}));

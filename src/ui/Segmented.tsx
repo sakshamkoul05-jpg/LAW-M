@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View, type LayoutRectangle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { color as C, font, motion, radius as R } from "@/theme";
+import { color as C, font, motion, radius as R, themed } from "@/theme";
 import { Press } from "./Press";
 import { T } from "./Text";
 
@@ -95,7 +95,7 @@ export function Segmented<K extends string>({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   track: {
     flexDirection: "row",
     padding: 4,
@@ -116,4 +116,4 @@ const styles = StyleSheet.create({
   },
   opt: { height: 36, paddingHorizontal: 16, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: 6 },
   count: { minWidth: 18, height: 18, paddingHorizontal: 5, borderRadius: 9, backgroundColor: C.surfaceTop, alignItems: "center", justifyContent: "center" },
-});
+}));

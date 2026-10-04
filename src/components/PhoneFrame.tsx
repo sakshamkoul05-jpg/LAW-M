@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 import { T } from "@/ui/Text";
-import { color as C, font, space } from "@/theme";
+import { color as C, font, space, themed } from "@/theme";
 
 /**
  * The web preview's phone.
@@ -54,7 +54,7 @@ export function useViewMode() {
   return { mode: "phone" as const, setMode: (_m: "phone" | "desktop") => {}, canFrame: false };
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   stage: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 96, backgroundColor: "#030303", padding: space.xxl },
   aside: { width: 300 },
   phone: {
@@ -70,4 +70,4 @@ const styles = StyleSheet.create({
   },
   button: { position: "absolute", right: -3, top: 180, width: 3, height: 80, borderRadius: 2, backgroundColor: "#2B2B2B" },
   screen: { flex: 1, borderRadius: 48, overflow: "hidden", backgroundColor: C.bg },
-});
+}));

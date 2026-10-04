@@ -15,7 +15,7 @@ import { exportStatement } from "@/features/statement";
 import { Pass } from "@/wallet/Pass";
 import { usePassData } from "@/wallet/usePassData";
 import { Button, EmptyState, IconButton, Press, Reveal, Screen, SectionHeader, Segmented, Sheet, SkeletonList, Surface, T } from "@/ui";
-import { color as C, radius as R, space } from "@/theme";
+import { color as C, radius as R, space, themed } from "@/theme";
 import type { WalletEntry } from "@/lawfic/wallet-entries";
 
 type Filter = "all" | "in" | "out";
@@ -226,13 +226,13 @@ export default function Wallet() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   lock: { borderRadius: 24, overflow: "hidden", alignItems: "center", justifyContent: "center" },
   lockInner: { alignItems: "center", padding: space.xl, backgroundColor: "rgba(5,5,5,0.55)", ...StyleSheet.absoluteFillObject, justifyContent: "center" },
   actions: { flexDirection: "row", gap: space.sm },
   action: { flex: 1, alignItems: "center", gap: 8, paddingVertical: space.md, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   actionIcon: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: C.goldWash, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
-  quote: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.lg, backgroundColor: "#15120C", borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
+  quote: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.lg, backgroundColor: C.goldSelect, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   strip: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   note: { flexDirection: "row", gap: space.md, paddingHorizontal: 4 },
-});
+}));

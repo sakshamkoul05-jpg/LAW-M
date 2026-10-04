@@ -2,19 +2,19 @@ import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
-import { color as C, font } from "@/theme";
+import { color as C, font, themed, perTheme } from "@/theme";
 import { T } from "./Text";
 
 export type BadgeTone = "neutral" | "action" | "good" | "bad" | "gold" | "info";
 
-const TONE: Record<BadgeTone, { fg: string; bg: string; line: string }> = {
-  neutral: { fg: C.textDim, bg: "rgba(255,255,255,0.05)", line: C.line },
+const TONE: Record<BadgeTone, { fg: string; bg: string; line: string }> = perTheme(() => ({
+  neutral: { fg: C.textDim, bg: C.track, line: C.line },
   action: { fg: C.amber, bg: C.amberWash, line: "rgba(229,180,90,0.25)" },
   good: { fg: C.green, bg: C.greenWash, line: "rgba(111,207,151,0.22)" },
   bad: { fg: C.red, bg: C.redWash, line: "rgba(235,122,111,0.25)" },
   gold: { fg: C.gold, bg: C.goldWash, line: C.goldLine },
   info: { fg: C.blue, bg: C.blueWash, line: "rgba(138,180,248,0.22)" },
-};
+}));
 
 /**
  * A status badge: a dot and a word, small caps.
@@ -62,7 +62,7 @@ export function Chip({ label, tone = "neutral", icon }: { label: string; tone?: 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   badge: {
     flexDirection: "row",
     alignItems: "center",
@@ -83,4 +83,4 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
   },
-});
+}));

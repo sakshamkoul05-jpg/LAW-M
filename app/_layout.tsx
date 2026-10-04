@@ -8,6 +8,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from "@expo-google-fonts/inter";
 import { color as C } from "@/theme";
+import { ThemeProvider, useThemeBoot } from "@/theme/ThemeProvider";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { AppWidthProvider } from "@/components/AppWidth";
 import { LockProvider } from "@/lib/lock";
@@ -27,7 +28,8 @@ export default function RootLayout() {
     const t = setTimeout(() => setGaveUp(true), 4000);
     return () => clearTimeout(t);
   }, []);
-  const ready = loaded || !!error || gaveUp;
+  const theme = useThemeBoot();
+  const ready = (loaded || !!error || gaveUp) && theme.ready;
   const onLayout = useCallback(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});
   }, [ready]);
@@ -38,14 +40,18 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: C.bg }}>
       <SafeAreaProvider>
         <View style={{ flex: 1, backgroundColor: C.bg }} onLayout={onLayout}>
-          <StatusBar style="light" />
+          <StatusBar style={theme.value.mode === "light" ? "dark" : "light"} />
           <PhoneFrame>
             <AppWidthProvider>
               <AuthProvider>
                 <StoreProvider>
                   <LockProvider>
                     <ToastProvider>
-                      <Shell />
+                      <ThemeProvider value={theme.value}>
+                        {/* Remounted on a theme change, so every screen
+                            redraws in the new palette. */}
+                        <Shell key={theme.value.mode} />
+                      </ThemeProvider>
                     </ToastProvider>
                   </LockProvider>
                 </StoreProvider>

@@ -9,7 +9,7 @@ import { savingOn } from "@/lawfic/subscription";
 import { allServices, categories, categoryOf, documents, feePaise, getService, iconFor, requestHref, serviceName } from "@/data/catalogue";
 import { rupees } from "@/lib/format";
 import { Badge, Button, EmptyState, IconButton, IconTile, Press, Reveal, Screen, SectionHeader, Surface, T, buzz } from "@/ui";
-import { color as C, font, motion, radius as R, space } from "@/theme";
+import { color as C, font, motion, radius as R, space, themed } from "@/theme";
 
 /**
  * One service.
@@ -319,7 +319,7 @@ function Heart({ saved, onPress }: { saved: boolean; onPress: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   note: { flexDirection: "row", gap: space.md, marginTop: space.lg, padding: space.lg, borderRadius: R.lg, backgroundColor: C.goldWash, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   check: { flexDirection: "row", alignItems: "flex-start", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 13 },
   checkIcon: { width: 24, height: 24, borderRadius: 8, backgroundColor: C.goldWash, alignItems: "center", justifyContent: "center", marginTop: -1 },
@@ -332,4 +332,4 @@ const styles = StyleSheet.create({
   memberStrip: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   more: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 13 },
   heart: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
-});
+}));

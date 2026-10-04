@@ -2,10 +2,10 @@
   "expo": {
     "name": "LAWFIC",
     "slug": "saksham",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "orientation": "portrait",
     "scheme": "lawfic",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/brand/splash.png",

@@ -8,7 +8,7 @@ import { rupees } from "@/lib/format";
 import { orderTotalPaise } from "@/lawfic/orders";
 import { Button, EmptyState, IconButton, Reveal, Screen, Segmented, SkeletonCard, T, Surface } from "@/ui";
 import { Icon } from "@/icons/Icon";
-import { color as C, space } from "@/theme";
+import { color as C, space, themed } from "@/theme";
 
 type Tab = "active" | "done" | "all";
 
@@ -103,7 +103,7 @@ export default function Filings() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   owed: { flexDirection: "row", alignItems: "center", gap: space.md },
   grid: { flexDirection: "row", flexWrap: "wrap" },
-});
+}));

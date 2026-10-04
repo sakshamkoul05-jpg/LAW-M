@@ -49,7 +49,7 @@ export function Donut({
   return (
     <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
       <Svg width={size} height={size} style={{ position: "absolute", transform: [{ rotate: "-90deg" }] }}>
-        <Circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} fill="none" />
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={C.track} strokeWidth={stroke} fill="none" />
         {arcs.map((a, i) => (
           <Arc key={i} r={r} size={size} stroke={stroke} color={a.color} len={Math.max(0, a.len - 3)} offset={a.offset} circ={circ} delay={i * 120} />
         ))}
@@ -153,7 +153,7 @@ function Bar({
             {
               width: "100%",
               borderRadius: 8,
-              backgroundColor: current ? C.gold : "rgba(255,255,255,0.1)",
+              backgroundColor: current ? C.gold : C.track,
             },
             style,
           ]}

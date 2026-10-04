@@ -10,7 +10,7 @@ import type { VaultItem, State } from "@/lib/store";
 import { dateLong } from "@/lib/format";
 import { serviceName } from "@/data/catalogue";
 import { Badge, Press, T } from "@/ui";
-import { color as C, font, radius as R, space } from "@/theme";
+import { color as C, font, radius as R, space, themed } from "@/theme";
 
 /**
  * Documents as files, not rows.
@@ -217,15 +217,15 @@ const INK = "#17120A";
 const INK_DIM = "#6B645A";
 const RULE = "#E3DDD1";
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   card: { borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
-  sheet: { height: 92, margin: space.sm, marginBottom: 0, borderRadius: 12, backgroundColor: "#1E1D1A", overflow: "hidden", borderWidth: StyleSheet.hairlineWidth, borderColor: C.lineStrong },
+  sheet: { height: 92, margin: space.sm, marginBottom: 0, borderRadius: 12, backgroundColor: C.surfaceTop, overflow: "hidden", borderWidth: StyleSheet.hairlineWidth, borderColor: C.lineStrong },
   sheetLines: { flex: 1, padding: 12, gap: 6 },
-  l: { height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.14)" },
+  l: { height: 4, borderRadius: 2, backgroundColor: C.lineStrong },
   fold: { position: "absolute", right: 0, top: 0 },
-});
+}));
 
-const paper = StyleSheet.create({
+const paper = themed(() => ({
   page: { backgroundColor: "#F4F1EA", borderRadius: 6, padding: 28, minHeight: 460 },
   head: { flexDirection: "row", justifyContent: "space-between", gap: space.lg },
   rule: { height: 1, backgroundColor: RULE, marginVertical: space.xl },
@@ -233,4 +233,4 @@ const paper = StyleSheet.create({
   v: { fontFamily: font.regular, fontSize: 12, color: INK, marginTop: 3, lineHeight: 17 },
   table: { marginTop: space.xl },
   tr: { flexDirection: "row", paddingVertical: 10, gap: space.md },
-});
+}));

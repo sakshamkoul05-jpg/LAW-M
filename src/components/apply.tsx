@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import Animated, { FadeIn, FadeInDown, ZoomIn, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
 import { Button, Field as BaseField, Press, T, buzz } from "@/ui";
-import { color as C, font, motion, radius as R, space } from "@/theme";
+import { color as C, font, motion, radius as R, space, themed } from "@/theme";
 
 /**
  * The pieces the application flows are built from (Udyam, Aadhaar).
@@ -220,17 +220,17 @@ export const panError = (v: string) => (!v ? null : /^[A-Z]{5}[0-9]{4}[A-Z]$/.te
 export const mobileError = (v: string) => (!v ? null : /^[6-9][0-9]{9}$/.test(v) ? null : "Ten digits, starting 6, 7, 8 or 9.");
 export const gstinError = (v: string) => (!v ? null : /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/.test(v.toUpperCase()) ? null : "Not a valid GSTIN — 15 characters, and it contains your PAN.");
 
-const styles = StyleSheet.create({
-  track: { height: 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.08)", overflow: "hidden" },
+const styles = themed(() => ({
+  track: { height: 3, borderRadius: 2, backgroundColor: C.track, overflow: "hidden" },
   fill: { flex: 1, backgroundColor: C.gold, borderRadius: 2, transformOrigin: "left" },
   choice: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: 1, borderColor: C.line },
   choiceTile: { flexDirection: "column", alignItems: "stretch", gap: space.sm, minHeight: 120 },
   tileHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  choiceOn: { borderColor: C.gold, backgroundColor: "#15120C" },
+  choiceOn: { borderColor: C.gold, backgroundColor: C.goldSelect },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: C.lineStrong, alignItems: "center", justifyContent: "center" },
   radioOn: { backgroundColor: C.gold, borderColor: C.gold },
   miniChip: { paddingHorizontal: 7, height: 18, borderRadius: 9, backgroundColor: C.surfaceTop, justifyContent: "center" },
   callout: { flexDirection: "row", gap: space.md, padding: space.lg, borderRadius: R.lg },
   take: { padding: space.lg, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   done: { width: 84, height: 84, borderRadius: 42, backgroundColor: C.gold, alignItems: "center", justifyContent: "center", shadowColor: C.gold, shadowOpacity: 0.4, shadowRadius: 24, shadowOffset: { width: 0, height: 8 } },
-});
+}));

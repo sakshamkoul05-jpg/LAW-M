@@ -8,7 +8,7 @@ import { useLayout } from "@/components/AppWidth";
 import { allServices, categories, feePaise, iconFor, liveServices, searchServices } from "@/data/catalogue";
 import { rupees } from "@/lib/format";
 import { Badge, EmptyState, IconTile, Press, Reveal, Screen, SectionHeader, T } from "@/ui";
-import { color as C, elevation, font, radius as R, space, text } from "@/theme";
+import { color as C, elevation, font, radius as R, space, text, themed, gradient } from "@/theme";
 
 /**
  * The services marketplace — the website's catalogue, 7 categories and 39
@@ -82,7 +82,7 @@ export default function Services() {
               {liveServices.map((s, i) => (
                 <Reveal key={s.slug} i={i} style={{ flex: wide ? 1 : undefined }}>
                   <Press onPress={() => router.push(`/service/${s.slug}`)} radius={R.xl} accessibilityLabel={s.name} style={[styles.feature, elevation.low]}>
-                    <LinearGradient colors={["#1A1712", "#111110", "#0D0D0D"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+                    <LinearGradient colors={gradient.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
                     <View style={styles.featureTop}>
                       <IconTile icon={iconFor(s.slug)} gold />
                       <Badge label={s.turnaround} tone="gold" icon="clock" />
@@ -177,7 +177,7 @@ function ServiceRow({ slug, name, blurb, live, first, category, onPress }: { slu
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   search: { flexDirection: "row", alignItems: "center", gap: 10, height: 54, paddingHorizontal: space.lg, borderRadius: 27, backgroundColor: C.surfaceHigh, borderWidth: 1, borderColor: C.line },
   searchOn: { borderColor: C.goldLine, shadowColor: C.gold, shadowOpacity: 0.18, shadowRadius: 14, shadowOffset: { width: 0, height: 0 } },
   input: { flex: 1, ...text.bodyMedium, color: C.text, fontFamily: font.medium, height: 50 },
@@ -190,5 +190,5 @@ const styles = StyleSheet.create({
   featureFoot: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginTop: "auto", paddingTop: space.lg },
   go: { width: 36, height: 36, borderRadius: 18, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
   cat: { width: 150, height: 128, padding: space.lg, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: 1, borderColor: C.line },
-  catOn: { borderColor: C.gold, backgroundColor: "#15120C" },
-});
+  catOn: { borderColor: C.gold, backgroundColor: C.goldSelect },
+}));

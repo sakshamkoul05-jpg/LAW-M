@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, StyleSheet, TextInput, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
-import { color as C, font, radius as R } from "@/theme";
+import { color as C, font, radius as R, themed } from "@/theme";
 import { pop } from "./enter";
 import { T } from "./Text";
 import { buzz } from "./Press";
@@ -78,7 +78,7 @@ export function CodeInput({ value, onChange, error, length = 6, autoFocus = true
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   row: { flexDirection: "row", gap: 8, justifyContent: "center" },
   box: { flex: 1, maxWidth: 52, aspectRatio: 0.82, borderRadius: R.sm, backgroundColor: C.surface, borderWidth: 1, borderColor: C.lineStrong, alignItems: "center", justifyContent: "center" },
   active: { borderColor: C.gold, shadowColor: C.gold, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 0 } },
@@ -87,4 +87,4 @@ const styles = StyleSheet.create({
   digit: { fontFamily: font.semibold, fontSize: 24, color: C.text },
   caret: { width: 2, height: 24, borderRadius: 1, backgroundColor: C.gold },
   hidden: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0, opacity: 0.02, color: "transparent" },
-});
+}));

@@ -14,7 +14,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
-import { color as C, elevation, font, gradient, radius as R } from "@/theme";
+import { color as C, elevation, font, gradient, radius as R, themed } from "@/theme";
 import { Press, buzz } from "./Press";
 import { T } from "./Text";
 
@@ -226,7 +226,7 @@ export function Spinner() {
   return <ActivityIndicator color={C.gold} />;
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   base: { alignItems: "center", justifyContent: "center", overflow: "visible" },
   secondary: { backgroundColor: C.surfaceTop, borderWidth: StyleSheet.hairlineWidth, borderColor: C.lineStrong },
   ghost: { backgroundColor: "transparent" },
@@ -248,4 +248,4 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: C.bg,
   },
-});
+}));

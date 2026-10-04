@@ -7,7 +7,7 @@ import { Icon } from "@/icons/Icon";
 import { iconFor, serviceName } from "@/data/catalogue";
 import { ago, dateLong, rupees, time } from "@/lib/format";
 import { Badge, IconTile, Press, ProgressRing, StepBar, T, type BadgeTone } from "@/ui";
-import { color as C, elevation, font, motion, radius as R, space } from "@/theme";
+import { color as C, elevation, font, motion, radius as R, space, themed } from "@/theme";
 
 /**
  * Filings — what the spec calls "matters".
@@ -217,7 +217,7 @@ function Step({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   card: {
     padding: space.lg,
     borderRadius: R.xl,
@@ -237,11 +237,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     height: 38,
     borderRadius: R.sm,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: C.press,
   },
   nextYours: { backgroundColor: C.goldWash },
   dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
   dotCore: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.ink },
   track: { flex: 1, width: 2, backgroundColor: C.line, marginVertical: 4, borderRadius: 1, overflow: "hidden" },
   trackFill: { flex: 1, transformOrigin: "top" },
-});
+}));

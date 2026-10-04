@@ -9,8 +9,10 @@ export function Switch({ value, onChange, label, disabled }: { value: boolean; o
   useEffect(() => {
     v.value = withSpring(value ? 1 : 0, motion.slide);
   }, [value, v]);
-  const track = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(v.value, [0, 1], [C.surfaceTop, C.gold]) }));
-  const knob = useAnimatedStyle(() => ({ transform: [{ translateX: v.value * 20 }], backgroundColor: interpolateColor(v.value, [0, 1], [C.textDim, "#FFFFFF"]) }));
+  /* Plain strings for the worklets — the palette is a live view. */
+  const off = C.surfaceTop, on = C.gold, knobOff = C.textDim;
+  const track = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(v.value, [0, 1], [off, on]) }));
+  const knob = useAnimatedStyle(() => ({ transform: [{ translateX: v.value * 20 }], backgroundColor: interpolateColor(v.value, [0, 1], [knobOff, "#FFFFFF"]) }));
   return (
     <Press
       onPress={() => onChange(!value)}

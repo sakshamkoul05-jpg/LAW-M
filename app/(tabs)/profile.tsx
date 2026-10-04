@@ -11,7 +11,7 @@ import { useLock } from "@/lib/lock";
 import { useAuth } from "@/lib/auth";
 import { dateLong, rupees } from "@/lib/format";
 import { Avatar, Badge, Button, Chip, Group, Press, Reveal, Row, Screen, SectionHeader, Sheet, Surface, Switch, T, useToast } from "@/ui";
-import { color as C, radius as R, space } from "@/theme";
+import { color as C, radius as R, space, themed, gradient } from "@/theme";
 
 /** Website paths → app screens. A row with no mapping and no href is not built. */
 const ROUTE: Record<string, string> = {
@@ -86,7 +86,7 @@ export default function Profile() {
     <Screen tabbed title="Profile" glow={false}>
       <Reveal fade>
         <View style={styles.hero}>
-          <LinearGradient colors={["#1E1A13", "#0E0D0B", "#080808"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+          <LinearGradient colors={gradient.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
           <View style={styles.heroRule} />
           <Press onPress={() => setPhoto(true)} radius={48} accessibilityLabel="Change profile photo" style={{ alignSelf: "center" }}>
             <Avatar name={p.fullName} uri={p.photoUri} size={92} ring />
@@ -179,7 +179,7 @@ export default function Profile() {
         <Group>
           <Row icon="support" title="Talk to the team" subtitle={company.supportHours} onPress={() => router.push("/support")} />
           <Row icon="star" title="Reviews" onPress={() => router.push("/reviews")} />
-          <Row icon="settings" title="Home & privacy preferences" onPress={() => router.push("/preferences")} />
+          <Row icon="sunMoon" title="Appearance, Home & privacy" subtitle="Light or dark theme, Home sections, hidden balances" onPress={() => router.push("/preferences")} />
           <Row icon="scale" title="Terms of service" trailingNode={<Icon name="external" size={15} color={C.textMuted} />} onPress={() => Linking.openURL("https://lawfic.pro/legal/terms")} />
         </Group>
       </Reveal>
@@ -251,10 +251,10 @@ export default function Profile() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   hero: { borderRadius: R.xxl, overflow: "hidden", paddingVertical: space.xxl, paddingHorizontal: space.xl, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   heroRule: { position: "absolute", left: 24, right: 24, top: 0, height: 1, backgroundColor: "rgba(224,199,131,0.3)" },
   cam: { position: "absolute", right: 2, bottom: 2, width: 28, height: 28, borderRadius: 14, backgroundColor: C.gold, alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: C.bg },
   member: { flexDirection: "row", alignItems: "center", gap: space.md },
   groupHead: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: space.sm, marginLeft: 4 },
-});
+}));

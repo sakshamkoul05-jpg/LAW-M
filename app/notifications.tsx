@@ -6,12 +6,12 @@ import { Icon, type IconName } from "@/icons/Icon";
 import { useStore, type Notice } from "@/lib/store";
 import { ago, dayBucket } from "@/lib/format";
 import { EmptyState, Press, Reveal, Screen, Segmented, T, Button } from "@/ui";
-import { color as C, radius as R, space } from "@/theme";
+import { color as C, radius as R, space, themed, perTheme } from "@/theme";
 
 type Filter = "all" | "unread";
 
 const ICON: Record<Notice["kind"], IconName> = { order: "filings", message: "chat", wallet: "credit" };
-const TINT: Record<Notice["tone"], string> = { neutral: C.textDim, action: C.gold, good: C.green, bad: C.red };
+const TINT: Record<Notice["tone"], string> = perTheme(() => ({ neutral: C.textDim, action: C.gold, good: C.green, bad: C.red }));
 
 /**
  * Notifications, grouped the way you remember things: today, yesterday,
@@ -101,10 +101,10 @@ export default function Notifications() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   group: { borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
   row: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 14 },
   rule: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: C.line },
   icon: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: C.surfaceTop, borderWidth: StyleSheet.hairlineWidth },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.gold },
-});
+}));

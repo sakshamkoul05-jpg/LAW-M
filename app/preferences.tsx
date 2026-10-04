@@ -1,8 +1,16 @@
 import React from "react";
 import { View } from "react-native";
 import { useStore, type Prefs } from "@/lib/store";
+import { Icon, type IconName } from "@/icons/Icon";
 import { Group, Reveal, Row, Screen, SectionHeader, Switch, T } from "@/ui";
-import { space } from "@/theme";
+import { color as C, space } from "@/theme";
+import { useThemeChoice, type ThemeChoice } from "@/theme/ThemeProvider";
+
+const THEMES: { id: ThemeChoice; title: string; sub: string; icon: IconName }[] = [
+  { id: "dark", title: "Dark", sub: "Obsidian and champagne — LAWFIC's own look", icon: "moon" },
+  { id: "light", title: "Light", sub: "Ivory and gold, easier in bright daylight", icon: "sun" },
+  { id: "system", title: "Same as phone", sub: "Follows your phone's light or dark setting", icon: "sunMoon" },
+];
 
 /**
  * Dashboard preference — the website's "Set Dash Board Preference" row,
@@ -20,9 +28,25 @@ const SECTIONS: { key: keyof Prefs["homeSections"]; title: string; sub: string }
 export default function Preferences() {
   const { state, setPrefs } = useStore();
   const p = state.prefs;
+  const theme = useThemeChoice();
   return (
-    <Screen back title="Preferences" kicker="Home & privacy">
+    <Screen back title="Preferences" kicker="Appearance, Home & privacy">
       <Reveal>
+        <SectionHeader title="Appearance" />
+        <Group>
+          {THEMES.map((t) => (
+            <Row
+              key={t.id}
+              icon={t.icon}
+              title={t.title}
+              subtitle={t.sub}
+              onPress={() => theme.setChoice(t.id)}
+              trailingNode={theme.choice === t.id ? <Icon name="checkCircle" size={20} color={C.gold} /> : <View style={{ width: 20 }} />}
+            />
+          ))}
+        </Group>
+      </Reveal>
+      <Reveal i={1} style={{ marginTop: space.xxl }}>
         <SectionHeader title="On your Home screen" />
         <Group>
           {SECTIONS.map((s) => (

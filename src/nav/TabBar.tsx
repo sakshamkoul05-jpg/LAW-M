@@ -8,7 +8,7 @@ import { Icon, type IconName } from "@/icons/Icon";
 import { useAppWidth, useLayout } from "@/components/AppWidth";
 import { useStore } from "@/lib/store";
 import { Glass, Panda, Press, T } from "@/ui";
-import { color as C, elevation, font, gradient, motion } from "@/theme";
+import { color as C, elevation, font, gradient, motion, themed } from "@/theme";
 import { QuickActions } from "./QuickActions";
 
 /**
@@ -123,7 +123,7 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   wrap: { position: "absolute", left: 0, right: 0, bottom: 0, alignItems: "center" },
   row: { flex: 1, flexDirection: "row", alignItems: "center" },
   tab: { height: 66, alignItems: "center", justifyContent: "center" },
@@ -134,4 +134,4 @@ const styles = StyleSheet.create({
   fabSlot: { position: "absolute", top: -18, alignItems: "center" },
   fab: { width: 58, height: 58, borderRadius: 29, alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: C.bg },
   fabShine: { position: "absolute", top: 2, left: 6, right: 6, height: 20, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.18)" },
-});
+}));

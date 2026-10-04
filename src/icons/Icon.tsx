@@ -99,6 +99,9 @@ import {
   ZoomIn,
   ZoomOut,
   type LucideIcon,
+  Moon,
+  Sun,
+  SunMoon,
 } from "lucide-react-native";
 import { color as C } from "@/theme";
 
@@ -230,6 +233,9 @@ const MAP = {
   briefcase: Briefcase,
   book: BookOpen,
   heart: Heart,
+  sun: Sun,
+  moon: Moon,
+  sunMoon: SunMoon,
   star: Star,
   inbox: Inbox,
 } satisfies Record<string, LucideIcon>;

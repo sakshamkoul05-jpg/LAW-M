@@ -15,7 +15,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import { PHONE_COLUMN, useDevice, useLayout } from "@/components/AppWidth";
-import { color as C, gradient, MAX_CONTENT, space } from "@/theme";
+import { color as C, gradient, MAX_CONTENT, space, themed, themeMode } from "@/theme";
 import { IconButton } from "./Button";
 import { T } from "./Text";
 
@@ -153,9 +153,9 @@ export function Screen({
         <View style={[styles.bar, { height: barH, paddingTop: insets.top }]} pointerEvents="box-none">
           <Animated.View style={[StyleSheet.absoluteFill, barBg]} pointerEvents="none">
             {Platform.OS === "ios" || Platform.OS === "web" ? (
-              <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
+              <BlurView intensity={40} tint={themeMode() === "light" ? "light" : "dark"} style={StyleSheet.absoluteFill} />
             ) : null}
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: Platform.OS === "android" ? "rgba(5,5,5,0.97)" : "rgba(5,5,5,0.7)" }]} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: Platform.OS === "android" ? C.barSolid : C.bar }]} />
             <View style={styles.barRule} />
           </Animated.View>
           <View style={[styles.barRow, styles.column, { paddingHorizontal: side - 4 }]} pointerEvents="box-none">
@@ -202,7 +202,7 @@ export function Glow({ height = 460, strength = 1 }: { height?: number; strength
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   fill: { flex: 1, backgroundColor: C.bg },
   column: { width: "100%", maxWidth: PHONE_COLUMN, alignSelf: "center" },
   large: { marginBottom: space.xxl, marginTop: space.xs },
@@ -213,4 +213,4 @@ const styles = StyleSheet.create({
   barTitle: { flex: 1, alignItems: "center" },
   footer: { position: "absolute", left: 0, right: 0, bottom: 0, paddingTop: space.xxl, alignItems: "center" },
   glow: { position: "absolute", left: 0, right: 0, top: 0 },
-});
+}));

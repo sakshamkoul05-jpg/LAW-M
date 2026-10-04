@@ -8,7 +8,7 @@ import { Icon } from "@/icons/Icon";
 import { useStore } from "@/lib/store";
 import { getIntake, iconFor, serviceName } from "@/data/catalogue";
 import { Button, Field, IconTile, Press, Reveal, Screen, Surface, T, buzz } from "@/ui";
-import { color as C, radius as R, space } from "@/theme";
+import { color as C, radius as R, space, themed } from "@/theme";
 import type { ServiceOrder } from "@/lawfic/orders";
 
 /** When a document has no questions of its own, the website asks these. */
@@ -169,9 +169,9 @@ export default function RequestService() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   options: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
   opt: { flexDirection: "row", alignItems: "center", gap: 6, height: 38, paddingHorizontal: 14, borderRadius: 19, backgroundColor: C.surface, borderWidth: 1, borderColor: C.line },
-  optOn: { borderColor: C.gold, backgroundColor: "#15120C" },
+  optOn: { borderColor: C.gold, backgroundColor: C.goldSelect },
   done: { width: 84, height: 84, borderRadius: 42, backgroundColor: C.gold, alignItems: "center", justifyContent: "center", shadowColor: C.gold, shadowOpacity: 0.4, shadowRadius: 24, shadowOffset: { width: 0, height: 8 } },
-});
+}));

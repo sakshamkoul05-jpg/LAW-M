@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
-import { color as C, space } from "@/theme";
+import { color as C, space, themed } from "@/theme";
 import { Button } from "./Button";
 import { T } from "./Text";
 
@@ -69,8 +69,8 @@ export function ErrorState({ title = "Something went wrong", body, onRetry }: { 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   wrap: { alignItems: "center", paddingVertical: space.section, paddingHorizontal: space.xl },
   ring: { width: 72, height: 72, borderRadius: 36, borderWidth: 1, borderColor: C.goldLine, alignItems: "center", justifyContent: "center" },
   inner: { width: 56, height: 56, borderRadius: 28, backgroundColor: C.goldWash, alignItems: "center", justifyContent: "center" },
-});
+}));

@@ -24,7 +24,7 @@ import {
 } from "@/data/home";
 import { rupees } from "@/lib/format";
 import { Press, T } from "@/ui";
-import { color as C, font, radius as R, space } from "@/theme";
+import { color as C, font, radius as R, space, themed, perTheme } from "@/theme";
 
 /**
  * The home page's sections from lawfic.pro, made for a phone.
@@ -223,12 +223,12 @@ export function QuickBar({ side, onOffers }: { side: number; onOffers: () => voi
 
 /* ── 4 · coupon tickets ──────────────────────────────────────────────────── */
 
-const TICKET_TONE: Record<Ticket["tone"], { bg: readonly [string, string]; ink: string; sub: string; line: string }> = {
+const TICKET_TONE: Record<Ticket["tone"], { bg: readonly [string, string]; ink: string; sub: string; line: string }> = perTheme(() => ({
   gold: { bg: ["#E0C783", "#A9843F"], ink: C.ink, sub: "rgba(23,18,10,0.72)", line: "rgba(23,18,10,0.35)" },
-  night: { bg: ["#1F1D1A", "#0A0A0A"], ink: C.text, sub: C.textDim, line: C.goldLine },
+  night: { bg: ["#1F1D1A", "#0A0A0A"], ink: "#F5F3EE", sub: "#A8A6A0", line: "rgba(198,161,91,0.32)" },
   blue: { bg: ["#1D4F8F", "#0C2446"], ink: "#F5F3EE", sub: "rgba(245,243,238,0.75)", line: "rgba(245,243,238,0.3)" },
   plum: { bg: ["#3B2158", "#150A22"], ink: "#F5F3EE", sub: "rgba(245,243,238,0.75)", line: "rgba(224,199,131,0.45)" },
-};
+}));
 
 export function OfferTickets({ side, width, stack, onPick }: { side: number; width: number; stack?: boolean; onPick?: () => void }) {
   const router = useRouter();
@@ -574,16 +574,16 @@ export function ComingSoon() {
 
 /* ── styles ─────────────────────────────────────────────────────────────── */
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: space.md },
   headAction: { flexDirection: "row", alignItems: "center", gap: 2 },
   row: { flexDirection: "row", alignItems: "center" },
 
-  strip: { height: 34, justifyContent: "center", borderRadius: R.pill, backgroundColor: "#000", borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
+  strip: { height: 34, justifyContent: "center", borderRadius: R.pill, backgroundColor: C.bgDeep, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   promise: { flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 16 },
   promiseDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: C.textMuted, marginLeft: 8 },
 
-  searchBand: { paddingVertical: space.lg, paddingHorizontal: space.md, borderRadius: R.xl, backgroundColor: "#000", borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
+  searchBand: { paddingVertical: space.lg, paddingHorizontal: space.md, borderRadius: R.xl, backgroundColor: C.bgDeep, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   taglineBox: { minHeight: 46, justifyContent: "center" },
   tagline: { fontFamily: font.bold, fontSize: 16, lineHeight: 22 },
   searchPill: { flexDirection: "row", alignItems: "center", height: 48, marginTop: space.md, paddingLeft: 4, paddingRight: 4, borderRadius: R.pill, backgroundColor: C.surfaceHigh, borderWidth: 1, borderColor: C.lineStrong },
@@ -632,4 +632,4 @@ const s = StyleSheet.create({
 
   soonWrap: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
   soon: { height: 34, justifyContent: "center", paddingHorizontal: 14, borderRadius: R.pill, backgroundColor: C.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: C.lineStrong, maxWidth: "100%" },
-});
+}));

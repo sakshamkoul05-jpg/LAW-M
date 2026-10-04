@@ -15,7 +15,7 @@ import { TransactionItem, TransactionSheet } from "@/features/money";
 import { pickDocument } from "@/features/upload";
 import { dateLong, rupees, time } from "@/lib/format";
 import { Button, Divider, EmptyState, IconTile, Logo, Press, ProgressRing, Reveal, Screen, Segmented, Sheet, Surface, T, useToast } from "@/ui";
-import { color as C, font, radius as R, space, text } from "@/theme";
+import { color as C, font, radius as R, space, text, themed } from "@/theme";
 import type { WalletEntry } from "@/lawfic/wallet-entries";
 
 type Tab = "overview" | "timeline" | "documents" | "messages" | "payments";
@@ -349,7 +349,7 @@ function Thread({ orderId }: { orderId: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   link: { flexDirection: "row", alignItems: "center", gap: space.md, padding: space.lg, borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
   fee: { flexDirection: "row", alignItems: "center", gap: space.lg, paddingHorizontal: space.lg, paddingVertical: 12 },
   docGrid: { flexDirection: "row", flexWrap: "wrap", gap: space.md },
@@ -358,9 +358,9 @@ const styles = StyleSheet.create({
   staff: { width: 30, height: 30, borderRadius: 15, backgroundColor: C.surfaceTop, alignItems: "center", justifyContent: "center", borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   bubble: { maxWidth: "82%", paddingHorizontal: 14, paddingVertical: 11, borderRadius: 18 },
   bubbleStaff: { backgroundColor: C.surfaceHigh, borderBottomLeftRadius: 6, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
-  bubbleMe: { backgroundColor: "#1C1811", borderBottomRightRadius: 6, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
+  bubbleMe: { backgroundColor: C.goldSelect, borderBottomRightRadius: 6, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   composer: { flexDirection: "row", alignItems: "flex-end", gap: 8, padding: 6, paddingLeft: space.lg, borderRadius: 26, backgroundColor: C.surface, borderWidth: 1, borderColor: C.lineStrong, marginTop: space.sm },
   composerInput: { flex: 1, ...text.callout, color: C.text, maxHeight: 120, paddingVertical: 10 },
   send: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
-});
+}));
 

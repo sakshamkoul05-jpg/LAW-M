@@ -10,7 +10,7 @@ import { rupees } from "@/lib/format";
 import { orderTotalPaise } from "@/lawfic/orders";
 import { serviceName } from "@/data/catalogue";
 import { Press, Sheet, T, useToast } from "@/ui";
-import { color as C, radius as R, space } from "@/theme";
+import { color as C, radius as R, space, themed } from "@/theme";
 
 /**
  * The "+" — everything you might have opened the app to do, one tap away.
@@ -91,7 +91,7 @@ function Tile({ icon, title, sub, onPress, gold, i, square }: { icon: IconName; 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   grid: { flexDirection: "row", flexWrap: "wrap", marginHorizontal: -space.xs },
   cell: { width: "50%", padding: space.xs },
   tile: {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     borderColor: C.line,
   },
   square: { flexDirection: "column", alignItems: "flex-start", height: 132 },
-  gold: { borderColor: C.goldLine, backgroundColor: "#16130D" },
+  gold: { borderColor: C.goldLine, backgroundColor: C.goldSelect },
   icon: {
     width: 40,
     height: 40,
@@ -116,4 +116,4 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: C.goldLine,
   },
-});
+}));

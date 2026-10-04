@@ -22,7 +22,7 @@ export function Skeleton({ w, h = 14, r = 7, style }: { w?: number | `${number}%
     <View style={[{ width: w ?? "100%", height: h, borderRadius: r, backgroundColor: C.surfaceTop, overflow: "hidden" }, style]}>
       <Animated.View style={[StyleSheet.absoluteFill, band]}>
         <LinearGradient
-          colors={["rgba(255,255,255,0)", "rgba(255,255,255,0.045)", "rgba(255,255,255,0)"]}
+          colors={["rgba(255,255,255,0)", C.shimmer, "rgba(255,255,255,0)"]}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={StyleSheet.absoluteFill}

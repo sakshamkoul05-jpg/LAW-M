@@ -5,7 +5,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { FadeOutUp, SlideInUp, runOnJS } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconName } from "@/icons/Icon";
-import { color as C, elevation, space } from "@/theme";
+import { color as C, elevation, space, themed, perTheme } from "@/theme";
 import { Glass } from "./Surface";
 import { T } from "./Text";
 import { buzz } from "./Press";
@@ -16,7 +16,7 @@ type Toast = { id: number; title: string; body?: string; tone: Tone; icon?: Icon
 const Ctx = createContext<(t: Omit<Toast, "id" | "tone"> & { tone?: Tone }) => void>(() => {});
 
 const ICON: Record<Tone, IconName> = { good: "checkCircle", bad: "alert", info: "info", gold: "verified" };
-const TINT: Record<Tone, string> = { good: C.green, bad: C.red, info: C.textDim, gold: C.gold };
+const TINT: Record<Tone, string> = perTheme(() => ({ good: C.green, bad: C.red, info: C.textDim, gold: C.gold }));
 
 /**
  * Toasts: one at a time, from the top, on a spring; gone after 2.8 s or
@@ -73,7 +73,7 @@ export function useToast() {
   return useContext(Ctx);
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   wrap: { width: "92%", maxWidth: 420 },
   inner: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 14 },
-});
+}));

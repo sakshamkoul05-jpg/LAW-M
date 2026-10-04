@@ -5,7 +5,7 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-g
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { layoutFor } from "@/components/AppWidth";
-import { color as C, elevation, motion, radius as R, space } from "@/theme";
+import { color as C, elevation, motion, radius as R, space, themed } from "@/theme";
 import { IconButton } from "./Button";
 import { T } from "./Text";
 
@@ -133,7 +133,7 @@ export function Sheet({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   bottom: { justifyContent: "flex-end" },
   centre: { justifyContent: "center", alignItems: "center" },
   sheet: {
@@ -144,6 +144,6 @@ const styles = StyleSheet.create({
     borderColor: C.lineStrong,
     overflow: "hidden",
   },
-  handle: { alignSelf: "center", width: 38, height: 4, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.18)", marginTop: 8 },
+  handle: { alignSelf: "center", width: 38, height: 4, borderRadius: 2, backgroundColor: C.handle, marginTop: 8 },
   head: { flexDirection: "row", alignItems: "flex-start", gap: space.md, paddingHorizontal: space.xl, paddingTop: space.lg, paddingBottom: space.lg },
-});
+}));

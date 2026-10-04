@@ -5,7 +5,7 @@ import Animated, { Extrapolation, interpolate, useAnimatedScrollHandler, useAnim
 import { Icon } from "@/icons/Icon";
 import { flyers, type Flyer } from "@/data/flyers";
 import { Press, T } from "@/ui";
-import { color as C, elevation, font, space } from "@/theme";
+import { color as C, elevation, font, space, themed } from "@/theme";
 
 /**
  * The website's promotional banners (lib/promotional.ts), with the website's
@@ -80,7 +80,7 @@ function FlyerCard({ flyer, i, width, stride, x, onPress }: { flyer: Flyer; i: n
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   body: { flex: 1, padding: space.xl },
   kicker: { flexDirection: "row", alignItems: "center", gap: 6 },
   cta: {
@@ -95,4 +95,4 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(255,255,255,0.18)",
   },
-});
+}));

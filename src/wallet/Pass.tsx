@@ -19,7 +19,7 @@ import Animated, {
 import { Icon, type IconName } from "@/icons/Icon";
 import { AnimatedMoney, T, buzz } from "@/ui";
 import { pad2 } from "@/lib/format";
-import { color as C, elevation, font, motion } from "@/theme";
+import { color as C, elevation, font, motion, themed, darkColor as D } from "@/theme";
 
 /**
  * The LAWFIC pass.
@@ -49,9 +49,9 @@ export const PASS_RATIO = 1.586;
 type Material = { bg: readonly [string, string, string]; ink: string; dim: string; accent: string; line: string };
 
 const MATERIAL: Record<PassKind, Material> = {
-  wallet: { bg: ["#23201B", "#0F0E0D", "#060606"], ink: C.text, dim: "rgba(245,243,238,0.5)", accent: C.gold, line: "rgba(198,161,91,0.16)" },
-  filings: { bg: ["#1D1D1F", "#111112", "#08080A"], ink: C.text, dim: "rgba(245,243,238,0.5)", accent: C.goldLight, line: "rgba(255,255,255,0.07)" },
-  vault: { bg: ["#2A2118", "#15110D", "#0A0806"], ink: "#F3E7D3", dim: "rgba(243,231,211,0.52)", accent: C.goldLight, line: "rgba(224,199,131,0.12)" },
+  wallet: { bg: ["#23201B", "#0F0E0D", "#060606"], ink: D.text, dim: "rgba(245,243,238,0.5)", accent: D.gold, line: "rgba(198,161,91,0.16)" },
+  filings: { bg: ["#1D1D1F", "#111112", "#08080A"], ink: D.text, dim: "rgba(245,243,238,0.5)", accent: D.goldLight, line: "rgba(255,255,255,0.07)" },
+  vault: { bg: ["#2A2118", "#15110D", "#0A0806"], ink: "#F3E7D3", dim: "rgba(243,231,211,0.52)", accent: D.goldLight, line: "rgba(224,199,131,0.12)" },
   membership: { bg: ["#EAD7A6", "#CBAA67", "#9C7A3C"], ink: "#1C150A", dim: "rgba(28,21,10,0.58)", accent: "#1C150A", line: "rgba(28,21,10,0.12)" },
 };
 
@@ -156,7 +156,9 @@ export function TiltCard({
       <Animated.View
         accessibilityRole={onPress ? "button" : "image"}
         accessibilityLabel={label}
-        style={[{ width, height }, elevation.card, style]}
+        /* Rounded like the card, so its shadow is too — on ivory a square
+           shadow shows at the corners. */
+        style={[{ width, height, borderRadius: 24 }, elevation.card, style]}
       >
         {children({ px, py, on })}
       </Animated.View>
@@ -330,7 +332,7 @@ function Top({ m, title }: { m: Material; title: string }) {
  * gold would vanish into the card's gold.
  */
 function MarkOn({ m }: { m: Material }) {
-  const onGold = m.accent !== C.gold && m.accent !== C.goldLight;
+  const onGold = m.accent !== D.gold && m.accent !== D.goldLight;
   return (
     <View style={onGold ? { width: 30, height: 30, borderRadius: 15, backgroundColor: "#0E0C08", alignItems: "center", justifyContent: "center" } : undefined}>
       <Image source={require("../../assets/brand/lawfic-logo.png")} style={{ width: onGold ? 26 : 30, height: onGold ? 24 : 27 }} resizeMode="contain" />
@@ -375,15 +377,15 @@ export function Pass({
                 <Top m={m} title="LEGAL WALLET" />
                 <View>
                   <T style={{ fontFamily: font.semibold, fontSize: 9, letterSpacing: 1.4, color: m.dim, marginBottom: 2 }}>AVAILABLE BALANCE</T>
-                  <AnimatedMoney paise={data.balancePaise} size={Math.min(38, width * 0.105)} hidden={data.hidden} dimColor={m.dim} />
+                  <AnimatedMoney paise={data.balancePaise} size={Math.min(38, width * 0.105)} hidden={data.hidden} color={m.ink} dimColor={m.dim} />
                 </View>
                 <View style={[styles.bottom, { gap: Math.min(22, width * 0.05) }]}>
                   <Stat value={pad2(data.active)} label="Active filings" m={m} />
                   <Stat value={pad2(data.documents)} label="Documents" m={m} />
                   <View style={{ flex: 1 }} />
                   <View style={[styles.secured, { borderColor: data.secured ? "rgba(198,161,91,0.45)" : "rgba(255,255,255,0.12)" }]}>
-                    <Icon name={data.secured ? "shield" : "lock"} size={11} color={data.secured ? C.gold : m.dim} strokeWidth={2} />
-                    <T numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 8.5, letterSpacing: 1.2, color: data.secured ? C.gold : m.dim }}>
+                    <Icon name={data.secured ? "shield" : "lock"} size={11} color={data.secured ? D.gold : m.dim} strokeWidth={2} />
+                    <T numberOfLines={1} style={{ fontFamily: font.semibold, fontSize: 8.5, letterSpacing: 1.2, color: data.secured ? D.gold : m.dim }}>
                       {data.secured ? "SECURED" : width < 360 ? "CLOSED" : "CLOSED-LOOP"}
                     </T>
                   </View>
@@ -448,7 +450,7 @@ export function Pass({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   card: { borderRadius: 24, overflow: "hidden", backgroundColor: "#0B0B0B" },
   face: { flex: 1, justifyContent: "space-between" },
   top: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
@@ -457,4 +459,4 @@ const styles = StyleSheet.create({
   sheen: { position: "absolute", width: 90 },
   rim: { borderRadius: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.09)" },
   topEdge: { position: "absolute", left: 18, right: 18, top: 0, height: 1 },
-});
+}));

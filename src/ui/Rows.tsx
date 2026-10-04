@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Icon, type IconName } from "@/icons/Icon";
 import { initial } from "@/lib/format";
-import { color as C, font, motion, radius as R, space } from "@/theme";
+import { color as C, font, motion, radius as R, space, themed, gradient } from "@/theme";
 import { Press } from "./Press";
 import { T } from "./Text";
 
@@ -149,7 +149,7 @@ export function Avatar({ name, uri, size = 40, ring }: { name?: string | null; u
         <Image source={{ uri }} style={{ width: "100%", height: "100%" }} />
       ) : (
         <>
-          <LinearGradient colors={["#2A261F", "#15130F"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+          <LinearGradient colors={gradient.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
           <T style={{ fontFamily: font.semibold, fontSize: size * 0.4, color: C.goldLight }}>{initial(name)}</T>
         </>
       )}
@@ -183,10 +183,10 @@ export function Mark({ size = 20 }: { size?: number }) {
   return <Logo size={size * LOGO_RATIO} />;
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   head: { flexDirection: "row", alignItems: "flex-end", marginBottom: space.md },
   action: { flexDirection: "row", alignItems: "center", gap: 2, paddingVertical: 4 },
   row: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 13, minHeight: 56 },
   group: { borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
   rule: { height: StyleSheet.hairlineWidth, backgroundColor: C.line, marginLeft: 64 },
-});
+}));

@@ -10,7 +10,7 @@ import { isActive, useStore } from "@/lib/store";
 import { askPanda, appPathFor, PANDA_ERROR_COPY, type PandaError, type Turn } from "@/lib/panda";
 import { serviceName } from "@/data/catalogue";
 import { Dots, Glow, IconButton, Panda, Press, T } from "@/ui";
-import { color as C, font, radius as R, space, text } from "@/theme";
+import { color as C, font, radius as R, space, text, themed } from "@/theme";
 
 type Msg = Turn & { id: string; error?: PandaError; context?: string };
 
@@ -307,7 +307,7 @@ function labelFor(path: string): string {
   return map[slug] ?? slug.replace(/-/g, " ");
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   top: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.line, paddingBottom: space.md },
   column: { width: "100%", maxWidth: 760, alignSelf: "center" },
   prompt: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 14, borderRadius: R.lg, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line },
@@ -319,5 +319,5 @@ const styles = StyleSheet.create({
   composer: { flexDirection: "row", alignItems: "flex-end", gap: 8, padding: 6, paddingLeft: space.lg, borderRadius: 28, backgroundColor: C.surfaceHigh, borderWidth: 1, borderColor: C.lineStrong },
   input: { flex: 1, ...text.body, color: C.text, maxHeight: 130, paddingVertical: 10, fontFamily: font.regular },
   send: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.gold, alignItems: "center", justifyContent: "center" },
-});
+}));
 

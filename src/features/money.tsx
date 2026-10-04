@@ -6,7 +6,7 @@ import { Icon, type IconName } from "@/icons/Icon";
 import { useStore } from "@/lib/store";
 import { dateLong, dayHeading, rupees, signed, time } from "@/lib/format";
 import { Badge, Button, Divider, Press, Reveal, Sheet, T } from "@/ui";
-import { color as C, font, radius as R, space } from "@/theme";
+import { color as C, font, radius as R, space, themed } from "@/theme";
 
 /** What kind of movement an entry is, for its icon. */
 function kindOf(e: WalletEntry): { icon: IconName; label: string } {
@@ -155,7 +155,7 @@ function Line({ k, v }: { k: string; v: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   row: { flexDirection: "row", alignItems: "center", gap: space.md, paddingHorizontal: space.lg, paddingVertical: 12 },
   tile: {
     width: 40,
@@ -170,4 +170,4 @@ const styles = StyleSheet.create({
   dayHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: space.sm, paddingHorizontal: 4 },
   group: { borderRadius: R.xl, backgroundColor: C.surfaceHigh, borderWidth: StyleSheet.hairlineWidth, borderColor: C.line, overflow: "hidden" },
   line: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: space.lg, paddingHorizontal: space.lg, paddingVertical: 13, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: C.line },
-});
+}));

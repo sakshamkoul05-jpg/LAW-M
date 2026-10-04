@@ -5,7 +5,7 @@ import { Press, Screen, Segmented, T } from "@/ui";
 import { useStore } from "@/lib/store";
 import { useToast } from "@/ui";
 import { Callout, Choices, Field, Sent, StepHead, StepNav, Stepper, Take, digits, mobileError } from "@/components/apply";
-import { color as C, radius, space } from "@/theme";
+import { color as C, radius, space, themed } from "@/theme";
 import {
   CENTRE_FEE_NOTE,
   ENROLMENT_FEE_NOTE,
@@ -213,10 +213,10 @@ export default function AadhaarApply() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => ({
   banner: { flexDirection: "row", gap: space.md, padding: space.lg, borderRadius: radius.lg, backgroundColor: C.goldWash, borderWidth: StyleSheet.hairlineWidth, borderColor: C.goldLine },
   toggle: { padding: space.lg, borderRadius: radius.lg, borderWidth: 1, borderColor: C.line, backgroundColor: C.surfaceHigh },
-  toggleOn: { borderColor: C.gold, backgroundColor: "#15120C" },
+  toggleOn: { borderColor: C.gold, backgroundColor: C.goldSelect },
   count: { flex: 1, padding: space.md, borderRadius: radius.md, borderWidth: 1, borderColor: C.line, backgroundColor: C.surfaceHigh },
-  countOn: { borderColor: C.gold, backgroundColor: "#15120C" },
-});
+  countOn: { borderColor: C.gold, backgroundColor: C.goldSelect },
+}));

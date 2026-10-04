@@ -1,11 +1,11 @@
 import React from "react";
 import { Text, type TextProps, type TextStyle } from "react-native";
-import { color as C, tabular, text } from "@/theme";
+import { color as C, tabular, text, perTheme } from "@/theme";
 
 export type Variant = keyof typeof text;
 export type Tone = "text" | "dim" | "muted" | "gold" | "ink" | "green" | "red" | "amber";
 
-const TONES: Record<Tone, string> = {
+const TONES: Record<Tone, string> = perTheme(() => ({
   text: C.text,
   dim: C.textDim,
   muted: C.textMuted,
@@ -14,7 +14,7 @@ const TONES: Record<Tone, string> = {
   green: C.green,
   red: C.red,
   amber: C.amber,
-};
+}));
 
 /** Default tone per variant: headings in full white, supporting text dimmer. */
 const DEFAULT_TONE: Partial<Record<Variant, Tone>> = {
